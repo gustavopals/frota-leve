@@ -1,0 +1,35 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold">Dashboard</h1>
+    <p class="text-muted-foreground">Visão geral da sua frota</p>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <app-stat-card
+      *ngFor="let stat of stats"
+      [title]="stat.title"
+      [value]="stat.value"
+      [icon]="stat.icon"
+    ></app-stat-card>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <app-card>
+      <app-card-header>
+        <app-card-title>Últimas Atividades</app-card-title>
+      </app-card-header>
+      <app-card-content>
+        <p class="text-sm text-muted-foreground">Nenhuma atividade recente</p>
+      </app-card-content>
+    </app-card>
+
+    <app-card>
+      <app-card-header>
+        <app-card-title>Alertas</app-card-title>
+      </app-card-header>
+      <app-card-content>
+        <p class="text-sm text-muted-foreground">Sem alertas no momento</p>
+      </app-card-content>
+    </app-card>
+  </div>
+</div>

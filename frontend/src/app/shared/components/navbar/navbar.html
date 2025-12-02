@@ -1,0 +1,19 @@
+<nav class="border-b bg-card">
+  <div class="flex h-16 items-center px-4 container mx-auto">
+    <a routerLink="/dashboard" class="text-xl font-bold mr-8">Frota Leve</a>
+    
+    <div class="ml-auto flex items-center space-x-4">
+      <app-theme-toggle></app-theme-toggle>
+      
+      <div class="flex items-center space-x-2">
+        <span class="text-sm">{{ currentUser()?.name }}</span>
+        <button
+          (click)="logout()"
+          class="text-sm text-muted-foreground hover:text-foreground"
+        >
+          Sair
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
