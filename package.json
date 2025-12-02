@@ -1,0 +1,34 @@
+{
+  "name": "frota-leve",
+  "version": "1.0.0",
+  "description": "Sistema de Gestão de Frota Leve - SaaS Multi-tenant",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "backend": "npm run start:dev --workspace=backend",
+    "frontend": "npm run start --workspace=frontend",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "prisma:migrate": "npm run migrate:dev --workspace=backend",
+    "prisma:studio": "npm run studio --workspace=backend",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "lint": "npm run lint --workspaces"
+  },
+  "keywords": [
+    "fleet-management",
+    "saas",
+    "multi-tenant",
+    "nestjs",
+    "angular",
+    "prisma"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^3.1.0"
+  }
+}
