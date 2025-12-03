@@ -143,6 +143,7 @@ model FuelLog {
   liters     Decimal  @db.Decimal(10, 2)
   totalValue Decimal  @db.Decimal(12, 2)
   odometer   Decimal  @db.Decimal(10, 2)
+  notes      String?  @db.Text
   createdAt  DateTime @default(now())
 
   tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)

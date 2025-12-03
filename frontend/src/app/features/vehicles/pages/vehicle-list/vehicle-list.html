@@ -1,74 +1,66 @@
-<div class="min-h-screen bg-background">
-  <app-navbar></app-navbar>
-  <div class="flex">
-    <app-sidebar class="hidden lg:block"></app-sidebar>
-    <main class="flex-1 p-6">
-      <div class="space-y-6">
-        <div class="flex justify-between items-center">
-          <div>
-            <h1 class="text-3xl font-bold">Veículos</h1>
-            <p class="text-muted-foreground">Gerencie sua frota</p>
-          </div>
-          <a routerLink="/vehicles/new">
-            <button class="inline-flex items-center justify-center rounded-md font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-              + Novo Veículo
-            </button>
-          </a>
-        </div>
-
-        <app-card>
-          <app-card-content>
-            <div *ngIf="loading" class="py-8 text-center text-muted-foreground">
-              Carregando veículos...
-            </div>
-
-            <div *ngIf="!loading && vehicles.length === 0" class="py-8 text-center">
-              <p class="text-muted-foreground mb-4">Nenhum veículo cadastrado</p>
-              <a routerLink="/vehicles/new">
-                <button class="inline-flex items-center justify-center rounded-md font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
-                  Cadastrar Primeiro Veículo
-                </button>
-              </a>
-            </div>
-
-            <div *ngIf="!loading && vehicles.length > 0" class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="border-b">
-                  <tr class="text-left">
-                    <th class="pb-3 font-medium">Placa</th>
-                    <th class="pb-3 font-medium">Marca/Modelo</th>
-                    <th class="pb-3 font-medium">Ano</th>
-                    <th class="pb-3 font-medium">KM Atual</th>
-                    <th class="pb-3 font-medium">Status</th>
-                    <th class="pb-3 font-medium">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let vehicle of vehicles" class="border-b last:border-0">
-                    <td class="py-3">{{ vehicle.plate }}</td>
-                    <td class="py-3">{{ vehicle.brand }} {{ vehicle.model }}</td>
-                    <td class="py-3">{{ vehicle.year }}</td>
-                    <td class="py-3">{{ vehicle.currentKm | number }} km</td>
-                    <td class="py-3">
-                      <span
-                        [class]="vehicle.status === 'ATIVO' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'"
-                        class="px-2 py-1 rounded-full text-xs"
-                      >
-                        {{ vehicle.status }}
-                      </span>
-                    </td>
-                    <td class="py-3">
-                      <a [routerLink]="['/vehicles', vehicle.id, 'edit']" class="text-primary hover:underline text-sm">
-                        Editar
-                      </a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </app-card-content>
-        </app-card>
-      </div>
-    </main>
+<div class="space-y-6">
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold">Veículos</h1>
+      <p class="text-muted-foreground">Gerencie sua frota</p>
+    </div>
+    <a routerLink="/vehicles/new">
+      <button class="inline-flex items-center justify-center rounded-md font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+        + Novo Veículo
+      </button>
+    </a>
   </div>
+
+  <app-card>
+    <app-card-content>
+      <div *ngIf="loading" class="py-8 text-center text-muted-foreground">
+        Carregando veículos...
+      </div>
+
+      <div *ngIf="!loading && vehicles.length === 0" class="py-8 text-center">
+        <p class="text-muted-foreground mb-4">Nenhum veículo cadastrado</p>
+        <a routerLink="/vehicles/new">
+          <button class="inline-flex items-center justify-center rounded-md font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+            Cadastrar Primeiro Veículo
+          </button>
+        </a>
+      </div>
+
+      <div *ngIf="!loading && vehicles.length > 0" class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="border-b">
+            <tr class="text-left">
+              <th class="pb-3 font-medium">Placa</th>
+              <th class="pb-3 font-medium">Marca/Modelo</th>
+              <th class="pb-3 font-medium">Ano</th>
+              <th class="pb-3 font-medium">KM Atual</th>
+              <th class="pb-3 font-medium">Status</th>
+              <th class="pb-3 font-medium">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let vehicle of vehicles" class="border-b last:border-0">
+              <td class="py-3">{{ vehicle.plate }}</td>
+              <td class="py-3">{{ vehicle.brand }} {{ vehicle.model }}</td>
+              <td class="py-3">{{ vehicle.year }}</td>
+              <td class="py-3">{{ vehicle.currentKm | number }} km</td>
+              <td class="py-3">
+                <span
+                  [class]="vehicle.status === 'ATIVO' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'"
+                  class="px-2 py-1 rounded-full text-xs"
+                >
+                  {{ vehicle.status }}
+                </span>
+              </td>
+              <td class="py-3">
+                <a [routerLink]="['/vehicles', vehicle.id, 'edit']" class="text-primary hover:underline text-sm">
+                  Editar
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </app-card-content>
+  </app-card>
 </div>

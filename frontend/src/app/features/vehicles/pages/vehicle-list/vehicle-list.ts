@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../../core/services/api';
 import { Vehicle } from '../../../../core/models/vehicle.model';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar';
-import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar';
 import { CardComponent, CardContentComponent } from '../../../../shared/components/card/card';
 
 @Component({
@@ -12,8 +10,6 @@ import { CardComponent, CardContentComponent } from '../../../../shared/componen
   imports: [
     CommonModule,
     RouterLink,
-    NavbarComponent,
-    SidebarComponent,
     CardComponent,
     CardContentComponent
   ],

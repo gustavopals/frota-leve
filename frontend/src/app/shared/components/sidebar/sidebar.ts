@@ -19,5 +19,6 @@ export class SidebarComponent {
     { label: 'Dashboard', icon: '📊', route: '/dashboard' },
     { label: 'Veículos', icon: '🚗', route: '/vehicles' },
     { label: 'Manutenções', icon: '🔧', route: '/maintenance' },
+    { label: 'Abastecimentos', icon: '⛽', route: '/fuel' },
   ];
 }
