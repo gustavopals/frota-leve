@@ -1,14 +1,17 @@
-<div class="container mx-auto p-6">
+<div class="space-y-6">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold">Manutenções</h1>
+    <div>
+      <h1 class="text-3xl font-bold">Manutenções</h1>
+      <p class="text-muted-foreground">Histórico de manutenções realizadas</p>
+    </div>
     <div class="flex gap-2">
       <a routerLink="/maintenance/plans" 
-         class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600">
-        Planos de Manutenção
+         class="inline-flex items-center justify-center rounded-md font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+        📋 Planos de Manutenção
       </a>
       <a routerLink="/maintenance/new" 
-         class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-        Nova Manutenção
+         class="inline-flex items-center justify-center rounded-md font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+        ➕ Nova Manutenção
       </a>
     </div>
   </div>
@@ -18,7 +21,7 @@
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>
   } @else if (maintenances().length === 0) {
-    <div class="bg-card rounded-lg border p-12 text-center">
+    <div class="bg-card rounded-md border p-12 text-center">
       <p class="text-muted-foreground text-lg mb-4">Nenhuma manutenção registrada</p>
       <a routerLink="/maintenance/new" 
          class="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
@@ -26,7 +29,7 @@
       </a>
     </div>
   } @else {
-    <div class="bg-card rounded-lg border overflow-hidden">
+    <div class="bg-card rounded-md border overflow-hidden">
       <table class="min-w-full divide-y divide-border">
         <thead class="bg-muted">
           <tr>

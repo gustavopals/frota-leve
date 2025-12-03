@@ -14,7 +14,7 @@
   </div>
 
   @if (showForm()) {
-    <div class="bg-card rounded-lg border p-6 mb-6">
+    <div class="bg-card rounded-md border p-6 mb-6">
       <h2 class="text-xl font-semibold mb-4">
         {{ editingPlanId() ? 'Editar Plano' : 'Novo Plano' }}
       </h2>
@@ -86,7 +86,7 @@
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>
   } @else if (plans().length === 0) {
-    <div class="bg-card rounded-lg border p-12 text-center">
+    <div class="bg-card rounded-md border p-12 text-center">
       <p class="text-muted-foreground text-lg mb-4">Nenhum plano de manutenção criado</p>
       <button (click)="openForm()" 
               class="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
@@ -96,7 +96,7 @@
   } @else {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       @for (plan of plans(); track plan.id) {
-        <div class="bg-card rounded-lg border p-6 hover:shadow-lg transition-shadow">
+        <div class="bg-card rounded-md border p-6 hover:shadow-lg transition-shadow">
           <div class="flex justify-between items-start mb-3">
             <h3 class="text-lg font-semibold">{{ plan.name }}</h3>
             <span class="text-xs px-2 py-1 bg-primary/10 text-primary rounded">

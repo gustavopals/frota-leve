@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../core/services/api';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar';
-import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar';
 import { CardComponent, CardContentComponent } from '../../../../shared/components/card/card';
 
 @Component({
@@ -12,8 +10,6 @@ import { CardComponent, CardContentComponent } from '../../../../shared/componen
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    NavbarComponent,
-    SidebarComponent,
     CardComponent,
     CardContentComponent
   ],

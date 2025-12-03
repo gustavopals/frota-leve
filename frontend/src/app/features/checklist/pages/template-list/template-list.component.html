@@ -1,28 +1,31 @@
 <div class="p-6">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Templates de Checklist</h1>
+    <div>
+      <h1 class="text-3xl font-bold">Templates de Checklist</h1>
+      <p class="text-muted-foreground">Gerencie modelos de checklist para a frota</p>
+    </div>
     <a
       routerLink="/checklist/templates/new"
-      class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+      class="inline-flex items-center justify-center rounded-md font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
     >
-      Novo Template
+      ➕ Novo Template
     </a>
   </div>
 
   @if (loading()) {
     <div class="text-center py-12">
-      <p class="text-gray-500">Carregando...</p>
+      <p class="text-muted-foreground">Carregando...</p>
     </div>
   } @else if (error()) {
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p class="text-red-600">{{ error() }}</p>
+    <div class="bg-destructive/10 border border-destructive rounded-md p-4">
+      <p class="text-destructive">{{ error() }}</p>
     </div>
   } @else if (templates().length === 0) {
-    <div class="text-center py-12 bg-gray-50 rounded-lg">
-      <p class="text-gray-500 mb-4">Nenhum template cadastrado</p>
+    <div class="text-center py-12 bg-muted rounded-md">
+      <p class="text-muted-foreground mb-4">Nenhum template cadastrado</p>
       <a
         routerLink="/checklist/templates/new"
-        class="text-blue-600 hover:text-blue-700 font-medium"
+        class="text-primary hover:text-primary font-medium"
       >
         Criar primeiro template
       </a>
@@ -30,13 +33,13 @@
   } @else {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       @for (template of templates(); track template.id) {
-        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div class="bg-card rounded-md shadow hover:shadow-lg transition-shadow">
           <div class="p-6">
             <div class="flex justify-between items-start mb-4">
               <div>
-                <h3 class="text-lg font-semibold text-gray-900">{{ template.name }}</h3>
+                <h3 class="text-lg font-semibold text-foreground">{{ template.name }}</h3>
                 @if (template.vehicleType) {
-                  <p class="text-sm text-gray-500">{{ template.vehicleType }}</p>
+                  <p class="text-sm text-muted-foreground">{{ template.vehicleType }}</p>
                 }
               </div>
               <span
@@ -48,14 +51,14 @@
             </div>
 
             <div class="space-y-2 mb-4">
-              <div class="flex items-center text-sm text-gray-600">
+              <div class="flex items-center text-sm text-muted-foreground">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                 </svg>
                 {{ template.items.length }} itens
               </div>
               @if (template._count?.checklistSubmissions) {
-                <div class="flex items-center text-sm text-gray-600">
+                <div class="flex items-center text-sm text-muted-foreground">
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
@@ -67,19 +70,19 @@
             <div class="flex gap-2">
               <a
                 [routerLink]="['/checklist/templates/edit', template.id]"
-                class="flex-1 text-center px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+                class="flex-1 text-center px-3 py-2 bg-blue-50 text-primary rounded-md hover:bg-blue-100 transition-colors text-sm font-medium"
               >
                 Editar
               </a>
               <button
                 (click)="toggleActive(template)"
-                class="flex-1 px-3 py-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium"
+                class="flex-1 px-3 py-2 bg-muted text-muted-foreground rounded-md hover:bg-accent transition-colors text-sm font-medium"
               >
                 {{ template.isActive ? 'Desativar' : 'Ativar' }}
               </button>
               <button
                 (click)="deleteTemplate(template.id)"
-                class="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
+                class="px-3 py-2 bg-destructive/10 text-destructive rounded-md hover:bg-red-100 transition-colors text-sm font-medium"
               >
                 Excluir
               </button>

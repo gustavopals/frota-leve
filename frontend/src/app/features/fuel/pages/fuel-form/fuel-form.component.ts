@@ -143,9 +143,13 @@ export class FuelFormComponent implements OnInit {
     this.router.navigate(['/fuel']);
   }
 
-  calculatePricePerLiter(): number {
+  getPricePerLiter(): number {
     const liters = this.form.value.liters;
     const totalValue = this.form.value.totalValue;
     return liters > 0 ? totalValue / liters : 0;
+  }
+
+  formatCurrency(value: number): string {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
 }

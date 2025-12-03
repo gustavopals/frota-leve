@@ -1,24 +1,27 @@
 <div class="p-6 max-w-4xl mx-auto">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Análise de Consumo</h1>
+    <div>
+      <h1 class="text-3xl font-bold">Análise de Consumo</h1>
+      <p class="text-muted-foreground">Estatísticas e consumo médio da frota</p>
+    </div>
     <button
       (click)="goBack()"
-      class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+      class="inline-flex items-center justify-center rounded-md font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
     >
-      Voltar
+      ← Voltar
     </button>
   </div>
 
   <!-- Seletor de Veículo -->
-  <div class="bg-white rounded-lg shadow p-6 mb-6">
-    <label for="vehicleSelect" class="block text-sm font-medium text-gray-700 mb-2">
+  <div class="bg-card rounded-md shadow p-6 mb-6">
+    <label for="vehicleSelect" class="block text-sm font-medium text-foreground mb-2">
       Selecione o Veículo
     </label>
     <select
       id="vehicleSelect"
       [value]="selectedVehicleId()"
       (change)="onVehicleChange($any($event.target).value)"
-      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
     >
       @for (vehicle of vehicles(); track vehicle.id) {
         <option [value]="vehicle.id">
@@ -30,15 +33,15 @@
 
   @if (loading()) {
     <div class="text-center py-12">
-      <p class="text-gray-500">Carregando análises...</p>
+      <p class="text-muted-foreground">Carregando análises...</p>
     </div>
   } @else if (error()) {
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p class="text-red-600">{{ error() }}</p>
+    <div class="bg-destructive/10 border border-destructive rounded-md p-4">
+      <p class="text-destructive">{{ error() }}</p>
     </div>
   } @else if (analytics()) {
     @if (analytics()!.totalRefuels < 2) {
-      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+      <div class="bg-yellow-50 border border-yellow-200 rounded-md p-6">
         <p class="text-yellow-800 font-medium mb-2">Dados Insuficientes</p>
         <p class="text-yellow-700">
           É necessário ter pelo menos 2 abastecimentos cadastrados para calcular o consumo médio.
@@ -49,16 +52,16 @@
     <!-- Cards de Estatísticas -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
       <!-- Total de Abastecimentos -->
-      <div class="bg-white rounded-lg shadow p-6">
+      <div class="bg-card rounded-md shadow p-6">
         <div class="flex items-center">
           <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase">Total de Abastecimentos</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">
+            <p class="text-sm font-medium text-muted-foreground uppercase">Total de Abastecimentos</p>
+            <p class="text-3xl font-bold text-foreground mt-2">
               {{ analytics()!.totalRefuels }}
             </p>
           </div>
           <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
             </svg>
           </div>
@@ -66,11 +69,11 @@
       </div>
 
       <!-- Total de Litros -->
-      <div class="bg-white rounded-lg shadow p-6">
+      <div class="bg-card rounded-md shadow p-6">
         <div class="flex items-center">
           <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase">Total de Litros</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">
+            <p class="text-sm font-medium text-muted-foreground uppercase">Total de Litros</p>
+            <p class="text-3xl font-bold text-foreground mt-2">
               {{ formatNumber(analytics()!.totalLiters, 1) }}L
             </p>
           </div>
@@ -83,16 +86,16 @@
       </div>
 
       <!-- Total Gasto -->
-      <div class="bg-white rounded-lg shadow p-6">
+      <div class="bg-card rounded-md shadow p-6">
         <div class="flex items-center">
           <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase">Total Gasto</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">
+            <p class="text-sm font-medium text-muted-foreground uppercase">Total Gasto</p>
+            <p class="text-3xl font-bold text-foreground mt-2">
               {{ formatCurrency(analytics()!.totalSpent) }}
             </p>
           </div>
           <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
@@ -103,7 +106,7 @@
     <!-- Cards de Médias -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Consumo Médio -->
-      <div class="bg-white rounded-lg shadow p-6">
+      <div class="bg-card rounded-md shadow p-6">
         <div class="flex items-center mb-4">
           <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
             <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,16 +114,16 @@
             </svg>
           </div>
           <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase">Consumo Médio</p>
+            <p class="text-sm font-medium text-muted-foreground uppercase">Consumo Médio</p>
           </div>
         </div>
         @if (analytics()!.averageConsumption !== null) {
           <p class="text-4xl font-bold text-purple-600">
             {{ formatNumber(analytics()!.averageConsumption!, 2) }}
-            <span class="text-lg text-gray-500">km/L</span>
+            <span class="text-lg text-muted-foreground">km/L</span>
           </p>
           @if (analytics()!.totalDistance) {
-            <p class="text-sm text-gray-500 mt-2">
+            <p class="text-sm text-muted-foreground mt-2">
               Baseado em {{ analytics()!.totalDistance!.toLocaleString('pt-BR') }} km rodados
             </p>
           }
@@ -130,7 +133,7 @@
       </div>
 
       <!-- Preço Médio por Litro -->
-      <div class="bg-white rounded-lg shadow p-6">
+      <div class="bg-card rounded-md shadow p-6">
         <div class="flex items-center mb-4">
           <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
             <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,13 +141,13 @@
             </svg>
           </div>
           <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase">Preço Médio por Litro</p>
+            <p class="text-sm font-medium text-muted-foreground uppercase">Preço Médio por Litro</p>
           </div>
         </div>
         @if (analytics()!.averagePricePerLiter !== null) {
           <p class="text-4xl font-bold text-orange-600">
             {{ formatCurrency(analytics()!.averagePricePerLiter!) }}
-            <span class="text-lg text-gray-500">/L</span>
+            <span class="text-lg text-muted-foreground">/L</span>
           </p>
         } @else {
           <p class="text-gray-400 italic">Dados insuficientes</p>
@@ -154,24 +157,24 @@
 
     <!-- Informações do Veículo -->
     @if (getSelectedVehicle()) {
-      <div class="bg-white rounded-lg shadow p-6 mt-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Informações do Veículo</h3>
+      <div class="bg-card rounded-md shadow p-6 mt-6">
+        <h3 class="text-lg font-semibold text-foreground mb-4">Informações do Veículo</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <p class="text-sm text-gray-500">Placa</p>
-            <p class="font-medium text-gray-900">{{ getSelectedVehicle()!.plate }}</p>
+            <p class="text-sm text-muted-foreground">Placa</p>
+            <p class="font-medium text-foreground">{{ getSelectedVehicle()!.plate }}</p>
           </div>
           <div>
-            <p class="text-sm text-gray-500">Marca/Modelo</p>
-            <p class="font-medium text-gray-900">{{ getSelectedVehicle()!.brand }} {{ getSelectedVehicle()!.model }}</p>
+            <p class="text-sm text-muted-foreground">Marca/Modelo</p>
+            <p class="font-medium text-foreground">{{ getSelectedVehicle()!.brand }} {{ getSelectedVehicle()!.model }}</p>
           </div>
           <div>
-            <p class="text-sm text-gray-500">Ano</p>
-            <p class="font-medium text-gray-900">{{ getSelectedVehicle()!.year }}</p>
+            <p class="text-sm text-muted-foreground">Ano</p>
+            <p class="font-medium text-foreground">{{ getSelectedVehicle()!.year }}</p>
           </div>
           <div>
-            <p class="text-sm text-gray-500">Tipo de Combustível</p>
-            <p class="font-medium text-gray-900">{{ getSelectedVehicle()!.fuelType || '-' }}</p>
+            <p class="text-sm text-muted-foreground">Tipo de Combustível</p>
+            <p class="font-medium text-foreground">{{ getSelectedVehicle()!.fuelType || '-' }}</p>
           </div>
         </div>
       </div>

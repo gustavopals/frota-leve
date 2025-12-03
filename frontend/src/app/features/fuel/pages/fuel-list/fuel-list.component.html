@@ -1,106 +1,109 @@
-<div class="p-6">
+<div class="space-y-6">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Abastecimentos</h1>
+    <div>
+      <h1 class="text-3xl font-bold">Abastecimentos</h1>
+      <p class="text-muted-foreground">Controle de abastecimento da frota</p>
+    </div>
     <div class="flex gap-3">
       <a
         routerLink="/fuel/analytics"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        class="inline-flex items-center justify-center rounded-md font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
       >
-        Ver Análises
+        📊 Ver Análises
       </a>
       <a
         routerLink="/fuel/new"
-        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+        class="inline-flex items-center justify-center rounded-md font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
       >
-        Novo Abastecimento
+        ➕ Novo Abastecimento
       </a>
     </div>
   </div>
 
   @if (loading()) {
-    <div class="text-center py-12">
-      <p class="text-gray-500">Carregando...</p>
+    <div class="flex justify-center p-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>
   } @else if (error()) {
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-      <p class="text-red-600">{{ error() }}</p>
+    <div class="bg-destructive/10 border border-destructive rounded-md p-4">
+      <p class="text-destructive">{{ error() }}</p>
     </div>
   } @else if (fuelLogs().length === 0) {
-    <div class="text-center py-12 bg-gray-50 rounded-lg">
-      <p class="text-gray-500 mb-4">Nenhum abastecimento cadastrado</p>
+    <div class="bg-card rounded-md border p-12 text-center">
+      <p class="text-muted-foreground text-lg mb-4">Nenhum abastecimento cadastrado</p>
       <a
         routerLink="/fuel/new"
-        class="text-blue-600 hover:text-blue-700 font-medium"
+        class="inline-flex items-center justify-center rounded-md font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 py-2"
       >
-        Cadastrar primeiro abastecimento
+        Cadastrar Primeiro Abastecimento
       </a>
     </div>
   } @else {
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+    <div class="bg-card rounded-md border overflow-hidden">
+      <table class="min-w-full divide-y divide-border">
+        <thead class="bg-muted">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">-wider">
               Data
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Veículo
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Posto
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Litros
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Valor
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               KM
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Motorista
             </th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Ações
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-card divide-y divide-border">
           @for (fuel of fuelLogs(); track fuel.id) {
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            <tr class="hover:bg-muted/50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
                 {{ formatDate(fuel.date) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <div class="font-medium text-gray-900">{{ fuel.vehicle?.plate }}</div>
-                <div class="text-gray-500">{{ fuel.vehicle?.brand }} {{ fuel.vehicle?.model }}</div>
+                <div class="font-medium">{{ fuel.vehicle?.plate }}</div>
+                <div class="text-xs text-muted-foreground">{{ fuel.vehicle?.brand }} {{ fuel.vehicle?.model }}</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
                 {{ fuel.station }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
                 {{ fuel.liters.toFixed(2) }}L
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 {{ formatCurrency(fuel.totalValue) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
                 {{ fuel.odometer.toLocaleString('pt-BR') }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                 {{ fuel.driver?.name || '-' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <a
                   [routerLink]="['/fuel/edit', fuel.id]"
-                  class="text-blue-600 hover:text-blue-900 mr-4"
+                  class="text-primary hover:text-primary/80 mr-4"
                 >
                   Editar
                 </a>
                 <button
                   (click)="deleteFuelLog(fuel.id)"
-                  class="text-red-600 hover:text-red-900"
+                  class="text-destructive hover:text-destructive/80"
                 >
                   Excluir
                 </button>
