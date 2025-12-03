@@ -69,10 +69,13 @@ model Vehicle {
   name            String
   plate           String
   renavam         String?
+  chassisNumber   String?
   type            String?
   brand           String?
   model           String?
   year            Int?
+  color           String?
+  fuelType        String?
   currentOdometer Decimal       @default(0) @db.Decimal(10, 2)
   status          VehicleStatus @default(ACTIVE)
   createdAt       DateTime      @default(now())
