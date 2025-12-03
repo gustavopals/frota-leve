@@ -20,5 +20,6 @@ export class SidebarComponent {
     { label: 'Veículos', icon: '🚗', route: '/vehicles' },
     { label: 'Manutenções', icon: '🔧', route: '/maintenance' },
     { label: 'Abastecimentos', icon: '⛽', route: '/fuel' },
+    { label: 'Checklists', icon: '📋', route: '/checklist' },
   ];
 }

@@ -32,6 +32,10 @@ export const routes: Routes = [
         path: 'fuel',
         loadChildren: () => import('./features/fuel/fuel.routes').then(m => m.fuelRoutes)
       },
+      {
+        path: 'checklist',
+        loadChildren: () => import('./features/checklist/checklist.routes').then(m => m.checklistRoutes)
+      },
     ]
   },
   {

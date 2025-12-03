@@ -1,0 +1,145 @@
+<div class="p-6 max-w-2xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Preencher Checklist</h1>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white rounded-lg shadow p-6">
+    <div class="space-y-6">
+      <!-- Seleção de Template -->
+      <div>
+        <label for="templateId" class="block text-sm font-medium text-gray-700 mb-2">
+          Template de Checklist *
+        </label>
+        <select
+          id="templateId"
+          formControlName="templateId"
+          (change)="onTemplateChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          [class.border-red-500]="form.get('templateId')?.invalid && form.get('templateId')?.touched"
+        >
+          <option value="">Selecione um template</option>
+          @for (template of templates(); track template.id) {
+            <option [value]="template.id">{{ template.name }}</option>
+          }
+        </select>
+        @if (form.get('templateId')?.invalid && form.get('templateId')?.touched) {
+          <p class="mt-1 text-sm text-red-600">Template é obrigatório</p>
+        }
+      </div>
+
+      <!-- Seleção de Veículo -->
+      <div>
+        <label for="vehicleId" class="block text-sm font-medium text-gray-700 mb-2">
+          Veículo *
+        </label>
+        <select
+          id="vehicleId"
+          formControlName="vehicleId"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          [class.border-red-500]="form.get('vehicleId')?.invalid && form.get('vehicleId')?.touched"
+        >
+          <option value="">Selecione um veículo</option>
+          @for (vehicle of vehicles(); track vehicle.id) {
+            <option [value]="vehicle.id">
+              {{ vehicle.plate }} - {{ vehicle.brand }} {{ vehicle.model }}
+            </option>
+          }
+        </select>
+        @if (form.get('vehicleId')?.invalid && form.get('vehicleId')?.touched) {
+          <p class="mt-1 text-sm text-red-600">Veículo é obrigatório</p>
+        }
+      </div>
+
+      <!-- Itens do Checklist -->
+      @if (selectedTemplate()) {
+        <div class="border-t pt-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Itens a Verificar</h2>
+          
+          <div formArrayName="answers" class="space-y-4">
+            @for (answer of answers.controls; track $index; let i = $index) {
+              @let item = getItemForAnswer(i);
+              <div [formGroupName]="i" class="bg-gray-50 rounded-lg p-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  {{ item?.label }}
+                </label>
+
+                @switch (item?.type) {
+                  @case ('BOOLEAN') {
+                    <div class="flex gap-4">
+                      <label class="inline-flex items-center">
+                        <input
+                          type="radio"
+                          formControlName="value"
+                          value="true"
+                          (change)="updateOverallStatus()"
+                          class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                        />
+                        <span class="ml-2 text-sm text-gray-700">Sim</span>
+                      </label>
+                      <label class="inline-flex items-center">
+                        <input
+                          type="radio"
+                          formControlName="value"
+                          value="false"
+                          (change)="updateOverallStatus()"
+                          class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                        />
+                        <span class="ml-2 text-sm text-gray-700">Não</span>
+                      </label>
+                    </div>
+                  }
+                  @case ('TEXT') {
+                    <input
+                      type="text"
+                      formControlName="value"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  }
+                  @case ('NUMBER') {
+                    <input
+                      type="number"
+                      formControlName="value"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  }
+                  @case ('SELECT') {
+                    <select
+                      formControlName="value"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Selecione...</option>
+                      <!-- Aqui você pode adicionar opções do config -->
+                    </select>
+                  }
+                }
+
+                @if (answer.get('value')?.invalid && answer.get('value')?.touched) {
+                  <p class="mt-1 text-sm text-red-600">Este campo é obrigatório</p>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Botões -->
+    <div class="flex justify-end gap-3 mt-6">
+      <button
+        type="button"
+        (click)="cancel()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+        [disabled]="loading()"
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="loading() || form.invalid || !selectedTemplate()"
+      >
+        {{ loading() ? 'Salvando...' : 'Enviar Checklist' }}
+      </button>
+    </div>
+  </form>
+</div>
