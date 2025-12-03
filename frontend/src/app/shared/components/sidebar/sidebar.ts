@@ -18,5 +18,6 @@ export class SidebarComponent {
   menuItems: MenuItem[] = [
     { label: 'Dashboard', icon: '📊', route: '/dashboard' },
     { label: 'Veículos', icon: '🚗', route: '/vehicles' },
+    { label: 'Manutenções', icon: '🔧', route: '/maintenance' },
   ];
 }

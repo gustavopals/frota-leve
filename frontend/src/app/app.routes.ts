@@ -22,6 +22,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/vehicles/vehicles.routes').then(m => m.VEHICLES_ROUTES)
   },
   {
+    path: 'maintenance',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/maintenance/maintenance.routes').then(m => m.maintenanceRoutes)
+  },
+  {
     path: '**',
     redirectTo: 'dashboard'
   }
