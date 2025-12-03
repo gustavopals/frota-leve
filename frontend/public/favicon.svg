@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#3b82f6"/>
+  <g transform="translate(4, 8)" fill="white">
+    <!-- Rodas -->
+    <circle cx="5" cy="13" r="2" fill="white"/>
+    <circle cx="17" cy="13" r="2" fill="white"/>
+    <!-- Cabine -->
+    <path d="M2 6 L2 13 L5 13 C5 11.34 6.34 10 8 10 L14 10 C14 11.66 15.34 13 17 13 L20 13 L20 6 L2 6 Z" opacity="0.9"/>
+    <!-- Carroceria -->
+    <path d="M14 2 L14 10 L20 10 L17 2 Z" opacity="0.7"/>
+    <!-- Farol -->
+    <rect x="20" y="8" width="2" height="2" fill="white"/>
+  </g>
+</svg>
