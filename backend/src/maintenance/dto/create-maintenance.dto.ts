@@ -15,15 +15,6 @@ export class CreateMaintenanceDto {
   @IsDateString()
   date: string;
 
-  @ApiProperty({ example: 'Troca de óleo e filtro' })
-  @IsString()
-  serviceType: string;
-
-  @ApiPropertyOptional({ example: 'Troca de óleo sintético 5W30 e filtro original' })
-  @IsString()
-  @IsOptional()
-  description?: string;
-
   @ApiPropertyOptional({ example: 45000 })
   @IsNumber()
   @Min(0)

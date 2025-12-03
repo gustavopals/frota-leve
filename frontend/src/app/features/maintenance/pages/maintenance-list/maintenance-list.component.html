@@ -2,11 +2,11 @@
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-3xl font-bold">Manutenções</h1>
     <div class="flex gap-2">
-      <a routerLink="/dashboard/maintenance/plans" 
+      <a routerLink="/maintenance/plans" 
          class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600">
         Planos de Manutenção
       </a>
-      <a routerLink="/dashboard/maintenance/new" 
+      <a routerLink="/maintenance/new" 
          class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
         Nova Manutenção
       </a>
@@ -20,7 +20,7 @@
   } @else if (maintenances().length === 0) {
     <div class="bg-card rounded-lg border p-12 text-center">
       <p class="text-muted-foreground text-lg mb-4">Nenhuma manutenção registrada</p>
-      <a routerLink="/dashboard/maintenance/new" 
+      <a routerLink="/maintenance/new" 
          class="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
         Registrar Primeira Manutenção
       </a>
@@ -32,7 +32,7 @@
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Data</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Veículo</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Serviço</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Plano/Notas</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Oficina</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Custo</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">KM</th>
@@ -50,9 +50,14 @@
                 <div class="text-xs text-muted-foreground">{{ maintenance.vehicle?.model }}</div>
               </td>
               <td class="px-6 py-4">
-                <div class="text-sm font-medium">{{ maintenance.serviceType }}</div>
                 @if (maintenance.plan) {
-                  <div class="text-xs text-muted-foreground">{{ maintenance.plan.name }}</div>
+                  <div class="text-sm font-medium">{{ maintenance.plan.name }}</div>
+                }
+                @if (maintenance.notes) {
+                  <div class="text-xs text-muted-foreground truncate max-w-xs">{{ maintenance.notes }}</div>
+                }
+                @if (!maintenance.plan && !maintenance.notes) {
+                  <span class="text-muted-foreground">-</span>
                 }
               </td>
               <td class="px-6 py-4 text-sm">
@@ -65,7 +70,7 @@
                 {{ maintenance.odometer ? (maintenance.odometer | number) + ' km' : '-' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <a [routerLink]="['/dashboard/maintenance/edit', maintenance.id]" 
+                <a [routerLink]="['/maintenance/edit', maintenance.id]" 
                    class="text-primary hover:text-primary/80 mr-4">
                   Editar
                 </a>

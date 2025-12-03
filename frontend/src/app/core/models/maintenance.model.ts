@@ -15,8 +15,6 @@ export interface Maintenance {
   vehicleId: string;
   maintenancePlanId?: string;
   date: string;
-  serviceType: string;
-  description?: string;
   odometer?: number;
   cost: number;
   provider?: string;

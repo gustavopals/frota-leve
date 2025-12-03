@@ -31,8 +31,6 @@ export class MaintenanceFormComponent implements OnInit {
       vehicleId: ['', Validators.required],
       maintenancePlanId: [''],
       date: ['', Validators.required],
-      serviceType: ['', Validators.required],
-      description: [''],
       odometer: [null],
       cost: [0, [Validators.required, Validators.min(0)]],
       provider: [''],
@@ -75,8 +73,6 @@ export class MaintenanceFormComponent implements OnInit {
           vehicleId: data.vehicleId,
           maintenancePlanId: data.maintenancePlanId || '',
           date: data.date.split('T')[0],
-          serviceType: data.serviceType,
-          description: data.description || '',
           odometer: data.odometer,
           cost: data.cost,
           provider: data.provider || '',
@@ -111,7 +107,7 @@ export class MaintenanceFormComponent implements OnInit {
 
     request.subscribe({
       next: () => {
-        this.router.navigate(['/dashboard/maintenance']);
+        this.router.navigate(['/maintenance']);
       },
       error: (error) => {
         console.error('Erro ao salvar manutenção:', error);
@@ -121,6 +117,6 @@ export class MaintenanceFormComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/dashboard/maintenance']);
+    this.router.navigate(['/maintenance']);
   }
 }

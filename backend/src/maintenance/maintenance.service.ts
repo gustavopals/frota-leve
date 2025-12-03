@@ -79,11 +79,26 @@ export class MaintenanceService {
       }
     }
 
+    // Extrair apenas os campos que existem no schema
+    const { serviceType, description, ...maintenanceData } = dto as any;
+
+    // Combinar description e serviceType nas notes
+    const notesContent = [
+      serviceType,
+      description,
+      maintenanceData.notes,
+    ].filter(Boolean).join(' - ');
+
     return this.prisma.maintenance.create({
       data: {
-        ...dto,
-        tenantId,
+        vehicleId: maintenanceData.vehicleId,
+        maintenancePlanId: maintenanceData.maintenancePlanId,
         date: new Date(dto.date),
+        odometer: maintenanceData.odometer,
+        cost: maintenanceData.cost,
+        provider: maintenanceData.provider,
+        notes: notesContent || null,
+        tenantId,
       },
       include: {
         vehicle: {
@@ -158,9 +173,26 @@ export class MaintenanceService {
   async update(tenantId: string, id: string, dto: UpdateMaintenanceDto) {
     await this.findOne(tenantId, id);
 
-    const updateData = { ...dto, date: undefined };
-    if (dto.date) {
-      updateData.date = new Date(dto.date) as unknown as string;
+    // Extrair apenas os campos que existem no schema
+    const { serviceType, description, date, ...maintenanceData } = dto as any;
+
+    // Combinar description e serviceType nas notes se fornecidos
+    let notesContent = maintenanceData.notes;
+    if (serviceType || description) {
+      notesContent = [
+        serviceType,
+        description,
+        maintenanceData.notes,
+      ].filter(Boolean).join(' - ');
+    }
+
+    const updateData: any = {
+      ...maintenanceData,
+      notes: notesContent,
+    };
+
+    if (date) {
+      updateData.date = new Date(date);
     }
 
     return this.prisma.maintenance.update({
