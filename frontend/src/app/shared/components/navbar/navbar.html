@@ -1,6 +1,29 @@
 <nav class="border-b bg-card">
   <div class="flex h-16 items-center px-4 container mx-auto">
-    <a routerLink="/dashboard" class="text-xl font-bold mr-8">Frota Leve</a>
+    <a routerLink="/dashboard" class="flex items-center gap-3 mr-8 group">
+      <!-- Logo SVG -->
+      <div class="relative">
+        <svg class="w-8 h-8 text-primary transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Caminhão estilizado -->
+          <path d="M16 17.5C16 18.88 14.88 20 13.5 20C12.12 20 11 18.88 11 17.5C11 16.12 12.12 15 13.5 15C14.88 15 16 16.12 16 17.5Z" fill="currentColor"/>
+          <path d="M7 17.5C7 18.88 5.88 20 4.5 20C3.12 20 2 18.88 2 17.5C2 16.12 3.12 15 4.5 15C5.88 15 7 16.12 7 17.5Z" fill="currentColor"/>
+          <path d="M17 6H14V12H20.46L17 6Z" fill="currentColor" opacity="0.7"/>
+          <path d="M14 4H3C2.45 4 2 4.45 2 5V15H4C4 13.34 5.34 12 7 12H11C11 13.66 12.34 15 14 15H16V6L14 4Z" fill="currentColor" opacity="0.4"/>
+          <rect x="20" y="12" width="2" height="3" fill="currentColor"/>
+        </svg>
+        <div class="absolute -bottom-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+      </div>
+      
+      <!-- Texto da Logo -->
+      <div class="flex flex-col leading-none">
+        <span class="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          Frota Leve
+        </span>
+        <span class="text-[10px] text-muted-foreground font-medium tracking-wider">
+          GESTÃO INTELIGENTE
+        </span>
+      </div>
+    </a>
     
     <div class="ml-auto flex items-center space-x-4">
       <app-theme-toggle></app-theme-toggle>
