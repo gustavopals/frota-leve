@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "paths": {
+      "@frota-leve/shared": ["./packages/shared/src/index.ts"],
+      "@frota-leve/shared/*": ["./packages/shared/src/*"],
+      "@frota-leve/database": ["./packages/database/src/index.ts"],
+      "@frota-leve/database/*": ["./packages/database/src/*"],
+      "@frota-leve/ai": ["./packages/ai/src/index.ts"],
+      "@frota-leve/ai/*": ["./packages/ai/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "coverage", ".turbo"]
+}

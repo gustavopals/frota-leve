@@ -92,8 +92,8 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **0.1.1** — Inicializar repositório Git e criar `.gitignore` completo (node_modules, dist, .env, .turbo, coverage, .angular)
-- [ ] **0.1.2** — Inicializar Turborepo (`npx create-turbo@latest`) com estrutura de pastas:
+- [x] **0.1.1** — Inicializar repositório Git e criar `.gitignore` completo (node_modules, dist, .env, .turbo, coverage, .angular)
+- [x] **0.1.2** — Inicializar Turborepo (`npx create-turbo@latest`) com estrutura de pastas:
   ```
   frota-leve/
   ├── apps/
@@ -108,9 +108,9 @@ Uma task só está **pronta** quando:
   ├── tools/
   └── .github/
   ```
-- [ ] **0.1.3** — Configurar `turbo.json` com pipelines: `build`, `dev`, `test`, `lint`, `type-check`
-- [ ] **0.1.4** — Configurar `tsconfig.base.json` na raiz com path aliases (`@frota-leve/shared`, `@frota-leve/database`, `@frota-leve/ai`)
-- [ ] **0.1.5** — Criar `packages/shared` com `package.json`, `tsconfig.json` e estrutura:
+- [x] **0.1.3** — Configurar `turbo.json` com pipelines: `build`, `dev`, `test`, `lint`, `type-check`
+- [x] **0.1.4** — Configurar `tsconfig.base.json` na raiz com path aliases (`@frota-leve/shared`, `@frota-leve/database`, `@frota-leve/ai`)
+- [x] **0.1.5** — Criar `packages/shared` com `package.json`, `tsconfig.json` e estrutura:
   ```
   packages/shared/
   ├── src/
@@ -123,10 +123,10 @@ Uma task só está **pronta** quando:
   ├── tsconfig.json
   └── package.json
   ```
-- [ ] **0.1.6** — Configurar ESLint + Prettier na raiz com config compartilhada (regras: no-any, no-unused-vars, prefer-const, consistent-return)
-- [ ] **0.1.7** — Configurar Husky + lint-staged para pre-commit (lint + type-check nos arquivos alterados)
-- [ ] **0.1.8** — Criar `README.md` com instruções de setup do projeto para novos desenvolvedores
-- [ ] **0.1.9** — Criar `.env.example` com todas as variáveis de ambiente documentadas
+- [x] **0.1.6** — Configurar ESLint + Prettier na raiz com config compartilhada (regras: no-any, no-unused-vars, prefer-const, consistent-return)
+- [x] **0.1.7** — Configurar Husky + lint-staged para pre-commit (lint + type-check nos arquivos alterados)
+- [x] **0.1.8** — Criar `README.md` com instruções de setup do projeto para novos desenvolvedores
+- [x] **0.1.9** — Criar `.env.example` com todas as variáveis de ambiente documentadas
 
 ---
 

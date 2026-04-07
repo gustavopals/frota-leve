@@ -1,0 +1,13 @@
+{
+  "name": "@frota-leve/api",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "echo 'API — setup na TASK 0.2'",
+    "dev": "echo 'API — setup na TASK 0.2'",
+    "lint": "echo 'OK'",
+    "type-check": "echo 'OK'",
+    "test": "echo 'OK'",
+    "start": "echo 'API — setup na TASK 0.2'"
+  }
+}

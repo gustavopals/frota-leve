@@ -1,0 +1,13 @@
+{
+  "name": "@frota-leve/database",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "scripts": {
+    "build": "echo 'Database package — setup na TASK 0.3'",
+    "dev": "echo 'Database package — setup na TASK 0.3'",
+    "lint": "echo 'OK'",
+    "type-check": "echo 'OK'",
+    "test": "echo 'OK'"
+  }
+}

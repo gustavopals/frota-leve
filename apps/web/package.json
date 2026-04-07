@@ -1,0 +1,13 @@
+{
+  "name": "@frota-leve/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Web — setup na TASK 0.4'",
+    "dev": "echo 'Web — setup na TASK 0.4'",
+    "lint": "echo 'OK'",
+    "type-check": "echo 'OK'",
+    "test": "echo 'OK'",
+    "start": "echo 'Web — setup na TASK 0.4'"
+  }
+}
