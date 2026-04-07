@@ -679,7 +679,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.3.1** — Criar migration Prisma para tabela `Vehicle`:
+- [x] **1.3.1** — Criar migration Prisma para tabela `Vehicle`:
 
   ```prisma
   model Vehicle {
@@ -713,20 +713,20 @@ Uma task só está **pronta** quando:
   }
   ```
 
-- [ ] **1.3.2** — Criar módulo `apps/api/src/modules/vehicles/`
-- [ ] **1.3.3** — Implementar `GET /api/v1/vehicles` — listagem com paginação, filtros (status, category, fuelType, search por placa/modelo), ordenação
-- [ ] **1.3.4** — Implementar `GET /api/v1/vehicles/:id` — detalhes do veículo com timeline de eventos
-- [ ] **1.3.5** — Implementar `POST /api/v1/vehicles` — criação com validação (placa única no tenant, placa formato válido, campos obrigatórios)
-- [ ] **1.3.6** — Implementar `PUT /api/v1/vehicles/:id` — atualização completa
-- [ ] **1.3.7** — Implementar `PATCH /api/v1/vehicles/:id/status` — alterar status (com validação de transição: não pode ir de DECOMMISSIONED para ACTIVE, etc.)
-- [ ] **1.3.8** — Implementar `PATCH /api/v1/vehicles/:id/mileage` — atualizar quilometragem (validar que novo valor >= atual)
-- [ ] **1.3.9** — Implementar `DELETE /api/v1/vehicles/:id` — soft delete (setar status DECOMMISSIONED) ou hard delete se nunca teve movimentação
-- [ ] **1.3.10** — Implementar `POST /api/v1/vehicles/import` — importação via CSV/Excel (upload de arquivo, parse, validação em batch, retorno de erros por linha)
-- [ ] **1.3.11** — Implementar `GET /api/v1/vehicles/export` — exportação da lista em CSV
-- [ ] **1.3.12** — Implementar `GET /api/v1/vehicles/stats` — resumo: total por status, total por categoria, média de idade da frota, km médio
-- [ ] **1.3.13** — Implementar verificação de limite do plano: antes de criar veículo, verificar se tenant não excedeu maxVehicles do plano
-- [ ] **1.3.14** — Implementar audit log: registrar criação, edição e exclusão de veículos na tabela AuditLog
-- [ ] **1.3.15** — Escrever testes: CRUD completo, filtros, paginação, import, limite de plano, validações de placa
+- [x] **1.3.2** — Criar módulo `apps/api/src/modules/vehicles/`
+- [x] **1.3.3** — Implementar `GET /api/v1/vehicles` — listagem com paginação, filtros (status, category, fuelType, search por placa/modelo), ordenação
+- [x] **1.3.4** — Implementar `GET /api/v1/vehicles/:id` — detalhes do veículo com timeline de eventos
+- [x] **1.3.5** — Implementar `POST /api/v1/vehicles` — criação com validação (placa única no tenant, placa formato válido, campos obrigatórios)
+- [x] **1.3.6** — Implementar `PUT /api/v1/vehicles/:id` — atualização completa
+- [x] **1.3.7** — Implementar `PATCH /api/v1/vehicles/:id/status` — alterar status (com validação de transição: não pode ir de DECOMMISSIONED para ACTIVE, etc.)
+- [x] **1.3.8** — Implementar `PATCH /api/v1/vehicles/:id/mileage` — atualizar quilometragem (validar que novo valor >= atual)
+- [x] **1.3.9** — Implementar `DELETE /api/v1/vehicles/:id` — soft delete (setar status DECOMMISSIONED) ou hard delete se nunca teve movimentação
+- [x] **1.3.10** — Implementar `POST /api/v1/vehicles/import` — importação via CSV/Excel (upload de arquivo, parse, validação em batch, retorno de erros por linha)
+- [x] **1.3.11** — Implementar `GET /api/v1/vehicles/export` — exportação da lista em CSV
+- [x] **1.3.12** — Implementar `GET /api/v1/vehicles/stats` — resumo: total por status, total por categoria, média de idade da frota, km médio
+- [x] **1.3.13** — Implementar verificação de limite do plano: antes de criar veículo, verificar se tenant não excedeu maxVehicles do plano
+- [x] **1.3.14** — Implementar audit log: registrar criação, edição e exclusão de veículos na tabela AuditLog
+- [x] **1.3.15** — Escrever testes: CRUD completo, filtros, paginação, import, limite de plano, validações de placa
 
 ---
 

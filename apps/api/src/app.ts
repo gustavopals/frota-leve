@@ -8,6 +8,7 @@ import { errorHandler } from './middlewares/error-handler';
 import { rateLimiter } from './middlewares/rate-limiter';
 import { authRouter } from './modules/auth/auth.routes';
 import { healthRouter } from './modules/health/health.routes';
+import { vehiclesRouter } from './modules/vehicles/vehicles.routes';
 import { logger } from './config/logger';
 import { env } from './config/env';
 import { NotFoundError } from './shared/errors';
@@ -52,6 +53,7 @@ export function createApp() {
   // ─── Rotas ────────────────────────────────────────────────────────────────
   app.use('/api/v1/health', healthRouter);
   app.use('/api/v1/auth', authRouter);
+  app.use('/api/v1/vehicles', vehiclesRouter);
 
   // TODO: demais rotas serão registradas aqui conforme as tasks avançam
 
