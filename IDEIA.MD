@@ -1,4 +1,4 @@
-# 🚛 FROTAFY — Plataforma SaaS de Gestão de Frotas Inteligente
+# 🚛 frota-leve — Plataforma SaaS de Gestão de Frotas Inteligente
 
 > **Documento de Ideia e Visão de Produto**
 > Versão: 1.0 | Abril 2026
@@ -9,17 +9,17 @@
 
 ## 1. VISÃO GERAL DO PRODUTO
 
-### 1.1 O que é o Frotafy?
+### 1.1 O que é o frota-leve?
 
-O **Frotafy** é uma plataforma SaaS de gestão de frotas 100% brasileira, projetada para atender empresas de todos os portes — de microempresas com 2 veículos a grandes operações com centenas de ativos. A proposta central é democratizar a gestão profissional de frotas com uma ferramenta moderna, acessível, com onboarding self-service e potencializada por Inteligência Artificial.
+O **frota-leve** é uma plataforma SaaS de gestão de frotas 100% brasileira, projetada para atender empresas de todos os portes — de microempresas com 2 veículos a grandes operações com centenas de ativos. A proposta central é democratizar a gestão profissional de frotas com uma ferramenta moderna, acessível, com onboarding self-service e potencializada por Inteligência Artificial.
 
-O grande diferencial do Frotafy é combinar **simplicidade de uso** (o gestor se cadastra e começa a usar sozinho, sem implantação) com **profundidade funcional** (módulos completos de manutenção, combustível, pneus, multas, documentos, financeiro, motoristas, checklist e IA integrada) — tudo isso a um preço agressivo que os concorrentes tradicionais não conseguem praticar.
+O grande diferencial do frota-leve é combinar **simplicidade de uso** (o gestor se cadastra e começa a usar sozinho, sem implantação) com **profundidade funcional** (módulos completos de manutenção, combustível, pneus, multas, documentos, financeiro, motoristas, checklist e IA integrada) — tudo isso a um preço agressivo que os concorrentes tradicionais não conseguem praticar.
 
 ### 1.2 Proposta de Valor
 
 **"Sua frota sob controle total — em minutos, não em meses."**
 
-Enquanto concorrentes como Sofit (Localiza), Golfleet e Prolog exigem processos de implantação que duram semanas, reuniões comerciais e valores que começam em centenas de reais por mês, o Frotafy permite que qualquer empresa:
+Enquanto concorrentes como Sofit (Localiza), Golfleet e Prolog exigem processos de implantação que duram semanas, reuniões comerciais e valores que começam em centenas de reais por mês, o frota-leve permite que qualquer empresa:
 
 1. Se cadastre online em 3 minutos
 2. Importe seus veículos via planilha ou cadastro manual
@@ -62,7 +62,7 @@ Existe um **vácuo claro** no mercado brasileiro entre:
 - Soluções **gratuitas/baratas** que são genéricas e limitadas (Odoo, planilhas)
 - Soluções **profissionais** que exigem implantação, mínimo de veículos e contratos longos (Sofit, Golfleet)
 
-O Frotafy se posiciona exatamente nesse gap: **profissional, acessível, self-service e com IA integrada**.
+O frota-leve se posiciona exatamente nesse gap: **profissional, acessível, self-service e com IA integrada**.
 
 Nenhum concorrente brasileiro oferece simultaneamente:
 - ✅ Onboarding 100% self-service
@@ -309,9 +309,9 @@ O app mobile é a porta de entrada do motorista no sistema. Leve, rápido, offli
 
 ### 4.14 🤖 Módulo de Inteligência Artificial (Claude API)
 
-O módulo de IA é o **grande diferencial** do Frotafy. Utilizando a API do Claude (Anthropic), o sistema oferece capacidades que nenhum concorrente brasileiro possui:
+O módulo de IA é o **grande diferencial** do frota-leve. Utilizando a API do Claude (Anthropic), o sistema oferece capacidades que nenhum concorrente brasileiro possui:
 
-#### 4.14.1 Assistente IA Conversacional ("Frotafy AI")
+#### 4.14.1 Assistente IA Conversacional ("frota-leve AI")
 
 Um chat integrado no painel onde o gestor pode fazer perguntas em linguagem natural:
 
@@ -391,7 +391,7 @@ Com base no TCO, histórico de manutenção, depreciação e dados de mercado, a
 | 1 | **Onboarding self-service** | Nenhum concorrente brasileiro relevante permite que o cliente comece sozinho, sem reunião comercial ou implantação |
 | 2 | **IA Integrada (Claude)** | Nenhum concorrente brasileiro tem IA conversacional integrada para análise de dados da frota |
 | 3 | **Preço agressivo** | R$ 20/mês torna acessível para micro e pequenas empresas que nunca usaram software de frota |
-| 4 | **Sem mínimo de veículos** | Sofit exige mínimo de 20 veículos; Frotafy aceita a partir de 1 |
+| 4 | **Sem mínimo de veículos** | Sofit exige mínimo de 20 veículos; frota-leve aceita a partir de 1 |
 | 5 | **App mobile offline-first** | Motorista preenche checklist e registra abastecimento mesmo sem internet — sincroniza depois |
 | 6 | **OCR inteligente** | Fotografou o cupom fiscal, a IA extrai os dados automaticamente |
 | 7 | **Gamificação para motoristas** | Rankings, badges, metas de economia — engajamento real do motorista |
@@ -460,7 +460,7 @@ Com base no TCO, histórico de manutenção, depreciação e dados de mercado, a
 ### 6.3 Estrutura do Monorepo
 
 ```
-frotafy/
+frota-leve/
 ├── apps/
 │   ├── web/                    # Angular + PO-UI (painel do gestor)
 │   ├── api/                    # Node.js + Express + Prisma (API REST)
@@ -510,7 +510,7 @@ frotafy/
 ### 8.1 Fluxo do Cadastro
 
 ```
-1. Acessa frotafy.com.br
+1. Acessa frota-leve.com.br
 2. Clica "Começar Grátis" (trial 14 dias do Plano Profissional)
 3. Preenche: nome, e-mail, senha, CNPJ da empresa
 4. Validação do CNPJ (consulta automática para preencher razão social, endereço)
@@ -573,7 +573,7 @@ frotafy/
 3. Solução: screenshots do painel + 3 benefícios chave
 4. Funcionalidades: carrossel visual dos módulos
 5. IA: destaque para o assistente IA com demo interativo
-6. Comparativo: tabela Frotafy vs. Excel vs. Concorrentes
+6. Comparativo: tabela frota-leve vs. Excel vs. Concorrentes
 7. Planos e Preços: cards dos 3 planos com CTA
 8. Depoimentos: (inicialmente, beta testers)
 9. FAQ
@@ -667,11 +667,8 @@ frotafy/
 
 | Nome | Domínio | Observação |
 |------|---------|-----------|
-| **Frotafy** | frotafy.com.br | Nome sugerido neste documento; moderno, memorável |
-| **FrotaHub** | frotahub.com.br | Remete a central/hub de gestão |
-| **FrotaZen** | frotazen.com.br | Tranquilidade na gestão; gestão sem estresse |
-| **VeiculoAI** | veiculoai.com.br | Destaca o diferencial de IA |
-| **FrotaBox** | frotabox.com.br | Solução "caixa" completa |
+| **frota-leve** | frotaleve.com.br | Nome sugerido neste documento; moderno, memorável |
+
 
 > **Nota**: Verificar disponibilidade de domínio e marca no INPI antes de decidir.
 
@@ -679,7 +676,7 @@ frotafy/
 
 ## 15. RESUMO EXECUTIVO
 
-O **Frotafy** é uma oportunidade real de construir um SaaS lucrativo e escalável em um mercado brasileiro aquecido (R$ 61 bilhões em locação de veículos, crescendo 16% ao ano) e carente de soluções acessíveis e modernas.
+O **frota-leve** é uma oportunidade real de construir um SaaS lucrativo e escalável em um mercado brasileiro aquecido (R$ 61 bilhões em locação de veículos, crescendo 16% ao ano) e carente de soluções acessíveis e modernas.
 
 **Por que vai funcionar:**
 
@@ -694,4 +691,4 @@ O **Frotafy** é uma oportunidade real de construir um SaaS lucrativo e escaláv
 
 ---
 
-> *"A melhor hora para digitalizar sua frota foi há 5 anos. A segunda melhor hora é agora — com o Frotafy."*
+> *"A melhor hora para digitalizar sua frota foi há 5 anos. A segunda melhor hora é agora — com o frota-leve."*
