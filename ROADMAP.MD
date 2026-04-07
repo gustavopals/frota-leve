@@ -736,31 +736,31 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.4.1** — Criar `features/vehicles/vehicles.module.ts` com roteamento
-- [ ] **1.4.2** — Implementar **listagem** (`vehicles/list`):
+- [x] **1.4.1** — Criar `features/vehicles/vehicles.module.ts` com roteamento
+- [x] **1.4.2** — Implementar **listagem** (`vehicles/list`):
   - `po-page-list` com `po-table` (colunas: placa, marca/modelo, ano, categoria, status, km, ações)
   - Filtros: `po-combo` para status, categoria, tipo combustível; `po-input` para busca textual
   - Ações por linha: Editar, Ver detalhes, Alterar status
   - Ação de página: "Novo Veículo", "Importar", "Exportar"
   - Paginação server-side via `po-table` com `p-service-api`
   - Badges coloridos para status (verde=ativo, amarelo=manutenção, cinza=reserva, vermelho=baixado)
-- [ ] **1.4.3** — Implementar **formulário de criação/edição** (`vehicles/form`):
+- [x] **1.4.3** — Implementar **formulário de criação/edição** (`vehicles/form`):
   - `po-page-edit` com `po-dynamic-form` ou formulário manual
   - Campos: placa (com máscara Mercosul), RENAVAM, chassi, marca, modelo, ano, ano modelo, cor, tipo combustível, categoria, km atual, consumo esperado, data aquisição, valor aquisição, observações
   - Upload de fotos (até 4, com preview)
   - Validação client-side: placa obrigatória e formato válido, ano entre 1950 e ano atual+1
-- [ ] **1.4.4** — Implementar **tela de detalhes** (`vehicles/:id`):
+- [x] **1.4.4** — Implementar **tela de detalhes** (`vehicles/:id`):
   - `po-page-detail` com informações do veículo
   - Tabs: Dados, Manutenções, Abastecimentos, Multas, Documentos, Timeline
   - (as tabs serão populadas conforme os módulos forem desenvolvidos)
   - Card de resumo: custo total acumulado, última manutenção, próximo vencimento
-- [ ] **1.4.5** — Implementar **modal de importação**:
+- [x] **1.4.5** — Implementar **modal de importação**:
   - Upload de arquivo CSV/Excel
   - Preview dos dados importados em tabela
   - Exibição de erros de validação por linha
   - Botão de confirmação da importação
   - Download de template de exemplo
-- [ ] **1.4.6** — Implementar `vehicles.service.ts` no frontend com métodos para todos os endpoints
+- [x] **1.4.6** — Implementar `vehicles.service.ts` no frontend com métodos para todos os endpoints
 
 ---
 

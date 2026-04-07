@@ -13,6 +13,7 @@ import {
   replaceVehicleBodySchema,
   updateVehicleMileageBodySchema,
   updateVehicleStatusBodySchema,
+  vehicleImportQuerySchema,
   vehicleIdParamSchema,
   vehicleStatsQuerySchema,
 } from './vehicles.validators';
@@ -51,6 +52,7 @@ vehiclesRouter.get('/export', validate({ query: exportVehiclesQuerySchema }), co
 vehiclesRouter.post(
   '/import',
   authorize(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER),
+  validate({ query: vehicleImportQuerySchema }),
   importUploadMiddleware(),
   controller.import,
 );

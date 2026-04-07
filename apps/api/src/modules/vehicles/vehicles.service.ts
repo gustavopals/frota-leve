@@ -9,6 +9,7 @@ import type {
   VehicleActorContext,
   VehicleDeletionResult,
   VehicleImportError,
+  VehicleImportPreviewItem,
   VehicleImportResult,
   VehicleListResponse,
   VehicleStatsResponse,
@@ -41,6 +42,10 @@ const vehicleInclude = {
 type VehicleRecord = Prisma.VehicleGetPayload<{
   include: typeof vehicleInclude;
 }>;
+
+type VehicleListItem = VehicleRecord & {
+  brandModel: string;
+};
 
 type VehicleFilterQuery = VehicleListQueryInput | VehicleExportQueryInput | VehicleStatsQueryInput;
 
@@ -383,11 +388,33 @@ function buildVehicleCsv(vehicles: VehicleRecord[]): string {
     .join('\n')}`;
 }
 
+function toVehicleListItem(vehicle: VehicleRecord): VehicleListItem {
+  return {
+    ...vehicle,
+    brandModel: [vehicle.brand, vehicle.model].filter(Boolean).join(' / '),
+  };
+}
+
+function toVehicleImportPreviewItem(row: ImportPreparedRow): VehicleImportPreviewItem {
+  return {
+    row: row.row,
+    plate: formatPlate(row.input.plate),
+    brand: row.input.brand.trim(),
+    model: row.input.model.trim(),
+    year: row.input.year,
+    yearModel: row.input.yearModel,
+    status: row.input.status,
+    category: row.input.category,
+    fuelType: row.input.fuelType,
+    currentMileage: row.input.currentMileage,
+  };
+}
+
 export class VehiclesService {
   async listVehicles(
     context: VehicleActorContext,
     query: VehicleListQueryInput,
-  ): Promise<VehicleListResponse<VehicleRecord>> {
+  ): Promise<VehicleListResponse<VehicleListItem>> {
     const where = buildVehicleWhere(context.tenantId, query);
     const orderBy = buildVehicleOrderBy(query.sortBy, query.sortOrder);
     const skip = (query.page - 1) * query.pageSize;
@@ -404,7 +431,8 @@ export class VehiclesService {
     ]);
 
     return {
-      items,
+      items: items.map(toVehicleListItem),
+      hasNext: skip + items.length < total,
       meta: {
         page: query.page,
         pageSize: query.pageSize,
@@ -726,7 +754,10 @@ export class VehiclesService {
   async importVehicles(
     context: VehicleActorContext,
     file?: Express.Multer.File,
-  ): Promise<VehicleImportResult<VehicleRecord>> {
+    options: {
+      preview?: boolean;
+    } = {},
+  ): Promise<VehicleImportResult<VehicleRecord | VehicleImportPreviewItem>> {
     const rows = await parseVehicleImportFile(file as Express.Multer.File);
     const errors: VehicleImportError[] = [];
     const parsedRows: ImportPreparedRow[] = [];
@@ -858,6 +889,17 @@ export class VehiclesService {
       }
 
       rowsReadyForImport.splice(0, rowsReadyForImport.length, ...limitedRows);
+    }
+
+    if (options.preview) {
+      return {
+        preview: true,
+        readyCount: rowsReadyForImport.length,
+        importedCount: 0,
+        errorCount: errors.length,
+        items: rowsReadyForImport.map(toVehicleImportPreviewItem),
+        errors: errors.sort((left, right) => left.row - right.row),
+      };
     }
 
     const items =

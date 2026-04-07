@@ -5,6 +5,7 @@ import type {
   VehicleCreateInput,
   VehicleExportQueryInput,
   VehicleIdParams,
+  VehicleImportQueryInput,
   VehicleListQueryInput,
   VehicleMileageUpdateInput,
   VehicleReplaceInput,
@@ -104,7 +105,11 @@ export class VehiclesController {
 
   import = (req: Request, res: Response, next: NextFunction): void => {
     void vehiclesService
-      .importVehicles(this.getActorContext(req), req.file)
+      .importVehicles(
+        this.getActorContext(req),
+        req.file,
+        req.query as unknown as VehicleImportQueryInput,
+      )
       .then((result) => {
         res.status(200).json(result);
       })

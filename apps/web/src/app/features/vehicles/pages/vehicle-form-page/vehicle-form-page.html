@@ -1,0 +1,277 @@
+<po-page-edit
+  [p-breadcrumb]="breadcrumb"
+  [p-title]="title"
+  [p-subtitle]="subtitle"
+  [p-disable-submit]="!canSave"
+  (p-cancel)="cancel()"
+  (p-save)="save()"
+  (p-save-new)="saveAndCreateNew()"
+>
+  <section class="vehicle-form-page">
+    <div class="vehicle-form-page__main">
+      <form
+        class="vehicle-form-page__form"
+        [formGroup]="form"
+        novalidate
+      >
+        <section class="vehicle-form-page__section">
+          <div class="vehicle-form-page__section-head">
+            <span class="vehicle-form-page__eyebrow">Cadastro essencial</span>
+            <h2>Identificação do ativo</h2>
+          </div>
+
+          <div class="vehicle-form-page__grid vehicle-form-page__grid--identity">
+            <div class="vehicle-form-page__field">
+              <po-input
+                formControlName="plate"
+                name="plate"
+                p-label="Placa"
+                p-placeholder="ABC1D23"
+                p-upper-case="true"
+              ></po-input>
+              @for (error of getControlErrors('plate'); track error) {
+                <small class="vehicle-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="vehicle-form-page__field">
+              <po-input
+                formControlName="brand"
+                name="brand"
+                p-label="Marca"
+              ></po-input>
+              @for (error of getControlErrors('brand'); track error) {
+                <small class="vehicle-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="vehicle-form-page__field">
+              <po-input
+                formControlName="model"
+                name="model"
+                p-label="Modelo"
+              ></po-input>
+              @for (error of getControlErrors('model'); track error) {
+                <small class="vehicle-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <po-input
+              formControlName="renavam"
+              name="renavam"
+              p-label="RENAVAM"
+            ></po-input>
+
+            <po-input
+              formControlName="chassis"
+              name="chassis"
+              p-label="Chassi"
+            ></po-input>
+
+            <po-input
+              formControlName="color"
+              name="color"
+              p-label="Cor"
+            ></po-input>
+          </div>
+        </section>
+
+        <po-divider p-label="Operação e classificação"></po-divider>
+
+        <section class="vehicle-form-page__section">
+          <div class="vehicle-form-page__grid vehicle-form-page__grid--operation">
+            <div class="vehicle-form-page__field">
+              <po-number
+                formControlName="year"
+                name="year"
+                p-label="Ano fabricação"
+                [p-min]="1950"
+                [p-max]="currentYearMax"
+              ></po-number>
+              @for (error of getControlErrors('year'); track error) {
+                <small class="vehicle-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="vehicle-form-page__field">
+              <po-number
+                formControlName="yearModel"
+                name="yearModel"
+                p-label="Ano modelo"
+                [p-min]="1950"
+                [p-max]="currentYearModelMax"
+              ></po-number>
+              @for (error of getControlErrors('yearModel'); track error) {
+                <small class="vehicle-form-page__error">{{ error }}</small>
+              }
+              @if (yearModelError) {
+                <small class="vehicle-form-page__error">{{ yearModelError }}</small>
+              }
+            </div>
+
+            <po-combo
+              formControlName="fuelType"
+              name="fuelType"
+              p-label="Combustível"
+              [p-options]="fuelTypeOptions"
+            ></po-combo>
+
+            <po-combo
+              formControlName="category"
+              name="category"
+              p-label="Categoria"
+              [p-options]="categoryOptions"
+            ></po-combo>
+
+            <po-combo
+              formControlName="status"
+              name="status"
+              p-label="Status"
+              [p-options]="statusOptions"
+            ></po-combo>
+
+            <div class="vehicle-form-page__field">
+              <po-number
+                formControlName="currentMileage"
+                name="currentMileage"
+                p-label="Km atual"
+                [p-min]="0"
+              ></po-number>
+              @for (error of getControlErrors('currentMileage'); track error) {
+                <small class="vehicle-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="vehicle-form-page__field">
+              <po-decimal
+                formControlName="expectedConsumption"
+                name="expectedConsumption"
+                p-label="Consumo esperado"
+                [p-decimals-length]="2"
+                [p-min]="0.1"
+                p-help="km/l estimado do fabricante"
+              ></po-decimal>
+              @for (error of getControlErrors('expectedConsumption'); track error) {
+                <small class="vehicle-form-page__error">{{ error }}</small>
+              }
+            </div>
+          </div>
+        </section>
+
+        <po-divider p-label="Aquisição"></po-divider>
+
+        <section class="vehicle-form-page__section">
+          <div class="vehicle-form-page__grid vehicle-form-page__grid--acquisition">
+            <po-datepicker
+              formControlName="acquisitionDate"
+              name="acquisitionDate"
+              p-label="Data de aquisição"
+              p-format="dd/mm/yyyy"
+            ></po-datepicker>
+
+            <div class="vehicle-form-page__field">
+              <po-decimal
+                formControlName="acquisitionValue"
+                name="acquisitionValue"
+                p-label="Valor de aquisição"
+                [p-decimals-length]="2"
+                [p-min]="0"
+              ></po-decimal>
+              @for (error of getControlErrors('acquisitionValue'); track error) {
+                <small class="vehicle-form-page__error">{{ error }}</small>
+              }
+            </div>
+          </div>
+        </section>
+
+        <po-divider p-label="Fotos e observações"></po-divider>
+
+        <section class="vehicle-form-page__section">
+          <div class="vehicle-form-page__photo-shell">
+            <div class="vehicle-form-page__photo-uploader">
+              <po-upload
+                name="vehicle-photos"
+                p-label="Fotos do veículo"
+                p-help="Selecione até 4 imagens para pré-visualização local."
+                [ngModel]="photoUploadFiles"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="handlePhotoFilesChange($event)"
+                [p-restrictions]="photoRestrictions"
+                [p-multiple]="true"
+                [p-drag-drop]="true"
+                [p-hide-send-button]="true"
+                [p-required-url]="false"
+              ></po-upload>
+
+              <p class="vehicle-form-page__photo-hint">
+                O storage definitivo ainda não está ligado nesta etapa. Para persistir imagens agora,
+                informe URLs válidas abaixo.
+              </p>
+            </div>
+
+            <div class="vehicle-form-page__photo-grid">
+              @for (url of persistedPhotoUrls; track url) {
+                <figure class="vehicle-form-page__photo-card">
+                  <img
+                    [src]="url"
+                    alt="Foto persistida do veículo"
+                  />
+                  <figcaption>Imagem já salva</figcaption>
+                </figure>
+              }
+
+              @for (url of localPhotoPreviewUrls; track url) {
+                <figure class="vehicle-form-page__photo-card vehicle-form-page__photo-card--preview">
+                  <img
+                    [src]="url"
+                    alt="Pré-visualização local"
+                  />
+                  <figcaption>Prévia local</figcaption>
+                </figure>
+              }
+            </div>
+          </div>
+
+          <div class="vehicle-form-page__grid vehicle-form-page__grid--photos">
+            @for (fieldName of photoUrlFieldNames; track fieldName) {
+              <div class="vehicle-form-page__field">
+                <po-input
+                  [formControlName]="fieldName"
+                  [name]="fieldName"
+                  [p-label]="'URL da foto ' + ($index + 1)"
+                ></po-input>
+                @for (error of getControlErrors(fieldName); track error) {
+                  <small class="vehicle-form-page__error">{{ error }}</small>
+                }
+              </div>
+            }
+          </div>
+
+          <po-textarea
+            formControlName="notes"
+            name="notes"
+            p-label="Observações"
+            [p-rows]="4"
+          ></po-textarea>
+        </section>
+      </form>
+    </div>
+
+    <aside class="vehicle-form-page__aside">
+      <po-widget p-title="Prévia rápida">
+        <span class="vehicle-form-page__preview-plate">{{ previewPlate }}</span>
+        <strong>{{ previewBrandModel }}</strong>
+        <small>Visual compacto para revisar o cadastro antes de salvar.</small>
+      </po-widget>
+
+      <po-widget p-title="Checklist">
+        <ul class="vehicle-form-page__checklist">
+          <li>Placa e modelo são obrigatórios.</li>
+          <li>Ano mínimo 1950 e ano modelo compatível.</li>
+          <li>Fotos locais servem como preview nesta etapa.</li>
+          <li>URLs de fotos podem ser persistidas agora.</li>
+        </ul>
+      </po-widget>
+    </aside>
+  </section>
+</po-page-edit>

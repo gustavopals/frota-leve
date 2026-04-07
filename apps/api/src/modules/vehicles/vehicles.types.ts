@@ -17,6 +17,7 @@ export type VehicleListMeta = {
 
 export type VehicleListResponse<TVehicle> = {
   items: TVehicle[];
+  hasNext: boolean;
   meta: VehicleListMeta;
 };
 
@@ -38,7 +39,22 @@ export type VehicleImportError = {
   errors: string[];
 };
 
+export type VehicleImportPreviewItem = {
+  row: number;
+  plate: string;
+  brand: string;
+  model: string;
+  year: number;
+  yearModel: number;
+  status: VehicleStatus;
+  category: VehicleCategory;
+  fuelType: FuelType;
+  currentMileage: number;
+};
+
 export type VehicleImportResult<TVehicle> = {
+  preview?: boolean;
+  readyCount?: number;
   importedCount: number;
   errorCount: number;
   items: TVehicle[];
