@@ -1,0 +1,13 @@
+{
+  "name": "@frota-leve/ai",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "scripts": {
+    "build": "echo 'AI package — setup na TASK 3.1'",
+    "dev": "echo 'AI package — setup na TASK 3.1'",
+    "lint": "echo 'OK'",
+    "type-check": "echo 'OK'",
+    "test": "echo 'OK'"
+  }
+}

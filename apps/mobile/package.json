@@ -1,0 +1,13 @@
+{
+  "name": "@frota-leve/mobile",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Mobile — setup na TASK 4.1'",
+    "dev": "echo 'Mobile — setup na TASK 4.1'",
+    "lint": "echo 'OK'",
+    "type-check": "echo 'OK'",
+    "test": "echo 'OK'",
+    "start": "echo 'Mobile — setup na TASK 4.1'"
+  }
+}

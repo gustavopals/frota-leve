@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "paths": {
+      "@frota-leve/shared": ["../../packages/shared/src/index.ts"],
+      "@frota-leve/shared/*": ["../../packages/shared/src/*"],
+      "@frota-leve/database": ["../../packages/database/src/index.ts"],
+      "@frota-leve/database/*": ["../../packages/database/src/*"],
+      "@frota-leve/ai": ["../../packages/ai/src/index.ts"],
+      "@frota-leve/ai/*": ["../../packages/ai/src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "exclude": ["node_modules", "dist", "coverage"]
+}

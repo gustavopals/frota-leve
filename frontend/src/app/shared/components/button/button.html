@@ -1,9 +1,0 @@
-<button
-  [type]="type"
-  [disabled]="disabled || loading"
-  [class]="buttonClass"
-  (click)="handleClick($event)"
->
-  <span *ngIf="loading" class="mr-2 animate-spin">⏳</span>
-  <ng-content></ng-content>
-</button>
