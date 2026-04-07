@@ -18,12 +18,12 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "@frota-leve/shared": ["./packages/shared/src/index.ts"],
-      "@frota-leve/shared/*": ["./packages/shared/src/*"],
-      "@frota-leve/database": ["./packages/database/src/index.ts"],
-      "@frota-leve/database/*": ["./packages/database/src/*"],
-      "@frota-leve/ai": ["./packages/ai/src/index.ts"],
-      "@frota-leve/ai/*": ["./packages/ai/src/*"]
+      "@frota-leve/shared": ["./packages/shared"],
+      "@frota-leve/shared/*": ["./packages/shared/*"],
+      "@frota-leve/database": ["./packages/database"],
+      "@frota-leve/database/*": ["./packages/database/*"],
+      "@frota-leve/ai": ["./packages/ai"],
+      "@frota-leve/ai/*": ["./packages/ai/*"]
     }
   },
   "exclude": ["node_modules", "dist", "coverage", ".turbo"]

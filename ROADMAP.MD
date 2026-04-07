@@ -187,13 +187,13 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **0.3.1** — Criar `packages/database` com Prisma instalado
+- [x] **0.3.1** — Criar `packages/database` com Prisma instalado
 - [x] **0.3.2** — Criar `docker-compose.yml` na raiz com serviços:
   - `postgres`: PostgreSQL 16 com volume persistente, porta 5432
   - `redis`: Redis 7 com porta 6379
   - `pgadmin` (opcional): para visualização em dev
-- [ ] **0.3.3** — Configurar `schema.prisma` com provider postgresql, extensão pgvector habilitada (`previewFeatures = ["multiSchema", "postgresqlExtensions"]`)
-- [ ] **0.3.4** — Criar schema base (tabelas globais no schema `public`):
+- [x] **0.3.3** — Configurar `schema.prisma` com provider postgresql, schema `public` explícito e extensão pgvector habilitada (`previewFeatures = ["postgresqlExtensions"]` no Prisma 6, com `schemas = ["public"]` e `@@schema("public")`)
+- [x] **0.3.4** — Criar schema base (tabelas globais no schema `public`):
 
   ```prisma
   // === TENANTS ===
@@ -272,14 +272,14 @@ Uma task só está **pronta** quando:
   }
   ```
 
-- [ ] **0.3.5** — Rodar primeira migration: `npx prisma migrate dev --name init`
-- [ ] **0.3.6** — Criar `seed.ts` com dados de desenvolvimento:
+- [x] **0.3.5** — Rodar primeira migration: `npx prisma migrate dev --name init`
+- [x] **0.3.6** — Criar `seed.ts` com dados de desenvolvimento:
   - 1 tenant de demo (empresa fictícia "Transportadora Demo Ltda")
   - 1 user OWNER (admin@demo.com / senha: 123456)
   - 1 user MANAGER, 1 user DRIVER
-- [ ] **0.3.7** — Criar script `db:seed`, `db:reset`, `db:studio` no package.json
-- [ ] **0.3.8** — Exportar PrismaClient singleton configurado de `packages/database/src/client.ts`
-- [ ] **0.3.9** — Configurar `packages/database` como dependência do `apps/api` no workspace
+- [x] **0.3.7** — Criar script `db:seed`, `db:reset`, `db:studio` no package.json
+- [x] **0.3.8** — Exportar PrismaClient singleton configurado de `packages/database/src/client.ts`
+- [x] **0.3.9** — Configurar `packages/database` como dependência do `apps/api` no workspace
 
 ---
 

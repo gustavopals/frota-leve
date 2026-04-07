@@ -1,6 +1,2 @@
-/**
- * Placeholder do package de banco.
- * O Prisma Client e utilitários de acesso serão adicionados na TASK 0.3.
- */
-
-export {};
+export { prisma } from './client';
+export { Prisma, PrismaClient, PlanType, TenantStatus, UserRole } from '@prisma/client';

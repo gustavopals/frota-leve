@@ -7,7 +7,7 @@ Plataforma SaaS multi-tenant de gestão de frotas para empresas brasileiras.
 O monorepo base e o backend Express da Fase 0 estão prontos.
 
 - `apps/api`: funcional, com health check, middlewares base, testes e OpenAPI inicial
-- `packages/database`: serviços locais de PostgreSQL + Redis para desenvolvimento
+- `packages/database`: Prisma, migration inicial, seed e serviços locais de PostgreSQL + Redis
 - `apps/web` e `apps/mobile`: ainda são placeholders das próximas tasks
 
 ## Pré-requisitos
@@ -33,7 +33,11 @@ cp .env.example .env
 # 4. Suba PostgreSQL e Redis locais
 npm run services:up
 
-# 5. Inicie a API + serviços locais em modo desenvolvimento
+# 5. Rode a migration inicial e o seed
+npm run db:migrate -- --name init
+npm run db:seed
+
+# 6. Inicie a API + serviços locais em modo desenvolvimento
 npm run dev:backend
 ```
 
@@ -45,7 +49,7 @@ curl http://localhost:3000/api/v1/health
 ```
 
 - Especificação OpenAPI inicial: [docs/openapi/api.yaml](./docs/openapi/api.yaml)
-- O setup de Prisma, migrations e seeds será concluído na `TASK 0.3`
+- Prisma inicial em `packages/database/prisma/schema.prisma`
 
 ## Comandos Principais
 
@@ -66,6 +70,18 @@ npm run services:down
 
 # Acompanhar logs de PostgreSQL + Redis
 npm run services:logs
+
+# Rodar migration de desenvolvimento
+npm run db:migrate -- --name nome_da_migration
+
+# Popular o banco com dados de desenvolvimento
+npm run db:seed
+
+# Resetar banco local e reaplicar seed
+npm run db:reset
+
+# Abrir Prisma Studio
+npm run db:studio
 
 # Build de todos os packages e apps
 npm run build
@@ -119,8 +135,24 @@ npm run lint --workspace=apps/api
 
 ## Banco de Dados (Prisma)
 
-O package `packages/database` já sobe PostgreSQL e Redis locais para desenvolvimento.
-O schema Prisma, migrations e seeds serão adicionados na `TASK 0.3`.
+```bash
+# Subir PostgreSQL + Redis
+npm run services:up
+
+# Aplicar migration de desenvolvimento
+npm run db:migrate -- --name init
+
+# Rodar seed
+npm run db:seed
+
+# Resetar o banco local e executar seed novamente
+npm run db:reset
+
+# Abrir Prisma Studio
+npm run db:studio
+```
+
+O `docker-compose.yml` também expõe um `pgadmin` opcional via profile `pgadmin`.
 
 ## Variáveis de Ambiente
 

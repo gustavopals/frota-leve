@@ -1,0 +1,103 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  schemas    = ["public"]
+  extensions = [vector]
+}
+
+model Tenant {
+  id                   String       @id @default(uuid()) @db.Uuid
+  name                 String
+  tradeName            String?      @map("trade_name")
+  cnpj                 String       @unique
+  email                String
+  phone                String?
+  address              Json?
+  logoUrl              String?      @map("logo_url")
+  plan                 PlanType     @default(ESSENTIAL)
+  status               TenantStatus @default(TRIAL)
+  trialEndsAt          DateTime?    @map("trial_ends_at")
+  stripeCustomerId     String?      @map("stripe_customer_id")
+  stripeSubscriptionId String?      @map("stripe_subscription_id")
+  settings             Json?
+  createdAt            DateTime     @default(now()) @map("created_at")
+  updatedAt            DateTime     @updatedAt @map("updated_at")
+  users                User[]
+
+  @@map("tenants")
+  @@schema("public")
+}
+
+enum PlanType {
+  ESSENTIAL
+  PROFESSIONAL
+  ENTERPRISE
+
+  @@map("plan_type")
+  @@schema("public")
+}
+
+enum TenantStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+
+  @@map("tenant_status")
+  @@schema("public")
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name         String
+  email        String
+  passwordHash String    @map("password_hash")
+  role         UserRole  @default(VIEWER)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  avatarUrl    String?   @map("avatar_url")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("users")
+  @@schema("public")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MANAGER
+  FINANCIAL
+  DRIVER
+  VIEWER
+
+  @@map("user_role")
+  @@schema("public")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  action    String
+  entity    String
+  entityId  String   @map("entity_id")
+  changes   Json?
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId])
+  @@index([tenantId, entity])
+  @@map("audit_logs")
+  @@schema("public")
+}
