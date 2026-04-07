@@ -20,10 +20,91 @@ The project is being **restructured**. The `main` branch contains an initial imp
 
 - **Monorepo**: Turborepo with `apps/web`, `apps/api`, `apps/mobile`, `packages/shared`, `packages/database`, `packages/ai`
 - **Backend**: Node.js + Express + Prisma + PostgreSQL + Redis
-- **Frontend**: Angular 18+ with PO-UI (TOTVS design system)
+- **Frontend**: Angular 21 with PO-UI (TOTVS design system) — **Standalone Components** (see below)
 - **Mobile**: Angular PWA (offline-first)
 - **AI**: Claude API integration (`packages/ai`)
 - **Payments**: Stripe Billing
+
+### Angular Migration: NgModules → Standalone Components
+
+⚠️ **CRITICAL**: As of 2026-04-07, the frontend is transitioning from **NgModules to Standalone Components** (Angular 21 best practice).
+
+**Current Status:**
+
+- ✅ Architecture planned in `docs/MIGRA-ANGULAR-BEST-PRACTICES.md`
+- ⏳ Migration in progress (Phases 1-5 over 6 sprints)
+- **IMPORTANT**: All NEW code must be **standalone-first**
+
+**Rules for Code Generation:**
+
+1. **Components**: Always use `standalone: true`
+
+   ```typescript
+   @Component({
+     selector: 'app-my-component',
+     standalone: true,  // ← Required
+     imports: [CommonModule, PoModule, ...],
+     templateUrl: './my-component.html',
+   })
+   export class MyComponent {}
+   ```
+
+2. **No `@NgModule` for new code** — Use standalone + routes arrays
+
+   ```typescript
+   // ❌ DON'T: Create new NgModules
+   @NgModule({
+     declarations: [...],
+     imports: [...],
+   })
+   export class MyModule {}
+
+   // ✅ DO: Use routes + standalone components
+   export const MY_ROUTES: Routes = [{
+     path: '',
+     component: MyComponent,
+     providers: [MyService],
+   }];
+   ```
+
+3. **Route Guards**: Use function-based, not class-based
+
+   ```typescript
+   // ✅ Correct (Angular 21+)
+   export const authGuard = () => {
+     const authService = inject(AuthService);
+     return authService.isAuthenticated();
+   };
+   ```
+
+4. **Dependency Injection**: Use `inject()` in components, not constructor parameters
+
+   ```typescript
+   // ✅ Preferred
+   export class MyComponent {
+     private readonly service = inject(MyService);
+   }
+   ```
+
+5. **Shared Code**: Import components/pipes directly, not from `SharedModule`
+
+   ```typescript
+   // ✅ Correct
+   @Component({
+     imports: [CommonModule, PoModule, CustomPipe, SharedComponent],
+   })
+
+   // ❌ Wrong
+   @Component({
+     imports: [SharedModule],
+   })
+   ```
+
+**Reference Documentation:**
+
+- 📖 Full migration guide: `docs/MIGRA-ANGULAR-BEST-PRACTICES.md`
+- 📖 Post-migration patterns: Will be in `docs/ANGULAR-PATTERNS.md` (Phase 5)
+- 📖 Official Angular docs: https://angular.io/guide/standalone-components
 
 ## Build & Run Commands
 
@@ -81,6 +162,16 @@ Conventional commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`
 ### Tests
 
 Place `.spec.ts` files next to the file being tested.
+
+### Angular Conventions
+
+- **Standalone First**: All new Angular components/directives/pipes must have `standalone: true`
+- **Imports in Decorator**: Explicitly list all dependencies in `imports: [...]`
+- **Routes as Arrays**: Export `Routes` arrays (e.g., `export const MY_ROUTES: Routes = [...]`), NOT modules
+- **Lazy Loading**: Use `loadChildren: () => import(...).then(m => m.MY_ROUTES)`
+- **Change Detection**: Prefer `ChangeDetectionStrategy.OnPush` with standalone
+- **No SharedModule**: Delete feature `*-module.ts` files — components are self-contained
+- **File Naming**: `component.ts` (not `component.component.ts` unless multiple components in one folder)
 
 ## Multi-Tenancy (Critical)
 
