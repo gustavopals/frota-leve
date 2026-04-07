@@ -1,7 +1,6 @@
 import type { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import type { Observable } from 'rxjs';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth';
@@ -12,14 +11,13 @@ export class ErrorInterceptor implements HttpInterceptor {
   constructor(
     private readonly authService: AuthService,
     private readonly notificationService: NotificationService,
-    private readonly router: Router,
   ) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
       catchError((error: unknown) => {
         if (error instanceof HttpErrorResponse) {
-          this.handleHttpError(error);
+          this.handleHttpError(request, error);
         }
 
         return throwError(() => error);
@@ -27,11 +25,18 @@ export class ErrorInterceptor implements HttpInterceptor {
     );
   }
 
-  private handleHttpError(error: HttpErrorResponse): void {
+  private handleHttpError(request: HttpRequest<unknown>, error: HttpErrorResponse): void {
+    const isAuthRequest =
+      /\/auth\/(login|register|forgot-password|reset-password|refresh)(?:\?|$)/.test(request.url);
+
     if (error.status === 401) {
-      this.authService.clearSession();
-      this.notificationService.warning('Sua sessao expirou. Faca login novamente.');
-      void this.router.navigate(['/auth/login']);
+      if (!isAuthRequest && this.authService.isAuthenticated()) {
+        this.authService.logout();
+        this.notificationService.warning('Sua sessao expirou. Faca login novamente.');
+        return;
+      }
+
+      this.notificationService.warning(this.resolveClientErrorMessage(error));
 
       return;
     }
@@ -52,11 +57,26 @@ export class ErrorInterceptor implements HttpInterceptor {
       return error.error;
     }
 
-    if (typeof error.error === 'object' && error.error && 'message' in error.error) {
-      const message = error.error.message;
+    if (typeof error.error === 'object' && error.error) {
+      if ('message' in error.error) {
+        const message = error.error.message;
 
-      if (typeof message === 'string' && message.trim()) {
-        return message;
+        if (typeof message === 'string' && message.trim()) {
+          return message;
+        }
+      }
+
+      if (
+        'error' in error.error &&
+        typeof error.error.error === 'object' &&
+        error.error.error &&
+        'message' in error.error.error
+      ) {
+        const message = error.error.error.message;
+
+        if (typeof message === 'string' && message.trim()) {
+          return message;
+        }
       }
     }
 

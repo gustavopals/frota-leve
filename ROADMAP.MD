@@ -571,8 +571,8 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.1.1** — Instalar dependências: bcryptjs, jsonwebtoken, @types/jsonwebtoken
-- [ ] **1.1.2** — Criar módulo `apps/api/src/modules/auth/`:
+- [x] **1.1.1** — Instalar dependências: bcryptjs, jsonwebtoken, @types/jsonwebtoken
+- [x] **1.1.2** — Criar módulo `apps/api/src/modules/auth/`:
   ```
   auth/
   ├── auth.controller.ts
@@ -581,7 +581,7 @@ Uma task só está **pronta** quando:
   ├── auth.validators.ts    # Schemas zod para cada endpoint
   └── auth.types.ts          # TokenPayload, etc.
   ```
-- [ ] **1.1.3** — Implementar `POST /api/v1/auth/register`:
+- [x] **1.1.3** — Implementar `POST /api/v1/auth/register`:
   - Input: name, email, password, companyName, cnpj
   - Validar CNPJ (formato e dígitos verificadores)
   - Verificar se CNPJ já existe → ConflictError
@@ -591,7 +591,7 @@ Uma task só está **pronta** quando:
   - Criar User com role OWNER
   - Gerar access token (JWT, 15 min) e refresh token (JWT, 7 dias)
   - Retornar tokens + dados do user (sem passwordHash)
-- [ ] **1.1.4** — Implementar `POST /api/v1/auth/login`:
+- [x] **1.1.4** — Implementar `POST /api/v1/auth/login`:
   - Input: email, password
   - Buscar user por email (incluir tenant)
   - Verificar senha com bcrypt
@@ -599,41 +599,41 @@ Uma task só está **pronta** quando:
   - Verificar se tenant não está CANCELLED ou SUSPENDED
   - Gerar tokens, atualizar lastLoginAt
   - Retornar tokens + dados do user + dados do tenant
-- [ ] **1.1.5** — Implementar `POST /api/v1/auth/refresh`:
+- [x] **1.1.5** — Implementar `POST /api/v1/auth/refresh`:
   - Input: refreshToken
   - Verificar validade do refresh token
   - Gerar novos access + refresh tokens (rotação)
   - Invalidar refresh token anterior (blacklist no Redis, TTL 7 dias)
-- [ ] **1.1.6** — Implementar `POST /api/v1/auth/forgot-password`:
+- [x] **1.1.6** — Implementar `POST /api/v1/auth/forgot-password`:
   - Input: email
   - Gerar token de reset (UUID, salvar hash no banco, TTL 1 hora)
   - Enviar e-mail com link de reset (template HTML básico)
   - Sempre retornar 200 (não revelar se e-mail existe)
-- [ ] **1.1.7** — Implementar `POST /api/v1/auth/reset-password`:
+- [x] **1.1.7** — Implementar `POST /api/v1/auth/reset-password`:
   - Input: token, newPassword
   - Verificar token válido e não expirado
   - Atualizar senha, invalidar token
-- [ ] **1.1.8** — Implementar `POST /api/v1/auth/change-password`:
+- [x] **1.1.8** — Implementar `POST /api/v1/auth/change-password`:
   - Input: currentPassword, newPassword (requer auth)
   - Verificar senha atual, atualizar para nova
-- [ ] **1.1.9** — Implementar `GET /api/v1/auth/me`:
+- [x] **1.1.9** — Implementar `GET /api/v1/auth/me`:
   - Retornar dados do user autenticado + tenant + plano
-- [ ] **1.1.10** — Implementar middleware `auth.ts`:
+- [x] **1.1.10** — Implementar middleware `auth.ts`:
   - Extrair Bearer token do header
   - Verificar JWT (secret, expiração)
   - Buscar user no banco (ou cache Redis)
   - Setar `req.user` com { id, tenantId, role, email }
   - Lançar UnauthorizedError se inválido
-- [ ] **1.1.11** — Implementar middleware `tenant.ts`:
+- [x] **1.1.11** — Implementar middleware `tenant.ts`:
   - Ler `tenantId` do `req.user`
   - Buscar tenant no banco
   - Verificar status (bloquear se SUSPENDED ou CANCELLED)
   - Setar `req.tenant` com dados do tenant
-- [ ] **1.1.12** — Implementar middleware `authorize(...roles: UserRole[])`:
+- [x] **1.1.12** — Implementar middleware `authorize(...roles: UserRole[])`:
   - Verificar se `req.user.role` está na lista de roles permitidos
   - Lançar ForbiddenError se não autorizado
-- [ ] **1.1.13** — Escrever testes: register (sucesso, CNPJ duplicado, email duplicado, CNPJ inválido), login (sucesso, senha errada, user inativo), refresh, me
-- [ ] **1.1.14** — Implementar rate limiting específico para auth: 5 tentativas de login por minuto por IP, 3 tentativas de forgot-password por hora por email
+- [x] **1.1.13** — Escrever testes: register (sucesso, CNPJ duplicado, email duplicado, CNPJ inválido), login (sucesso, senha errada, user inativo), refresh, me
+- [x] **1.1.14** — Implementar rate limiting específico para auth: 5 tentativas de login por minuto por IP, 3 tentativas de forgot-password por hora por email
 
 ---
 
@@ -643,33 +643,33 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.2.1** — Criar `features/auth/auth.module.ts` e `auth-routing.module.ts`
-- [ ] **1.2.2** — Implementar tela de **Login** (`auth/login`):
+- [x] **1.2.1** — Criar `features/auth/auth.module.ts` e `auth-routing.module.ts`
+- [x] **1.2.2** — Implementar tela de **Login** (`auth/login`):
   - Formulário PO-UI: email (po-input), senha (po-password)
   - Botão "Entrar" com loading state
   - Link "Esqueci minha senha"
   - Link "Não tem conta? Cadastre-se grátis"
   - Validação no frontend (required, email format)
   - Chamar `POST /auth/login`, salvar tokens no localStorage, redirecionar para dashboard
-- [ ] **1.2.3** — Implementar tela de **Registro** (`auth/register`):
+- [x] **1.2.3** — Implementar tela de **Registro** (`auth/register`):
   - Formulário: nome, email, senha, confirmação de senha, nome da empresa, CNPJ
   - Máscara de CNPJ (po-input com mask)
   - Validação: senha mínimo 8 chars, confirmação match, CNPJ válido
   - Chamar `POST /auth/register`, salvar tokens, redirecionar para wizard de onboarding
-- [ ] **1.2.4** — Implementar tela de **Esqueci minha senha** (`auth/forgot-password`):
+- [x] **1.2.4** — Implementar tela de **Esqueci minha senha** (`auth/forgot-password`):
   - Input de e-mail
   - Exibir mensagem de sucesso (sempre, por segurança)
-- [ ] **1.2.5** — Implementar tela de **Redefinir senha** (`auth/reset-password?token=xxx`):
+- [x] **1.2.5** — Implementar tela de **Redefinir senha** (`auth/reset-password?token=xxx`):
   - Nova senha + confirmação
   - Validação de token via backend
-- [ ] **1.2.6** — Implementar `auth.service.ts`:
+- [x] **1.2.6** — Implementar `auth.service.ts`:
   - Métodos: login(), register(), forgotPassword(), resetPassword(), refreshToken(), logout(), getMe(), isAuthenticated()
   - Armazenar tokens no localStorage
   - Getter computado para currentUser (BehaviorSubject)
   - Auto-refresh do token quando faltam 2 minutos para expirar
-- [ ] **1.2.7** — Implementar `auth.guard.ts`: redirecionar para `/auth/login` se não autenticado
-- [ ] **1.2.8** — Implementar `role.guard.ts`: verificar role mínimo para acessar rota (data: { roles: ['OWNER', 'ADMIN'] })
-- [ ] **1.2.9** — Implementar lógica de logout: limpar tokens, redirecionar para login
+- [x] **1.2.7** — Implementar `auth.guard.ts`: redirecionar para `/auth/login` se não autenticado
+- [x] **1.2.8** — Implementar `role.guard.ts`: verificar role mínimo para acessar rota (data: { roles: ['OWNER', 'ADMIN'] })
+- [x] **1.2.9** — Implementar lógica de logout: limpar tokens, redirecionar para login
 
 ---
 

@@ -1,0 +1,134 @@
+.onboarding-hero {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
+  margin-bottom: 1.5rem;
+}
+
+.onboarding-hero h2 {
+  margin: 0.35rem 0 0.75rem;
+}
+
+.onboarding-hero p {
+  color: var(--color-neutral-dark-70);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.onboarding-kicker {
+  color: var(--color-action-default);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.onboarding-progress-card {
+  background:
+    linear-gradient(135deg, rgba(24, 144, 255, 0.12), rgba(24, 144, 255, 0.02)),
+    var(--color-neutral-light-00);
+  border: 1px solid rgba(24, 144, 255, 0.18);
+  border-radius: 1rem;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.25rem;
+}
+
+.onboarding-progress-label {
+  color: var(--color-neutral-dark-60);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.onboarding-progress-bar {
+  background: var(--color-neutral-light-20);
+  border-radius: 999px;
+  height: 0.5rem;
+  overflow: hidden;
+}
+
+.onboarding-progress-bar span {
+  background: linear-gradient(90deg, #0ea5e9, #22c55e);
+  display: block;
+  height: 100%;
+  width: 20%;
+}
+
+.onboarding-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
+}
+
+.onboarding-widget {
+  height: 100%;
+}
+
+.onboarding-step-list {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.onboarding-step-item {
+  align-items: flex-start;
+  border: 1px solid var(--color-neutral-light-20);
+  border-radius: 0.9rem;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 1rem;
+}
+
+.onboarding-step-item.is-active {
+  background: rgba(24, 144, 255, 0.04);
+  border-color: rgba(24, 144, 255, 0.28);
+}
+
+.onboarding-step-item p,
+.onboarding-step-item small {
+  display: block;
+  margin: 0.2rem 0 0;
+}
+
+.onboarding-step-item p {
+  color: var(--color-neutral-dark-70);
+}
+
+.onboarding-step-item small {
+  color: var(--color-neutral-dark-60);
+  line-height: 1.5;
+}
+
+.onboarding-step-index {
+  align-items: center;
+  background: var(--color-action-default);
+  border-radius: 999px;
+  color: var(--color-neutral-light-00);
+  display: inline-flex;
+  font-size: 0.85rem;
+  font-weight: 700;
+  height: 2rem;
+  justify-content: center;
+  width: 2rem;
+}
+
+.onboarding-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.onboarding-note {
+  color: var(--color-neutral-dark-60);
+  line-height: 1.5;
+  margin: 1rem 0 0;
+}
+
+@media (max-width: 960px) {
+  .onboarding-hero,
+  .onboarding-grid {
+    grid-template-columns: 1fr;
+  }
+}

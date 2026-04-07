@@ -1,0 +1,94 @@
+<section class="register-page">
+  <span class="register-page__eyebrow">Trial gratuito</span>
+  <h2>Crie sua conta</h2>
+  <p>Cadastre sua empresa, inicie o trial e libere o painel operacional da Frota Leve.</p>
+
+  <form
+    class="register-page__form"
+    [formGroup]="form"
+    novalidate
+  >
+    <div class="register-page__field">
+      <po-input
+        formControlName="name"
+        name="name"
+        p-label="Seu nome"
+      ></po-input>
+      @for (error of fieldErrors('name'); track error) {
+        <small class="register-page__error">{{ error }}</small>
+      }
+    </div>
+
+    <div class="register-page__field">
+      <po-input
+        formControlName="email"
+        name="email"
+        p-label="E-mail"
+      ></po-input>
+      @for (error of fieldErrors('email'); track error) {
+        <small class="register-page__error">{{ error }}</small>
+      }
+    </div>
+
+    <div class="register-page__grid">
+      <div class="register-page__field">
+        <po-password
+          formControlName="password"
+          name="password"
+          p-label="Senha"
+        ></po-password>
+        @for (error of fieldErrors('password'); track error) {
+          <small class="register-page__error">{{ error }}</small>
+        }
+      </div>
+
+      <div class="register-page__field">
+        <po-password
+          formControlName="confirmPassword"
+          name="confirmPassword"
+          p-label="Confirmar senha"
+        ></po-password>
+        @for (error of fieldErrors('confirmPassword'); track error) {
+          <small class="register-page__error">{{ error }}</small>
+        }
+      </div>
+    </div>
+
+    <div class="register-page__field">
+      <po-input
+        formControlName="companyName"
+        name="companyName"
+        p-label="Nome da empresa"
+      ></po-input>
+      @for (error of fieldErrors('companyName'); track error) {
+        <small class="register-page__error">{{ error }}</small>
+      }
+    </div>
+
+    <div class="register-page__field">
+      <po-input
+        formControlName="cnpj"
+        name="cnpj"
+        p-label="CNPJ"
+        p-mask="99.999.999/9999-99"
+      ></po-input>
+      @for (error of fieldErrors('cnpj'); track error) {
+        <small class="register-page__error">{{ error }}</small>
+      }
+    </div>
+  </form>
+
+  <div class="register-page__actions">
+    <po-button
+      p-kind="primary"
+      p-label="Criar conta"
+      [p-disabled]="form.invalid || isSubmitting"
+      [p-loading]="isSubmitting"
+      (p-click)="submit()"
+    ></po-button>
+  </div>
+
+  <nav class="register-page__links">
+    <a routerLink="/auth/login">Ja tenho conta</a>
+  </nav>
+</section>

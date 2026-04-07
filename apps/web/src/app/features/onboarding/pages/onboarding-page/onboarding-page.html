@@ -1,0 +1,50 @@
+<po-page-default p-title="Onboarding inicial">
+  <section class="onboarding-hero">
+    <div>
+      <span class="onboarding-kicker">Conta criada</span>
+      <h2>Bem-vindo ao setup da {{ tenantName }}</h2>
+      <p>
+        Sua autenticacao ja esta pronta. O proximo passo e fechar a configuracao inicial da frota
+        para liberar os fluxos principais do produto.
+      </p>
+    </div>
+
+    <div class="onboarding-progress-card">
+      <span class="onboarding-progress-label">Progresso sugerido</span>
+      <strong>1 de 5 etapas</strong>
+      <div class="onboarding-progress-bar" aria-hidden="true">
+        <span></span>
+      </div>
+      <small>Comece pelos veiculos e motoristas para o dashboard ganhar contexto real.</small>
+    </div>
+  </section>
+
+  <section class="onboarding-grid">
+    <po-widget class="onboarding-widget" p-title="Roteiro inicial">
+      <ol class="onboarding-step-list">
+        @for (step of steps; track step.title; let index = $index) {
+          <li class="onboarding-step-item" [class.is-active]="index === 0">
+            <span class="onboarding-step-index">{{ index + 1 }}</span>
+            <div>
+              <strong>{{ step.title }}</strong>
+              <p>{{ step.description }}</p>
+              <small>{{ step.helper }}</small>
+            </div>
+          </li>
+        }
+      </ol>
+    </po-widget>
+
+    <po-widget class="onboarding-widget" p-title="Proximas acoes">
+      <div class="onboarding-actions">
+        <a p-button p-kind="primary" routerLink="/vehicles"> Cadastrar veiculos </a>
+        <a p-button p-kind="secondary" routerLink="/drivers"> Cadastrar motoristas </a>
+        <a p-button p-kind="tertiary" routerLink="/dashboard"> Ir para o dashboard </a>
+      </div>
+      <p class="onboarding-note">
+        O wizard completo com persistencia de etapas e tour guiado continua previsto para a `TASK
+        5.2`.
+      </p>
+    </po-widget>
+  </section>
+</po-page-default>

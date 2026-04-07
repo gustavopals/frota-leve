@@ -1,11 +1,15 @@
-<po-toolbar [p-title]="appName"></po-toolbar>
+<po-toolbar
+  [p-title]="appName"
+  [p-profile]="toolbarProfile"
+  [p-profile-actions]="profileActions"
+></po-toolbar>
 
 <section class="main-layout">
   <header class="main-layout__banner">
     <div>
       <span class="main-layout__eyebrow">Operacao conectada</span>
       <h1>{{ appName }}</h1>
-      <p>Base de navegacao, autenticacao e integracao pronta para evoluir os modulos da plataforma.</p>
+      <p>{{ currentTenantName }} com autenticacao, sessao persistida e navegacao protegida.</p>
     </div>
 
     <div class="main-layout__meta">

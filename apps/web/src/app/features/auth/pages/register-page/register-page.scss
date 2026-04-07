@@ -1,9 +1,9 @@
-.login-page {
+.register-page {
   display: grid;
   gap: 1.25rem;
 }
 
-.login-page__eyebrow {
+.register-page__eyebrow {
   color: #c75000;
   font-size: 0.75rem;
   font-weight: 700;
@@ -11,65 +11,57 @@
   text-transform: uppercase;
 }
 
-.login-page h2 {
+.register-page h2 {
   color: #17313b;
   font-size: 2rem;
   letter-spacing: -0.04em;
   margin: 0;
 }
 
-.login-page p {
+.register-page p {
   color: #50616d;
   line-height: 1.65;
   margin: 0;
 }
 
-.login-page__form {
+.register-page__form {
   display: grid;
   gap: 1rem;
 }
 
-.login-page__field {
+.register-page__grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.register-page__field {
   display: grid;
   gap: 0.35rem;
 }
 
-.login-page__error {
+.register-page__error {
   color: #c53030;
   font-size: 0.82rem;
 }
 
-.login-page__actions {
+.register-page__actions {
   display: flex;
 }
 
-.login-page__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.85rem 1.25rem;
-}
-
-.login-page__links a {
+.register-page__links a {
   color: #0a6f8f;
   font-size: 0.92rem;
   font-weight: 700;
   text-decoration: none;
 }
 
-.login-page__links a:hover {
+.register-page__links a:hover {
   text-decoration: underline;
 }
 
-.login-page__hint {
-  background: rgba(23, 49, 59, 0.04);
-  border: 1px solid rgba(23, 49, 59, 0.08);
-  border-radius: 18px;
-  color: #17313b;
-  display: grid;
-  gap: 0.35rem;
-  padding: 1rem 1.1rem;
-}
-
-.login-page__hint small {
-  color: #50616d;
+@media (max-width: 720px) {
+  .register-page__grid {
+    grid-template-columns: 1fr;
+  }
 }

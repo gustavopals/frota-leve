@@ -1,30 +1,25 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/services/auth';
 import { NotificationService } from '../../../../core/services/notification';
 
 @Component({
-  selector: 'app-login-page',
+  selector: 'app-forgot-password-page',
   standalone: false,
-  templateUrl: './login-page.html',
-  styleUrl: './login-page.scss',
+  templateUrl: './forgot-password-page.html',
+  styleUrl: './forgot-password-page.scss',
 })
-export class LoginPage {
+export class ForgotPasswordPage {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly activatedRoute = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
 
-  appName = environment.appName;
-  version = environment.version;
   isSubmitting = false;
+  successMessage: string | null = null;
+
   readonly form = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required]],
   });
 
   submit(): void {
@@ -36,18 +31,16 @@ export class LoginPage {
     this.isSubmitting = true;
 
     this.authService
-      .login(this.form.getRawValue())
+      .forgotPassword(this.form.getRawValue())
       .pipe(
         finalize(() => {
           this.isSubmitting = false;
         }),
       )
       .subscribe({
-        next: () => {
-          const returnUrl =
-            this.activatedRoute.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
-          this.notificationService.success('Login realizado com sucesso.');
-          void this.router.navigateByUrl(returnUrl);
+        next: (response) => {
+          this.successMessage = response.message;
+          this.notificationService.success('Instrucao de recuperacao processada.');
         },
       });
   }
@@ -70,19 +63,5 @@ export class LoginPage {
     }
 
     return errors;
-  }
-
-  protected get passwordErrors(): string[] {
-    const control = this.form.controls.password;
-
-    if (!control.touched || !control.errors) {
-      return [];
-    }
-
-    if (control.hasError('required')) {
-      return ['Informe sua senha.'];
-    }
-
-    return [];
   }
 }

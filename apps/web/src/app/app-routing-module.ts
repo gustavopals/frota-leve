@@ -26,6 +26,13 @@ const routes: Routes = [
           import('./features/dashboard/dashboard-module').then((module) => module.DashboardModule),
       },
       {
+        path: 'onboarding',
+        loadChildren: () =>
+          import('./features/onboarding/onboarding-module').then(
+            (module) => module.OnboardingModule,
+          ),
+      },
+      {
         path: 'vehicles',
         loadChildren: () =>
           import('./features/vehicles/vehicles-module').then((module) => module.VehiclesModule),

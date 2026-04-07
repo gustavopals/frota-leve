@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import type { PoMenuItem } from '@po-ui/ng-components';
+import type { PoMenuItem, PoToolbarAction, PoToolbarProfile } from '@po-ui/ng-components';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../core/services/auth';
 
 @Component({
   selector: 'app-main-layout',
@@ -26,4 +27,32 @@ export class MainLayout {
     { label: 'IA', link: '/ai-assistant' },
     { label: 'Configuracoes', link: '/settings' },
   ];
+  constructor(private readonly authService: AuthService) {}
+
+  protected get profileActions(): PoToolbarAction[] {
+    return [
+      {
+        label: 'Sair',
+        action: () => this.authService.logout(),
+      },
+    ];
+  }
+
+  protected get toolbarProfile(): PoToolbarProfile | undefined {
+    const user = this.authService.getCurrentUser();
+
+    if (!user) {
+      return undefined;
+    }
+
+    return {
+      title: user.name,
+      subtitle: user.email,
+      avatar: user.avatarUrl ?? undefined,
+    };
+  }
+
+  protected get currentTenantName(): string {
+    return this.authService.getCurrentTenant()?.name ?? 'Operacao principal';
+  }
 }

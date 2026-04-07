@@ -1,15 +1,12 @@
 import type { Request, Response, NextFunction } from 'express';
-import { UnauthorizedError } from '../shared/errors/app-error';
+import type { UserRole } from '@frota-leve/database';
+import { authService } from '../modules/auth/auth.service';
+import { ForbiddenError, UnauthorizedError } from '../shared/errors/app-error';
 
 /**
  * Middleware de autenticação JWT.
  * Verifica o Bearer token no header Authorization e popula req.user.
  *
- * TODO TASK 1.1 — implementar verificação JWT completa:
- *   - Extrair Bearer token
- *   - Verificar assinatura e expiração (jsonwebtoken)
- *   - Buscar user no banco ou cache Redis
- *   - Setar req.user com { id, tenantId, role, email }
  */
 export function authenticate(req: Request, _res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
@@ -19,19 +16,39 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
     return;
   }
 
-  // Placeholder — implementação real na TASK 1.1
-  next();
+  const token = authHeader.slice('Bearer '.length).trim();
+
+  if (!token) {
+    next(new UnauthorizedError('Token de autenticação não fornecido'));
+    return;
+  }
+
+  void authService
+    .authenticateAccessToken(token)
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch(next);
 }
 
 /**
  * Factory de middleware de autorização por role.
  * Verifica se req.user.role está na lista de roles permitidos.
  *
- * TODO TASK 1.1 — implementar após autenticação estar pronta
  */
-export function authorize(..._roles: string[]) {
-  return (_req: Request, _res: Response, next: NextFunction): void => {
-    // Placeholder — implementação real na TASK 1.1
+export function authorize(...roles: UserRole[]) {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      next(new UnauthorizedError('Usuário não autenticado'));
+      return;
+    }
+
+    if (!roles.includes(req.user.role)) {
+      next(new ForbiddenError('Usuário sem permissão para acessar este recurso'));
+      return;
+    }
+
     next();
   };
 }
