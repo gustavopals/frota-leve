@@ -1,0 +1,48 @@
+.login-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.login-page__eyebrow {
+  color: #c75000;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.login-page h2 {
+  color: #17313b;
+  font-size: 2rem;
+  letter-spacing: -0.04em;
+  margin: 0;
+}
+
+.login-page p {
+  color: #50616d;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.login-page__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.login-page__actions {
+  display: flex;
+}
+
+.login-page__hint {
+  background: rgba(23, 49, 59, 0.04);
+  border: 1px solid rgba(23, 49, 59, 0.08);
+  border-radius: 18px;
+  color: #17313b;
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+}
+
+.login-page__hint small {
+  color: #50616d;
+}

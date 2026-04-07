@@ -289,11 +289,11 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **0.4.1** — Criar projeto Angular via CLI: `ng new web --style=scss --routing --strict`
-- [ ] **0.4.2** — Instalar PO-UI: `ng add @po-ui/ng-components` e `@po-ui/ng-templates`
-- [ ] **0.4.3** — Configurar `angular.json`: assets, styles (PO-UI theme), budget de build
-- [ ] **0.4.4** — Configurar path aliases no `tsconfig.json` para `@frota-leve/shared`
-- [ ] **0.4.5** — Criar estrutura de pastas do frontend:
+- [x] **0.4.1** — Criar projeto Angular via CLI: `ng new web --style=scss --routing --strict`
+- [x] **0.4.2** — Instalar PO-UI: `ng add @po-ui/ng-components` e `@po-ui/ng-templates`
+- [x] **0.4.3** — Configurar `angular.json`: assets, styles (PO-UI theme), budget de build
+- [x] **0.4.4** — Configurar path aliases no `tsconfig.json` para `@frota-leve/shared`
+- [x] **0.4.5** — Criar estrutura de pastas do frontend:
   ```
   apps/web/src/app/
   ├── core/                    # Singletons, guards, interceptors
@@ -337,21 +337,21 @@ Uma task só está **pronta** quando:
   ├── app-routing.module.ts
   └── app.component.ts
   ```
-- [ ] **0.4.6** — Implementar `main-layout`: usar `po-page-default` ou `po-page-detail` com `po-menu` lateral contendo itens de navegação (Dashboard, Veículos, Motoristas, Combustível, Manutenção, Pneus, Multas, Documentos, Sinistros, Financeiro, Relatórios, IA, Configurações)
-- [ ] **0.4.7** — Implementar `auth-layout`: layout limpo com logo centralizado para telas de login/registro
-- [ ] **0.4.8** — Configurar roteamento base com lazy loading:
+- [x] **0.4.6** — Implementar `main-layout`: usar `po-page-default` ou `po-page-detail` com `po-menu` lateral contendo itens de navegação (Dashboard, Veículos, Motoristas, Combustível, Manutenção, Pneus, Multas, Documentos, Sinistros, Financeiro, Relatórios, IA, Configurações)
+- [x] **0.4.7** — Implementar `auth-layout`: layout limpo com logo centralizado para telas de login/registro
+- [x] **0.4.8** — Configurar roteamento base com lazy loading:
   ```typescript
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'auth', loadChildren: () => import('./features/auth/auth.module') },
   { path: 'dashboard', loadChildren: () => import('./features/dashboard/dashboard.module'), canActivate: [AuthGuard] },
   // ... demais rotas com AuthGuard
   ```
-- [ ] **0.4.9** — Implementar `api.service.ts`: wrapper do HttpClient com `baseUrl` configurável via environment, métodos `get<T>`, `post<T>`, `put<T>`, `patch<T>`, `delete<T>`
-- [ ] **0.4.10** — Implementar `auth.interceptor.ts`: injeta Bearer token no header Authorization de cada request
-- [ ] **0.4.11** — Implementar `error.interceptor.ts`: captura erros HTTP, exibe `po-notification` (toast) para erros 4xx/5xx, redireciona para login em 401
-- [ ] **0.4.12** — Configurar `environment.ts` e `environment.prod.ts` com `apiUrl`, `appName`, `version`
-- [ ] **0.4.13** — Criar página placeholder para dashboard (com texto "Dashboard — em construção")
-- [ ] **0.4.14** — Verificar que `ng serve` roda sem erros e que o layout PO-UI aparece corretamente
+- [x] **0.4.9** — Implementar `api.service.ts`: wrapper do HttpClient com `baseUrl` configurável via environment, métodos `get<T>`, `post<T>`, `put<T>`, `patch<T>`, `delete<T>`
+- [x] **0.4.10** — Implementar `auth.interceptor.ts`: injeta Bearer token no header Authorization de cada request
+- [x] **0.4.11** — Implementar `error.interceptor.ts`: captura erros HTTP, exibe `po-notification` (toast) para erros 4xx/5xx, redireciona para login em 401
+- [x] **0.4.12** — Configurar `environment.ts` e `environment.prod.ts` com `apiUrl`, `appName`, `version`
+- [x] **0.4.13** — Criar página placeholder para dashboard (com texto "Dashboard — em construção")
+- [x] **0.4.14** — Verificar que `ng serve` roda sem erros e que o layout PO-UI aparece corretamente
 
 ---
 

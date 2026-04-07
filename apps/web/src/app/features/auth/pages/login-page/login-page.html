@@ -1,0 +1,36 @@
+<section class="login-page">
+  <span class="login-page__eyebrow">Ambiente de demonstracao</span>
+  <h2>Acessar {{ appName }}</h2>
+  <p>
+    Use as credenciais abaixo para carregar o shell inicial e validar o fluxo protegido da
+    aplicacao.
+  </p>
+
+  <div class="login-page__form">
+    <po-input
+      name="email"
+      p-label="E-mail"
+      [(ngModel)]="credentials.email"
+    ></po-input>
+
+    <po-password
+      name="password"
+      p-label="Senha"
+      [(ngModel)]="credentials.password"
+    ></po-password>
+  </div>
+
+  <div class="login-page__actions">
+    <po-button
+      p-kind="primary"
+      p-label="Entrar no demo"
+      (p-click)="enterDemo()"
+    ></po-button>
+  </div>
+
+  <footer class="login-page__hint">
+    <strong>Credenciais demo</strong>
+    <span>{{ credentials.email }} / {{ credentials.password }}</span>
+    <small>Versao {{ version }}</small>
+  </footer>
+</section>

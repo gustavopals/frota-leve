@@ -1,0 +1,24 @@
+<section class="auth-layout">
+  <aside class="auth-layout__hero">
+    <div class="auth-layout__content">
+      <span class="auth-layout__eyebrow">Plataforma operacional</span>
+      <h1>{{ appName }}</h1>
+      <p>
+        Gestao de frota com base modular para operacao, documentos, custos, manutencao e
+        inteligencia assistida.
+      </p>
+
+      <div class="auth-layout__highlights">
+        <span>API unificada</span>
+        <span>Shell PO-UI</span>
+        <span>Rotas lazy</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="auth-layout__panel">
+    <div class="auth-layout__card">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</section>

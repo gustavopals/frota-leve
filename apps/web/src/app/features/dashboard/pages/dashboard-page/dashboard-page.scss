@@ -1,0 +1,39 @@
+.dashboard-page__grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.dashboard-page__card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 247, 248, 0.9));
+  border: 1px solid rgba(23, 49, 59, 0.08);
+  border-radius: 18px;
+  display: grid;
+  gap: 0.65rem;
+  min-height: 180px;
+  padding: 1.1rem;
+}
+
+.dashboard-page__card strong {
+  color: #17313b;
+  font-size: 1rem;
+}
+
+.dashboard-page__card p,
+.dashboard-page__card li {
+  color: #50616d;
+  line-height: 1.55;
+}
+
+.dashboard-page__card ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.dashboard-page__label {
+  color: #c75000;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
