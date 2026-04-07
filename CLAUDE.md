@@ -11,11 +11,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The project is being **restructured**. The `main` branch contains an initial implementation with NestJS + Angular + Tailwind CSS. The `ROADMAP.MD` defines a new architecture using Express + Angular + PO-UI + Turborepo monorepo. When implementing, follow the ROADMAP unless explicitly told otherwise.
 
 ### Existing code (main branch)
+
 - **Backend**: NestJS + Prisma + PostgreSQL (`backend/`)
 - **Frontend**: Angular 18 + Tailwind CSS + Capacitor (`frontend/`)
 - Modules already scaffolded: auth, vehicles, fuel, maintenance, checklist, tenants, users
 
 ### Target architecture (per ROADMAP)
+
 - **Monorepo**: Turborepo with `apps/web`, `apps/api`, `apps/mobile`, `packages/shared`, `packages/database`, `packages/ai`
 - **Backend**: Node.js + Express + Prisma + PostgreSQL + Redis
 - **Frontend**: Angular 18+ with PO-UI (TOTVS design system)
@@ -26,6 +28,7 @@ The project is being **restructured**. The `main` branch contains an initial imp
 ## Build & Run Commands
 
 ### Backend (current - NestJS)
+
 ```bash
 cd backend
 npm run start:dev          # Dev server with watch
@@ -41,6 +44,7 @@ npm run seed               # Seed database (ts-node prisma/seed.ts)
 ```
 
 ### Frontend (current - Angular)
+
 ```bash
 cd frontend
 npm start                  # Dev server (ng serve)
@@ -49,6 +53,7 @@ npm test                   # Unit tests
 ```
 
 ### Docker (PostgreSQL + pgAdmin)
+
 ```bash
 npm run docker:up          # Start containers (from root)
 ```
@@ -56,6 +61,7 @@ npm run docker:up          # Start containers (from root)
 ## Conventions
 
 ### Language & Naming
+
 - **TypeScript strict** across the entire monorepo
 - **camelCase** for variables/functions, **PascalCase** for classes/interfaces/types, **UPPER_SNAKE_CASE** for constants and enums
 - **kebab-case** for file names (e.g., `vehicle-list.component.ts`)
@@ -65,12 +71,15 @@ npm run docker:up          # Start containers (from root)
 - Error messages in **Portuguese** (user-facing)
 
 ### Commits
+
 Conventional commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`
 
 ### Branches
+
 `feature/TASK-ID-descricao`, `fix/TASK-ID-descricao`
 
 ### Tests
+
 Place `.spec.ts` files next to the file being tested.
 
 ## Multi-Tenancy (Critical)
@@ -94,8 +103,9 @@ Every database query and API endpoint MUST be scoped by `tenantId`. This is the 
 ## ROADMAP Task Reference
 
 Development follows this order of dependencies:
+
 ```
-Monorepo → Backend → Database → Auth → Vehicles/Drivers → 
+Monorepo → Backend → Database → Auth → Vehicles/Drivers →
 Fuel/Maintenance/Documents/Fines/Tires/Incidents → Financial/TCO →
 AI (Claude API) → Mobile PWA → Billing (Stripe) → Launch
 ```

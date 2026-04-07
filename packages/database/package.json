@@ -2,12 +2,24 @@
   "name": "@frota-leve/database",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
-    "build": "echo 'Database package — setup na TASK 0.3'",
-    "dev": "echo 'Database package — setup na TASK 0.3'",
-    "lint": "echo 'OK'",
-    "type-check": "echo 'OK'",
+    "up": "node ./scripts/services.mjs up",
+    "down": "node ./scripts/services.mjs down",
+    "logs": "node ./scripts/services.mjs logs",
+    "check": "node ./scripts/services.mjs check",
+    "build": "tsc",
+    "dev": "node ./scripts/services.mjs dev",
+    "lint": "eslint src --ext .ts --max-warnings=0",
+    "type-check": "tsc --noEmit",
     "test": "echo 'OK'"
   }
 }

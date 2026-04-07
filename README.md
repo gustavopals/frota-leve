@@ -2,13 +2,21 @@
 
 Plataforma SaaS multi-tenant de gestão de frotas para empresas brasileiras.
 
+## Status Atual
+
+O monorepo base e o backend Express da Fase 0 estão prontos.
+
+- `apps/api`: funcional, com health check, middlewares base, testes e OpenAPI inicial
+- `packages/database`: serviços locais de PostgreSQL + Redis para desenvolvimento
+- `apps/web` e `apps/mobile`: ainda são placeholders das próximas tasks
+
 ## Pré-requisitos
 
 - **Node.js** >= 20.x
 - **npm** >= 10.x
 - **Docker** e **Docker Compose** (para PostgreSQL e Redis locais)
 
-## Setup Inicial
+## Setup Inicial do Backend
 
 ```bash
 # 1. Clone o repositório
@@ -22,27 +30,42 @@ npm install
 cp .env.example .env
 # Edite o .env com seus valores
 
-# 4. Suba os containers do banco e redis
-docker-compose up -d
+# 4. Suba PostgreSQL e Redis locais
+npm run services:up
 
-# 5. Execute as migrations do banco
-cd packages/database
-npx prisma migrate dev
-cd ../..
-
-# 6. Popule o banco com dados de desenvolvimento
-cd packages/database
-npx ts-node seed.ts
-cd ../..
+# 5. Inicie a API + serviços locais em modo desenvolvimento
+npm run dev:backend
 ```
+
+## Endpoints e Documentação
+
+```bash
+# Health check
+curl http://localhost:3000/api/v1/health
+```
+
+- Especificação OpenAPI inicial: [docs/openapi/api.yaml](./docs/openapi/api.yaml)
+- O setup de Prisma, migrations e seeds será concluído na `TASK 0.3`
 
 ## Comandos Principais
 
 Todos os comandos abaixo devem ser executados na raiz do monorepo.
 
 ```bash
-# Desenvolvimento (sobe API + Web simultaneamente)
+# Desenvolvimento de todos os workspaces ativos
 npm run dev
+
+# Desenvolvimento do backend com PostgreSQL + Redis locais
+npm run dev:backend
+
+# Subir apenas PostgreSQL + Redis
+npm run services:up
+
+# Derrubar serviços locais
+npm run services:down
+
+# Acompanhar logs de PostgreSQL + Redis
+npm run services:logs
 
 # Build de todos os packages e apps
 npm run build
@@ -96,17 +119,8 @@ npm run lint --workspace=apps/api
 
 ## Banco de Dados (Prisma)
 
-```bash
-# Criar nova migration
-cd packages/database
-npx prisma migrate dev --name nome_da_migration
-
-# Abrir Prisma Studio (GUI)
-npx prisma studio
-
-# Resetar banco (apenas DEV!)
-npx prisma migrate reset
-```
+O package `packages/database` já sobe PostgreSQL e Redis locais para desenvolvimento.
+O schema Prisma, migrations e seeds serão adicionados na `TASK 0.3`.
 
 ## Variáveis de Ambiente
 

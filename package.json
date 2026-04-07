@@ -10,11 +10,15 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "dev:backend": "turbo run dev --filter=@frota-leve/api --filter=@frota-leve/database",
+    "services:up": "npm run up --workspace=packages/database",
+    "services:down": "npm run down --workspace=packages/database",
+    "services:logs": "npm run logs --workspace=packages/database",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
+    "type-check:staged": "node tools/run-type-check-on-staged.mjs",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,yaml,yml}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,yaml,yml}\" --ignore-path .gitignore",
     "prepare": "husky"
   },
   "devDependencies": {
