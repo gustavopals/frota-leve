@@ -1,9 +1,9 @@
-<po-page-default [p-title]="title" [p-subtitle]="subtitle">
+<po-page-default [p-title]="title()" [p-subtitle]="subtitle()">
   <section class="feature-placeholder">
     <header class="feature-placeholder__header">
-      <span class="feature-placeholder__eyebrow">{{ eyebrow }}</span>
-      @if (description) {
-        <p class="feature-placeholder__description">{{ description }}</p>
+      <span class="feature-placeholder__eyebrow">{{ eyebrow() }}</span>
+      @if (description()) {
+        <p class="feature-placeholder__description">{{ description() }}</p>
       }
     </header>
 

@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-auth-layout',
-  standalone: false,
+  imports: [RouterOutlet],
   templateUrl: './auth-layout.html',
   styleUrl: './auth-layout.scss',
 })

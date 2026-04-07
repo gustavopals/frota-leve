@@ -1,10 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { PoThemeService } from '@po-ui/ng-components';
 
 @Component({
   selector: 'app-root',
+  imports: [RouterOutlet],
   templateUrl: './app.html',
-  standalone: false,
   styleUrl: './app.scss',
 })
 export class App {

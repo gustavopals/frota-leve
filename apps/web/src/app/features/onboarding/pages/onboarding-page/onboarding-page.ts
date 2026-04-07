@@ -1,4 +1,6 @@
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { PoPageModule, PoWidgetModule, PoButtonModule } from '@po-ui/ng-components';
 import { AuthService } from '../../../../core/services/auth';
 
 type OnboardingStep = {
@@ -9,7 +11,7 @@ type OnboardingStep = {
 
 @Component({
   selector: 'app-onboarding-page',
-  standalone: false,
+  imports: [RouterLink, PoPageModule, PoWidgetModule, PoButtonModule],
   templateUrl: './onboarding-page.html',
   styleUrl: './onboarding-page.scss',
 })

@@ -1,12 +1,14 @@
 import { Component, inject } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { PoButtonModule, PoFieldModule } from '@po-ui/ng-components';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth';
 import { NotificationService } from '../../../../core/services/notification';
 
 @Component({
   selector: 'app-forgot-password-page',
-  standalone: false,
+  imports: [ReactiveFormsModule, RouterLink, PoFieldModule, PoButtonModule],
   templateUrl: './forgot-password-page.html',
   styleUrl: './forgot-password-page.scss',
 })

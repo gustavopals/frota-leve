@@ -22,9 +22,18 @@ import {
   getTimelineChangeSummary,
 } from '../../vehicles.utils';
 
+import {
+  PoPageModule,
+  PoWidgetModule,
+  PoTagModule,
+  PoTabsModule,
+  PoInfoModule,
+  PoDividerModule,
+} from '@po-ui/ng-components';
+
 @Component({
   selector: 'app-vehicle-detail-page',
-  standalone: false,
+  imports: [PoPageModule, PoWidgetModule, PoTagModule, PoTabsModule, PoInfoModule, PoDividerModule],
   templateUrl: './vehicle-detail-page.html',
   styleUrl: './vehicle-detail-page.scss',
 })

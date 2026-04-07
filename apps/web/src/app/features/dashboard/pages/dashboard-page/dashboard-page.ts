@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
+import { FeaturePlaceholder } from '../../../../shared/components/feature-placeholder/feature-placeholder';
 
 @Component({
   selector: 'app-dashboard-page',
-  standalone: false,
+  imports: [FeaturePlaceholder],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
 })

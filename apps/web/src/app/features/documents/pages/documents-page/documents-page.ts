@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { FeaturePlaceholder } from '../../../../shared/components/feature-placeholder/feature-placeholder';
 
 @Component({
   selector: 'app-documents-page',
-  standalone: false,
+  imports: [FeaturePlaceholder],
   templateUrl: './documents-page.html',
   styleUrl: './documents-page.scss',
 })

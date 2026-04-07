@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { PoButtonModule, PoFieldModule } from '@po-ui/ng-components';
 import { finalize } from 'rxjs';
 import { sameValueValidator, strongPasswordValidator } from '../../auth-form-validators';
 import { AuthService } from '../../../../core/services/auth';
@@ -8,7 +9,7 @@ import { NotificationService } from '../../../../core/services/notification';
 
 @Component({
   selector: 'app-reset-password-page',
-  standalone: false,
+  imports: [ReactiveFormsModule, RouterLink, PoFieldModule, PoButtonModule],
   templateUrl: './reset-password-page.html',
   styleUrl: './reset-password-page.scss',
 })

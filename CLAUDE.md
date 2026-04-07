@@ -25,86 +25,22 @@ The project is being **restructured**. The `main` branch contains an initial imp
 - **AI**: Claude API integration (`packages/ai`)
 - **Payments**: Stripe Billing
 
-### Angular Migration: NgModules → Standalone Components
+### Angular Architecture (Standalone — Angular 21)
 
-⚠️ **CRITICAL**: As of 2026-04-07, the frontend is transitioning from **NgModules to Standalone Components** (Angular 21 best practice).
+The frontend uses **standalone components** exclusively (Angular 21 default). There are **zero NgModules** in the codebase.
 
-**Current Status:**
+**Rules:**
 
-- ✅ Architecture planned in `docs/MIGRA-ANGULAR-BEST-PRACTICES.md`
-- ⏳ Migration in progress (Phases 1-5 over 6 sprints)
-- **IMPORTANT**: All NEW code must be **standalone-first**
+1. **No `standalone: true` needed** — it's the default in Angular 21. Never add `standalone: false`
+2. **No NgModules** — use `*.routes.ts` with exported `Routes` arrays
+3. **Component imports**: list all dependencies in `imports: [...]` in the `@Component` decorator
+4. **Guards/Interceptors**: functional (`CanActivateFn`, `HttpInterceptorFn`), not class-based
+5. **Signal APIs**: use `input()`, `output()`, `viewChild()` instead of decorators
+6. **DI**: use `inject()`, not constructor parameters
+7. **Bootstrap**: `bootstrapApplication()` with `provideRouter()` and `provideHttpClient(withInterceptors(...))`
+8. **Lazy loading**: `loadChildren: () => import('./feature.routes').then(m => m.FEATURE_ROUTES)`
 
-**Rules for Code Generation:**
-
-1. **Components**: Always use `standalone: true`
-
-   ```typescript
-   @Component({
-     selector: 'app-my-component',
-     standalone: true,  // ← Required
-     imports: [CommonModule, PoModule, ...],
-     templateUrl: './my-component.html',
-   })
-   export class MyComponent {}
-   ```
-
-2. **No `@NgModule` for new code** — Use standalone + routes arrays
-
-   ```typescript
-   // ❌ DON'T: Create new NgModules
-   @NgModule({
-     declarations: [...],
-     imports: [...],
-   })
-   export class MyModule {}
-
-   // ✅ DO: Use routes + standalone components
-   export const MY_ROUTES: Routes = [{
-     path: '',
-     component: MyComponent,
-     providers: [MyService],
-   }];
-   ```
-
-3. **Route Guards**: Use function-based, not class-based
-
-   ```typescript
-   // ✅ Correct (Angular 21+)
-   export const authGuard = () => {
-     const authService = inject(AuthService);
-     return authService.isAuthenticated();
-   };
-   ```
-
-4. **Dependency Injection**: Use `inject()` in components, not constructor parameters
-
-   ```typescript
-   // ✅ Preferred
-   export class MyComponent {
-     private readonly service = inject(MyService);
-   }
-   ```
-
-5. **Shared Code**: Import components/pipes directly, not from `SharedModule`
-
-   ```typescript
-   // ✅ Correct
-   @Component({
-     imports: [CommonModule, PoModule, CustomPipe, SharedComponent],
-   })
-
-   // ❌ Wrong
-   @Component({
-     imports: [SharedModule],
-   })
-   ```
-
-**Reference Documentation:**
-
-- 📖 Full migration guide: `docs/MIGRA-ANGULAR-BEST-PRACTICES.md`
-- 📖 Post-migration patterns: Will be in `docs/ANGULAR-PATTERNS.md` (Phase 5)
-- 📖 Official Angular docs: https://angular.io/guide/standalone-components
+**Reference**: `docs/MIGRA-ANGULAR-BEST-PRACTICES.md`
 
 ## Build & Run Commands
 
@@ -165,13 +101,13 @@ Place `.spec.ts` files next to the file being tested.
 
 ### Angular Conventions
 
-- **Standalone First**: All new Angular components/directives/pipes must have `standalone: true`
+- **Standalone by default**: Never use `standalone: false` or `@NgModule`
 - **Imports in Decorator**: Explicitly list all dependencies in `imports: [...]`
-- **Routes as Arrays**: Export `Routes` arrays (e.g., `export const MY_ROUTES: Routes = [...]`), NOT modules
+- **Routes as Arrays**: Export `Routes` arrays (e.g., `export const MY_ROUTES: Routes = [...]`)
 - **Lazy Loading**: Use `loadChildren: () => import(...).then(m => m.MY_ROUTES)`
-- **Change Detection**: Prefer `ChangeDetectionStrategy.OnPush` with standalone
-- **No SharedModule**: Delete feature `*-module.ts` files — components are self-contained
-- **File Naming**: `component.ts` (not `component.component.ts` unless multiple components in one folder)
+- **Signal APIs**: Use `input()`, `output()`, `viewChild()` — not `@Input`, `@Output`, `@ViewChild`
+- **Functional Guards/Interceptors**: `CanActivateFn`, `HttpInterceptorFn`
+- **File Naming**: `component.ts` (not `component.component.ts`)
 
 ## Multi-Tenancy (Critical)
 

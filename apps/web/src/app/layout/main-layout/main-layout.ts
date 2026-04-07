@@ -1,15 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { PoMenuModule, PoToolbarModule } from '@po-ui/ng-components';
 import type { PoMenuItem, PoToolbarAction, PoToolbarProfile } from '@po-ui/ng-components';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth';
 
 @Component({
   selector: 'app-main-layout',
-  standalone: false,
+  imports: [RouterOutlet, PoToolbarModule, PoMenuModule],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss',
 })
 export class MainLayout {
+  private readonly authService = inject(AuthService);
+
   protected readonly appName = environment.appName;
   protected readonly appVersion = environment.version;
   protected readonly menus: PoMenuItem[] = [
@@ -27,7 +31,6 @@ export class MainLayout {
     { icon: 'an an-sparkle', label: 'IA', link: '/ai-assistant', shortLabel: 'IA' },
     { icon: 'an an-gear-six', label: 'Configuracoes', link: '/settings', shortLabel: 'Conf' },
   ];
-  constructor(private readonly authService: AuthService) {}
 
   protected get profileActions(): PoToolbarAction[] {
     return [

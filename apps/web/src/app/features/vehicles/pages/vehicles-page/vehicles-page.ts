@@ -1,5 +1,6 @@
-import { Component, ViewChild, inject } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
+import { Component, viewChild, inject } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import type {
   PoBreadcrumb,
@@ -8,7 +9,15 @@ import type {
   PoTableAction,
   PoTableColumn,
 } from '@po-ui/ng-components';
-import { PoModalComponent } from '@po-ui/ng-components';
+import {
+  PoModalComponent,
+  PoPageModule,
+  PoWidgetModule,
+  PoFieldModule,
+  PoButtonModule,
+  PoTableModule,
+  PoModalModule,
+} from '@po-ui/ng-components';
 import { FuelType } from '@frota-leve/shared/src/enums/fuel-type.enum';
 import { VehicleCategory } from '@frota-leve/shared/src/enums/vehicle-category.enum';
 import { VehicleStatus } from '@frota-leve/shared/src/enums/vehicle-status.enum';
@@ -64,14 +73,23 @@ function createEmptyStats(): VehicleStatsResponse {
 
 @Component({
   selector: 'app-vehicles-page',
-  standalone: false,
+  imports: [
+    DecimalPipe,
+    ReactiveFormsModule,
+    PoPageModule,
+    PoWidgetModule,
+    PoFieldModule,
+    PoButtonModule,
+    PoTableModule,
+    PoModalModule,
+    VehicleImportModal,
+  ],
   templateUrl: './vehicles-page.html',
   styleUrl: './vehicles-page.scss',
 })
 export class VehiclesPage {
-  @ViewChild('statusModal', { static: true }) private readonly statusModal?: PoModalComponent;
-  @ViewChild(VehicleImportModal, { static: true })
-  private readonly importModal?: VehicleImportModal;
+  private readonly statusModal = viewChild.required<PoModalComponent>('statusModal');
+  private readonly importModal = viewChild.required<VehicleImportModal>(VehicleImportModal);
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
@@ -267,7 +285,7 @@ export class VehiclesPage {
   }
 
   openImportModal(): void {
-    this.importModal?.open();
+    this.importModal().open();
   }
 
   openStatusModal(vehicle: VehicleListItem): void {
@@ -275,12 +293,12 @@ export class VehiclesPage {
     this.statusForm.setValue({
       status: vehicle.status,
     });
-    this.statusModal?.open();
+    this.statusModal().open();
   }
 
   closeStatusModal(): void {
     this.selectedVehicle = null;
-    this.statusModal?.close();
+    this.statusModal().close();
   }
 
   private confirmStatusChange(): void {

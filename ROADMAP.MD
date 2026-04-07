@@ -298,28 +298,25 @@ Uma task só está **pronta** quando:
   apps/web/src/app/
   ├── core/                    # Singletons, guards, interceptors
   │   ├── guards/
-  │   │   ├── auth.guard.ts
-  │   │   └── role.guard.ts
+  │   │   ├── auth-guard.ts        # CanActivateFn funcional
+  │   │   └── role-guard.ts        # CanActivateFn funcional
   │   ├── interceptors/
-  │   │   ├── auth.interceptor.ts
-  │   │   ├── error.interceptor.ts
-  │   │   └── tenant.interceptor.ts
-  │   ├── services/
-  │   │   ├── auth.service.ts
-  │   │   ├── api.service.ts       # HttpClient wrapper com base URL
-  │   │   ├── notification.service.ts
-  │   │   └── storage.service.ts
-  │   └── core.module.ts
+  │   │   ├── auth-interceptor.ts  # HttpInterceptorFn funcional
+  │   │   ├── error-interceptor.ts # HttpInterceptorFn funcional
+  │   │   └── tenant-interceptor.ts # HttpInterceptorFn funcional
+  │   └── services/
+  │       ├── auth.ts
+  │       ├── api.ts               # HttpClient wrapper com base URL
+  │       ├── notification.ts
+  │       └── storage.ts
   ├── shared/                   # Componentes e pipes reutilizáveis
   │   ├── components/
   │   ├── pipes/
-  │   ├── directives/
-  │   └── shared.module.ts
+  │   └── directives/
   ├── layout/                   # Shell da aplicação
-  │   ├── main-layout/          # Layout com menu lateral PO-UI
-  │   ├── auth-layout/          # Layout para login/registro (sem menu)
-  │   └── layout.module.ts
-  ├── features/                 # Feature modules (lazy loaded)
+  │   ├── main-layout/          # Layout com menu lateral PO-UI (standalone)
+  │   └── auth-layout/          # Layout para login/registro (standalone)
+  ├── features/                 # Features standalone (lazy loaded via routes)
   │   ├── auth/                 # Login, registro, forgot password
   │   ├── dashboard/            # Dashboard principal
   │   ├── vehicles/             # CRUD de veículos
@@ -334,17 +331,18 @@ Uma task só está **pronta** quando:
   │   ├── reports/              # Relatórios
   │   ├── ai-assistant/         # Chat IA
   │   └── settings/             # Configurações da conta
-  ├── app-routing.module.ts
-  └── app.component.ts
+  ├── app.routes.ts             # Array de rotas (provideRouter)
+  └── app.ts                    # Componente root (standalone)
   ```
 - [x] **0.4.6** — Implementar `main-layout`: usar `po-page-default` ou `po-page-detail` com `po-menu` lateral contendo itens de navegação (Dashboard, Veículos, Motoristas, Combustível, Manutenção, Pneus, Multas, Documentos, Sinistros, Financeiro, Relatórios, IA, Configurações)
 - [x] **0.4.7** — Implementar `auth-layout`: layout limpo com logo centralizado para telas de login/registro
 - [x] **0.4.8** — Configurar roteamento base com lazy loading:
   ```typescript
+  // app.routes.ts — standalone, sem NgModule
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: 'auth', loadChildren: () => import('./features/auth/auth.module') },
-  { path: 'dashboard', loadChildren: () => import('./features/dashboard/dashboard.module'), canActivate: [AuthGuard] },
-  // ... demais rotas com AuthGuard
+  { path: 'auth', loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES) },
+  { path: 'dashboard', loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES) },
+  // ... demais rotas com authGuard (CanActivateFn funcional)
   ```
 - [x] **0.4.9** — Implementar `api.service.ts`: wrapper do HttpClient com `baseUrl` configurável via environment, métodos `get<T>`, `post<T>`, `put<T>`, `patch<T>`, `delete<T>`
 - [x] **0.4.10** — Implementar `auth.interceptor.ts`: injeta Bearer token no header Authorization de cada request
@@ -643,7 +641,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [x] **1.2.1** — Criar `features/auth/auth.module.ts` e `auth-routing.module.ts`
+- [x] **1.2.1** — Criar `features/auth/auth.routes.ts` (standalone, sem NgModule)
 - [x] **1.2.2** — Implementar tela de **Login** (`auth/login`):
   - Formulário PO-UI: email (po-input), senha (po-password)
   - Botão "Entrar" com loading state
@@ -736,7 +734,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [x] **1.4.1** — Criar `features/vehicles/vehicles.module.ts` com roteamento
+- [x] **1.4.1** — Criar `features/vehicles/vehicles.routes.ts` (standalone, sem NgModule)
 - [x] **1.4.2** — Implementar **listagem** (`vehicles/list`):
   - `po-page-list` com `po-table` (colunas: placa, marca/modelo, ano, categoria, status, km, ações)
   - Filtros: `po-combo` para status, categoria, tipo combustível; `po-input` para busca textual
@@ -818,7 +816,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.6.1** — Criar `features/drivers/drivers.module.ts` com roteamento
+- [ ] **1.6.1** — Criar `features/drivers/drivers.routes.ts` (standalone, sem NgModule)
 - [ ] **1.6.2** — Implementar listagem com `po-table`: nome, CPF, CNH (categoria + validade), telefone, departamento, score, status
 - [ ] **1.6.3** — Implementar formulário de criação/edição com campos e máscaras (CPF, telefone)
 - [ ] **1.6.4** — Implementar tela de detalhes com tabs: Dados, Veículos Vinculados, Multas, Sinistros, Score

@@ -70,9 +70,26 @@ function urlValidator(control: AbstractControl): ValidationErrors | null {
   }
 }
 
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  PoPageModule,
+  PoFieldModule,
+  PoButtonModule,
+  PoDividerModule,
+  PoWidgetModule,
+} from '@po-ui/ng-components';
+
 @Component({
   selector: 'app-vehicle-form-page',
-  standalone: false,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    PoPageModule,
+    PoFieldModule,
+    PoButtonModule,
+    PoDividerModule,
+    PoWidgetModule,
+  ],
   templateUrl: './vehicle-form-page.html',
   styleUrl: './vehicle-form-page.scss',
 })
