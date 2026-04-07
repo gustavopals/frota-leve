@@ -13,19 +13,19 @@ export class MainLayout {
   protected readonly appName = environment.appName;
   protected readonly appVersion = environment.version;
   protected readonly menus: PoMenuItem[] = [
-    { label: 'Dashboard', link: '/dashboard' },
-    { label: 'Veiculos', link: '/vehicles' },
-    { label: 'Motoristas', link: '/drivers' },
-    { label: 'Combustivel', link: '/fuel' },
-    { label: 'Manutencao', link: '/maintenance' },
-    { label: 'Pneus', link: '/tires' },
-    { label: 'Multas', link: '/fines' },
-    { label: 'Documentos', link: '/documents' },
-    { label: 'Sinistros', link: '/incidents' },
-    { label: 'Financeiro', link: '/financial' },
-    { label: 'Relatorios', link: '/reports' },
-    { label: 'IA', link: '/ai-assistant' },
-    { label: 'Configuracoes', link: '/settings' },
+    { icon: 'an an-house-line', label: 'Dashboard', link: '/dashboard', shortLabel: 'Dash' },
+    { icon: 'an an-car-profile', label: 'Veiculos', link: '/vehicles', shortLabel: 'Veic' },
+    { icon: 'an an-users-three', label: 'Motoristas', link: '/drivers', shortLabel: 'Moto' },
+    { icon: 'an an-gas-pump', label: 'Combustivel', link: '/fuel', shortLabel: 'Comb' },
+    { icon: 'an an-wrench', label: 'Manutencao', link: '/maintenance', shortLabel: 'Manu' },
+    { icon: 'an an-circle-half-tilt', label: 'Pneus', link: '/tires', shortLabel: 'Pneu' },
+    { icon: 'an an-warning-circle', label: 'Multas', link: '/fines', shortLabel: 'Mult' },
+    { icon: 'an an-file-text', label: 'Documentos', link: '/documents', shortLabel: 'Docs' },
+    { icon: 'an an-shield-warning', label: 'Sinistros', link: '/incidents', shortLabel: 'Sini' },
+    { icon: 'an an-coins', label: 'Financeiro', link: '/financial', shortLabel: 'Fina' },
+    { icon: 'an an-chart-line-up', label: 'Relatorios', link: '/reports', shortLabel: 'Rela' },
+    { icon: 'an an-sparkle', label: 'IA', link: '/ai-assistant', shortLabel: 'IA' },
+    { icon: 'an an-gear-six', label: 'Configuracoes', link: '/settings', shortLabel: 'Conf' },
   ];
   constructor(private readonly authService: AuthService) {}
 

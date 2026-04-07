@@ -1,50 +1,52 @@
 :host {
   display: block;
   min-height: 100vh;
+  --main-layout-menu-offset: var(--menu-width);
 }
 
 .main-layout {
-  display: grid;
-  gap: 1.5rem;
-  min-height: calc(100vh - 56px);
-  padding: 1.5rem;
+  min-height: 100vh;
 }
 
-.main-layout__banner {
-  align-items: end;
-  background:
-    linear-gradient(140deg, rgba(236, 95, 18, 0.12), rgba(3, 95, 124, 0.08)),
-    #f5f7f8;
-  border: 1px solid rgba(58, 76, 87, 0.12);
-  border-radius: 24px;
+.main-layout__toolbar-shell {
   display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.main-layout__context {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(58, 76, 87, 0.1);
+  border-radius: 18px;
+  display: flex;
   gap: 1rem;
-  grid-template-columns: minmax(0, 1fr) auto;
-  padding: 1.5rem;
-}
-
-.main-layout__banner h1 {
-  color: #17313b;
-  font-size: clamp(2rem, 2vw + 1rem, 3rem);
-  letter-spacing: -0.04em;
-  margin: 0 0 0.35rem;
-}
-
-.main-layout__banner p {
-  color: #50616d;
-  line-height: 1.6;
-  margin: 0;
-  max-width: 60ch;
+  justify-content: space-between;
+  margin-left: calc(var(--main-layout-menu-offset) + 1rem);
+  margin-right: 1rem;
+  padding: 0.7rem 1rem;
+  transition:
+    margin-left 0.2s ease,
+    width 0.2s ease;
+  width: calc(100% - var(--main-layout-menu-offset) - 2rem);
 }
 
 .main-layout__eyebrow {
   color: #c75000;
   display: inline-block;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  margin-bottom: 0.65rem;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.15rem;
   text-transform: uppercase;
+}
+
+.main-layout__context strong {
+  color: var(--fl-ink);
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .main-layout__meta {
@@ -59,44 +61,48 @@
   border: 1px solid rgba(23, 49, 59, 0.12);
   border-radius: 999px;
   color: #17313b;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.55rem 0.85rem;
-}
-
-.main-layout__shell {
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: minmax(250px, 280px) minmax(0, 1fr);
-  min-height: 0;
-}
-
-.main-layout__menu {
-  background: #fff;
-  border: 1px solid rgba(58, 76, 87, 0.12);
-  border-radius: 24px;
-  overflow: hidden;
-  padding: 0.5rem 0;
+  padding: 0.4rem 0.75rem;
 }
 
 .main-layout__content {
   min-width: 0;
+  padding-bottom: 1rem;
+}
+
+:host ::ng-deep .po-wrapper.po-collapsed-menu {
+  --main-layout-menu-offset: var(--collapsed-menu-width);
 }
 
 @media (max-width: 960px) {
-  .main-layout {
-    padding: 1rem;
+  .main-layout__toolbar-shell {
+    margin-bottom: 0.75rem;
   }
+}
 
-  .main-layout__banner {
-    grid-template-columns: 1fr;
+@media screen and (max-width: 1200px) {
+  :host {
+    --main-layout-menu-offset: 44px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  :host {
+    --main-layout-menu-offset: 36px;
+  }
+}
+
+@media (max-width: 720px) {
+  .main-layout__context {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-left: calc(var(--main-layout-menu-offset) + 0.75rem);
+    margin-right: 0.75rem;
+    width: calc(100% - var(--main-layout-menu-offset) - 1.5rem);
   }
 
   .main-layout__meta {
     justify-content: flex-start;
-  }
-
-  .main-layout__shell {
-    grid-template-columns: 1fr;
   }
 }
