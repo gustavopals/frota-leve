@@ -1,2 +1,12 @@
-// Enums compartilhados — populado na TASK 0.6
-export {};
+export * from './plan.enum';
+export * from './tenant-status.enum';
+export * from './user-role.enum';
+export * from './vehicle-status.enum';
+export * from './fuel-type.enum';
+export * from './vehicle-category.enum';
+export * from './maintenance-type.enum';
+export * from './os-status.enum';
+export * from './fine-severity.enum';
+export * from './incident-type.enum';
+export * from './document-type.enum';
+export * from './checklist-status.enum';

@@ -1,0 +1,167 @@
+@if (vehicle) {
+  <po-page-detail
+    [p-breadcrumb]="breadcrumb"
+    [p-title]="title"
+    [p-subtitle]="subtitle"
+    (p-back)="goBack()"
+    (p-edit)="editVehicle()"
+  >
+    <section class="vehicle-detail-page__hero">
+      <div class="vehicle-detail-page__identity">
+        <span class="vehicle-detail-page__eyebrow">Operação dedicada</span>
+        <h2>{{ vehicle.brand }} {{ vehicle.model }}</h2>
+        <div class="vehicle-detail-page__identity-meta">
+          <po-tag
+            [p-value]="getStatusLabel(vehicle.status)"
+            [p-type]="statusType"
+          ></po-tag>
+          <span>{{ formatPlate(vehicle.plate) }}</span>
+          <span>{{ getCategoryLabel(vehicle.category) }}</span>
+          <span>{{ formatFuel(vehicle.fuelType) }}</span>
+        </div>
+      </div>
+
+      <div class="vehicle-detail-page__hero-grid">
+        <po-widget p-title="Custo acumulado">
+          <strong>{{ formatCurrency(vehicle.acquisitionValue) }}</strong>
+          <small>Baseado no cadastro atual e custos já conhecidos.</small>
+        </po-widget>
+
+        <po-widget p-title="Última manutenção">
+          <strong>Sem histórico</strong>
+          <small>Será alimentado quando o módulo de manutenção entrar.</small>
+        </po-widget>
+
+        <po-widget p-title="Próximo vencimento">
+          <strong>A definir</strong>
+          <small>Documentos e alertas entram nas próximas tasks.</small>
+        </po-widget>
+      </div>
+    </section>
+
+    <po-tabs p-size="medium">
+      <po-tab
+        p-label="Dados"
+        [p-active]="true"
+      >
+        <section class="vehicle-detail-page__info-grid">
+          <po-info
+            p-label="Placa"
+            [p-value]="formatPlate(vehicle.plate)"
+          ></po-info>
+          <po-info
+            p-label="Marca"
+            [p-value]="vehicle.brand"
+          ></po-info>
+          <po-info
+            p-label="Modelo"
+            [p-value]="vehicle.model"
+          ></po-info>
+          <po-info
+            p-label="Ano / Modelo"
+            [p-value]="vehicle.year + ' / ' + vehicle.yearModel"
+          ></po-info>
+          <po-info
+            p-label="Combustível"
+            [p-value]="formatFuel(vehicle.fuelType)"
+          ></po-info>
+          <po-info
+            p-label="Categoria"
+            [p-value]="getCategoryLabel(vehicle.category)"
+          ></po-info>
+          <po-info
+            p-label="Quilometragem"
+            [p-value]="formatMileage(vehicle.currentMileage)"
+          ></po-info>
+          <po-info
+            p-label="Consumo esperado"
+            [p-value]="vehicle.expectedConsumption ? (vehicle.expectedConsumption + ' km/l') : 'Não informado'"
+          ></po-info>
+          <po-info
+            p-label="Aquisição"
+            [p-value]="formatDate(vehicle.acquisitionDate)"
+          ></po-info>
+          <po-info
+            p-label="Valor aquisição"
+            [p-value]="formatCurrency(vehicle.acquisitionValue)"
+          ></po-info>
+          <po-info
+            p-label="RENAVAM"
+            [p-value]="vehicle.renavam ?? 'Não informado'"
+          ></po-info>
+          <po-info
+            p-label="Chassi"
+            [p-value]="vehicle.chassis ?? 'Não informado'"
+          ></po-info>
+        </section>
+
+        <po-divider p-label="Observações"></po-divider>
+
+        <section class="vehicle-detail-page__notes">
+          <p>{{ vehicle.notes ?? 'Sem observações registradas para este veículo.' }}</p>
+        </section>
+      </po-tab>
+
+      <po-tab p-label="Manutenções">
+        <section class="vehicle-detail-page__placeholder">
+          <h3>Manutenções vão aparecer aqui</h3>
+          <p>
+            A aba já está pronta para consolidar ordens de serviço, última intervenção e vencimentos.
+          </p>
+        </section>
+      </po-tab>
+
+      <po-tab p-label="Abastecimentos">
+        <section class="vehicle-detail-page__placeholder">
+          <h3>Abastecimentos em evolução</h3>
+          <p>Assim que o módulo de combustível entrar, esta visão passa a calcular consumo real.</p>
+        </section>
+      </po-tab>
+
+      <po-tab p-label="Multas">
+        <section class="vehicle-detail-page__placeholder">
+          <h3>Multas centralizadas</h3>
+          <p>Infrações e responsáveis serão apresentados aqui sem sair da ficha do veículo.</p>
+        </section>
+      </po-tab>
+
+      <po-tab p-label="Documentos">
+        <section class="vehicle-detail-page__placeholder">
+          <h3>Documentação prevista</h3>
+          <p>CRLV, seguros e alertas de renovação serão exibidos nesta aba.</p>
+        </section>
+      </po-tab>
+
+      <po-tab p-label="Timeline">
+        <section class="vehicle-detail-page__timeline">
+          @for (item of vehicle.timeline; track item.id) {
+            <article class="vehicle-detail-page__timeline-item">
+              <header>
+                <strong>{{ getTimelineAction(item.action) }}</strong>
+                <small>{{ formatDateTime(item.createdAt) }}</small>
+              </header>
+
+              <p>{{ getTimelineSummary(item) }}</p>
+
+              <footer>
+                <span>IP: {{ item.ipAddress ?? 'Não informado' }}</span>
+                <span>Usuário: {{ item.userId ?? 'Sistema' }}</span>
+              </footer>
+            </article>
+          } @empty {
+            <section class="vehicle-detail-page__placeholder">
+              <h3>Nenhum evento auditado ainda</h3>
+              <p>O histórico começa a aparecer assim que o veículo sofre alterações operacionais.</p>
+            </section>
+          }
+        </section>
+      </po-tab>
+    </po-tabs>
+  </po-page-detail>
+} @else {
+  <section class="vehicle-detail-page__loading">
+    <span class="vehicle-detail-page__eyebrow">Ficha do veículo</span>
+    <h2>{{ isLoading ? 'Carregando dados...' : 'Veículo não encontrado' }}</h2>
+    <p>Buscando a visão operacional completa do cadastro solicitado.</p>
+  </section>
+}

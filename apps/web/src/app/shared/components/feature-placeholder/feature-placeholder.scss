@@ -1,0 +1,25 @@
+.feature-placeholder {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.feature-placeholder__header {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.feature-placeholder__eyebrow {
+  color: #50616d;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.feature-placeholder__description {
+  color: #37454f;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 68ch;
+}

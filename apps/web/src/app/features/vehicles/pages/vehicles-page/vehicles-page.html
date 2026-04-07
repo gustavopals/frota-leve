@@ -1,0 +1,173 @@
+<po-page-list
+  p-title="Frota de veículos"
+  p-subtitle="Operação compacta com filtros server-side, visão rápida da frota e atalhos para cadastro, importação e detalhes."
+  [p-breadcrumb]="breadcrumb"
+  [p-actions]="pageActions"
+  p-components-size="medium"
+>
+  <section class="vehicles-page__metrics">
+    <po-widget
+      p-title="Frota ativa"
+      class="vehicles-page__metric"
+    >
+      <strong>{{ stats.byStatus.ACTIVE }}</strong>
+      <span>veículos em operação</span>
+    </po-widget>
+
+    <po-widget
+      p-title="Paradas"
+      class="vehicles-page__metric"
+    >
+      <strong>{{ stats.byStatus.MAINTENANCE + stats.byStatus.INCIDENT }}</strong>
+      <span>em manutenção ou sinistro</span>
+    </po-widget>
+
+    <po-widget
+      p-title="Idade média"
+      class="vehicles-page__metric"
+    >
+      <strong>{{ stats.averageFleetAge | number: '1.0-1' }}</strong>
+      <span>anos de uso da frota</span>
+    </po-widget>
+
+    <po-widget
+      p-title="Km médio"
+      class="vehicles-page__metric"
+    >
+      <strong>{{ stats.averageMileage | number: '1.0-0' }}</strong>
+      <span>quilômetros por veículo</span>
+    </po-widget>
+  </section>
+
+  <section class="vehicles-page__filters">
+    <div class="vehicles-page__filters-header">
+      <div>
+        <span class="vehicles-page__eyebrow">Filtro operacional</span>
+        <h2>Encontre rápido o veículo certo</h2>
+      </div>
+
+      <div class="vehicles-page__filters-meta">
+        <span>{{ activeFiltersCount }} filtros ativos</span>
+        @if (isLoadingStats) {
+          <small>Atualizando indicadores...</small>
+        } @else {
+          <small>Indicadores sincronizados com a API.</small>
+        }
+      </div>
+    </div>
+
+    <form
+      class="vehicles-page__filters-grid"
+      [formGroup]="filterForm"
+      novalidate
+    >
+      <po-input
+        class="vehicles-page__filter-search"
+        formControlName="search"
+        name="search"
+        p-label="Buscar"
+        p-placeholder="Placa ou modelo"
+        (p-enter)="applyFilters()"
+      ></po-input>
+
+      <po-combo
+        formControlName="status"
+        name="status"
+        p-label="Status"
+        [p-options]="statusOptions"
+      ></po-combo>
+
+      <po-combo
+        formControlName="category"
+        name="category"
+        p-label="Categoria"
+        [p-options]="categoryOptions"
+      ></po-combo>
+
+      <po-combo
+        formControlName="fuelType"
+        name="fuelType"
+        p-label="Combustível"
+        [p-options]="fuelTypeOptions"
+      ></po-combo>
+
+      <div class="vehicles-page__filter-actions">
+        <po-button
+          p-kind="primary"
+          p-label="Aplicar"
+          (p-click)="applyFilters()"
+        ></po-button>
+
+        <po-button
+          p-label="Limpar"
+          (p-click)="clearFilters()"
+        ></po-button>
+      </div>
+    </form>
+  </section>
+
+  <section class="vehicles-page__table-shell">
+    <po-table
+      [p-columns]="columns"
+      [p-actions]="rowActions"
+      [p-service-api]="serviceApiUrl"
+      p-container="shadow"
+      p-spacing="extraSmall"
+      [p-sort]="true"
+      [p-hide-columns-manager]="true"
+      [p-hide-batch-actions]="true"
+      [p-hide-table-search]="true"
+      [p-text-wrap]="true"
+    >
+      <ng-template
+        p-table-column-template
+        [p-property]="plateColumnProperty"
+        let-value
+      >
+        <div class="vehicles-page__plate-cell">
+          <strong>{{ formatPlate(value) }}</strong>
+          <small>ID visual da frota</small>
+        </div>
+      </ng-template>
+
+      <ng-template
+        p-table-column-template
+        [p-property]="mileageColumnProperty"
+        let-value
+      >
+        <span class="vehicles-page__mileage-cell">{{ formatMileage(value) }}</span>
+      </ng-template>
+    </po-table>
+  </section>
+</po-page-list>
+
+<app-vehicle-import-modal (completed)="handleImportCompleted()"></app-vehicle-import-modal>
+
+<po-modal
+  #statusModal
+  p-title="Alterar status do veículo"
+  [p-primary-action]="primaryStatusAction"
+  [p-secondary-action]="secondaryStatusAction"
+>
+  <section class="vehicles-page__status-modal">
+    <div class="vehicles-page__status-summary">
+      <span class="vehicles-page__eyebrow">Veículo selecionado</span>
+      <strong>{{ selectedVehicle?.plate }}</strong>
+      <p>{{ selectedVehicle?.brandModel }}</p>
+      <small>Status atual: {{ selectedVehicleStatusLabel }}</small>
+    </div>
+
+    <form
+      class="vehicles-page__status-form"
+      [formGroup]="statusForm"
+      novalidate
+    >
+      <po-select
+        formControlName="status"
+        name="status"
+        p-label="Novo status"
+        [p-options]="statusOptions"
+      ></po-select>
+    </form>
+  </section>
+</po-modal>

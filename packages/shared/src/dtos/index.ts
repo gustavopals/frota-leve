@@ -1,2 +1,4 @@
-// DTOs com validação zod — populado na TASK 0.6
-export {};
+export * from './auth.dto';
+export * from './vehicle.dto';
+export * from './driver.dto';
+export * from './fuel-record.dto';

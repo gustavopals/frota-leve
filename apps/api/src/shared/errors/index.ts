@@ -6,4 +6,5 @@ export {
   ForbiddenError,
   ConflictError,
   PlanLimitError,
+  TooManyRequestsError,
 } from './app-error';

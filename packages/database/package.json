@@ -2,12 +2,38 @@
   "name": "@frota-leve/database",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
-    "build": "echo 'Database package — setup na TASK 0.3'",
-    "dev": "echo 'Database package — setup na TASK 0.3'",
-    "lint": "echo 'OK'",
-    "type-check": "echo 'OK'",
+    "up": "node ./scripts/services.mjs up",
+    "down": "node ./scripts/services.mjs down",
+    "logs": "node ./scripts/services.mjs logs",
+    "check": "node ./scripts/services.mjs check",
+    "generate": "node ./scripts/prisma-command.mjs generate",
+    "migrate:dev": "node ./scripts/prisma-command.mjs migrate dev",
+    "db:seed": "node ./scripts/prisma-command.mjs db seed",
+    "db:reset": "node ./scripts/prisma-command.mjs migrate reset --force",
+    "db:studio": "node ./scripts/prisma-command.mjs studio",
+    "build": "npm run generate && tsc",
+    "dev": "node ./scripts/services.mjs dev",
+    "lint": "eslint src --ext .ts --max-warnings=0",
+    "type-check": "npm run generate && tsc --noEmit",
     "test": "echo 'OK'"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.15.0"
+  },
+  "devDependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "prisma": "^6.15.0",
+    "tsx": "^4.20.3"
   }
 }

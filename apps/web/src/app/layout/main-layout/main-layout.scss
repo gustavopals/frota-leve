@@ -1,0 +1,108 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  --main-layout-menu-offset: var(--menu-width);
+}
+
+.main-layout {
+  min-height: 100vh;
+}
+
+.main-layout__toolbar-shell {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.main-layout__context {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(58, 76, 87, 0.1);
+  border-radius: 18px;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-left: calc(var(--main-layout-menu-offset) + 1rem);
+  margin-right: 1rem;
+  padding: 0.7rem 1rem;
+  transition:
+    margin-left 0.2s ease,
+    width 0.2s ease;
+  width: calc(100% - var(--main-layout-menu-offset) - 2rem);
+}
+
+.main-layout__eyebrow {
+  color: #c75000;
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.15rem;
+  text-transform: uppercase;
+}
+
+.main-layout__context strong {
+  color: var(--fl-ink);
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.main-layout__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.main-layout__pill {
+  background: rgba(23, 49, 59, 0.06);
+  border: 1px solid rgba(23, 49, 59, 0.12);
+  border-radius: 999px;
+  color: #17313b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.4rem 0.75rem;
+}
+
+.main-layout__content {
+  min-width: 0;
+  padding-bottom: 1rem;
+}
+
+:host ::ng-deep .po-wrapper.po-collapsed-menu {
+  --main-layout-menu-offset: var(--collapsed-menu-width);
+}
+
+@media (max-width: 960px) {
+  .main-layout__toolbar-shell {
+    margin-bottom: 0.75rem;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  :host {
+    --main-layout-menu-offset: 44px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  :host {
+    --main-layout-menu-offset: 36px;
+  }
+}
+
+@media (max-width: 720px) {
+  .main-layout__context {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-left: calc(var(--main-layout-menu-offset) + 0.75rem);
+    margin-right: 0.75rem;
+    width: calc(100% - var(--main-layout-menu-offset) - 1.5rem);
+  }
+
+  .main-layout__meta {
+    justify-content: flex-start;
+  }
+}

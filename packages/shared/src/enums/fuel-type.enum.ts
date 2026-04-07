@@ -1,0 +1,9 @@
+export enum FuelType {
+  GASOLINE = 'GASOLINE',
+  ETHANOL = 'ETHANOL',
+  DIESEL = 'DIESEL',
+  DIESEL_S10 = 'DIESEL_S10',
+  GNV = 'GNV',
+  ELECTRIC = 'ELECTRIC',
+  HYBRID = 'HYBRID',
+}

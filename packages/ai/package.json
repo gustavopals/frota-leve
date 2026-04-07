@@ -2,12 +2,20 @@
   "name": "@frota-leve/ai",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
-    "build": "echo 'AI package — setup na TASK 3.1'",
-    "dev": "echo 'AI package — setup na TASK 3.1'",
-    "lint": "echo 'OK'",
-    "type-check": "echo 'OK'",
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts --max-warnings=0",
+    "type-check": "tsc --noEmit",
     "test": "echo 'OK'"
   }
 }

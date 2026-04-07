@@ -177,7 +177,7 @@ Uma task só está **pronta** quando:
 - [x] **0.2.11** — Implementar `server.ts`: graceful shutdown (SIGTERM, SIGINT), log de porta no boot
 - [x] **0.2.12** — Implementar módulo `health`: GET `/api/v1/health` retornando `{ status: 'ok', timestamp, version, uptime }`
 - [x] **0.2.13** — Configurar `ts-node-dev` para hot reload em desenvolvimento
-- [ ] **0.2.14** — Criar script `dev` no turbo que sobe api + banco simultaneamente
+- [x] **0.2.14** — Criar script `dev` no turbo que sobe api + banco simultaneamente
 
 ---
 
@@ -187,13 +187,14 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **0.3.1** — Criar `packages/database` com Prisma instalado
-- [ ] **0.3.2** — Criar `docker-compose.yml` na raiz com serviços:
+- [x] **0.3.1** — Criar `packages/database` com Prisma instalado
+- [x] **0.3.2** — Criar `docker-compose.yml` na raiz com serviços:
   - `postgres`: PostgreSQL 16 com volume persistente, porta 5432
   - `redis`: Redis 7 com porta 6379
   - `pgadmin` (opcional): para visualização em dev
-- [ ] **0.3.3** — Configurar `schema.prisma` com provider postgresql, extensão pgvector habilitada (`previewFeatures = ["multiSchema", "postgresqlExtensions"]`)
-- [ ] **0.3.4** — Criar schema base (tabelas globais no schema `public`):
+- [x] **0.3.3** — Configurar `schema.prisma` com provider postgresql, schema `public` explícito e extensão pgvector habilitada (`previewFeatures = ["postgresqlExtensions"]` no Prisma 6, com `schemas = ["public"]` e `@@schema("public")`)
+- [x] **0.3.4** — Criar schema base (tabelas globais no schema `public`):
+
   ```prisma
   // === TENANTS ===
   model Tenant {
@@ -270,14 +271,15 @@ Uma task só está **pronta** quando:
     createdAt   DateTime @default(now())
   }
   ```
-- [ ] **0.3.5** — Rodar primeira migration: `npx prisma migrate dev --name init`
-- [ ] **0.3.6** — Criar `seed.ts` com dados de desenvolvimento:
+
+- [x] **0.3.5** — Rodar primeira migration: `npx prisma migrate dev --name init`
+- [x] **0.3.6** — Criar `seed.ts` com dados de desenvolvimento:
   - 1 tenant de demo (empresa fictícia "Transportadora Demo Ltda")
   - 1 user OWNER (admin@demo.com / senha: 123456)
   - 1 user MANAGER, 1 user DRIVER
-- [ ] **0.3.7** — Criar script `db:seed`, `db:reset`, `db:studio` no package.json
-- [ ] **0.3.8** — Exportar PrismaClient singleton configurado de `packages/database/src/client.ts`
-- [ ] **0.3.9** — Configurar `packages/database` como dependência do `apps/api` no workspace
+- [x] **0.3.7** — Criar script `db:seed`, `db:reset`, `db:studio` no package.json
+- [x] **0.3.8** — Exportar PrismaClient singleton configurado de `packages/database/src/client.ts`
+- [x] **0.3.9** — Configurar `packages/database` como dependência do `apps/api` no workspace
 
 ---
 
@@ -287,11 +289,11 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **0.4.1** — Criar projeto Angular via CLI: `ng new web --style=scss --routing --strict`
-- [ ] **0.4.2** — Instalar PO-UI: `ng add @po-ui/ng-components` e `@po-ui/ng-templates`
-- [ ] **0.4.3** — Configurar `angular.json`: assets, styles (PO-UI theme), budget de build
-- [ ] **0.4.4** — Configurar path aliases no `tsconfig.json` para `@frota-leve/shared`
-- [ ] **0.4.5** — Criar estrutura de pastas do frontend:
+- [x] **0.4.1** — Criar projeto Angular via CLI: `ng new web --style=scss --routing --strict`
+- [x] **0.4.2** — Instalar PO-UI: `ng add @po-ui/ng-components` e `@po-ui/ng-templates`
+- [x] **0.4.3** — Configurar `angular.json`: assets, styles (PO-UI theme), budget de build
+- [x] **0.4.4** — Configurar path aliases no `tsconfig.json` para `@frota-leve/shared`
+- [x] **0.4.5** — Criar estrutura de pastas do frontend:
   ```
   apps/web/src/app/
   ├── core/                    # Singletons, guards, interceptors
@@ -335,21 +337,21 @@ Uma task só está **pronta** quando:
   ├── app-routing.module.ts
   └── app.component.ts
   ```
-- [ ] **0.4.6** — Implementar `main-layout`: usar `po-page-default` ou `po-page-detail` com `po-menu` lateral contendo itens de navegação (Dashboard, Veículos, Motoristas, Combustível, Manutenção, Pneus, Multas, Documentos, Sinistros, Financeiro, Relatórios, IA, Configurações)
-- [ ] **0.4.7** — Implementar `auth-layout`: layout limpo com logo centralizado para telas de login/registro
-- [ ] **0.4.8** — Configurar roteamento base com lazy loading:
+- [x] **0.4.6** — Implementar `main-layout`: usar `po-page-default` ou `po-page-detail` com `po-menu` lateral contendo itens de navegação (Dashboard, Veículos, Motoristas, Combustível, Manutenção, Pneus, Multas, Documentos, Sinistros, Financeiro, Relatórios, IA, Configurações)
+- [x] **0.4.7** — Implementar `auth-layout`: layout limpo com logo centralizado para telas de login/registro
+- [x] **0.4.8** — Configurar roteamento base com lazy loading:
   ```typescript
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'auth', loadChildren: () => import('./features/auth/auth.module') },
   { path: 'dashboard', loadChildren: () => import('./features/dashboard/dashboard.module'), canActivate: [AuthGuard] },
   // ... demais rotas com AuthGuard
   ```
-- [ ] **0.4.9** — Implementar `api.service.ts`: wrapper do HttpClient com `baseUrl` configurável via environment, métodos `get<T>`, `post<T>`, `put<T>`, `patch<T>`, `delete<T>`
-- [ ] **0.4.10** — Implementar `auth.interceptor.ts`: injeta Bearer token no header Authorization de cada request
-- [ ] **0.4.11** — Implementar `error.interceptor.ts`: captura erros HTTP, exibe `po-notification` (toast) para erros 4xx/5xx, redireciona para login em 401
-- [ ] **0.4.12** — Configurar `environment.ts` e `environment.prod.ts` com `apiUrl`, `appName`, `version`
-- [ ] **0.4.13** — Criar página placeholder para dashboard (com texto "Dashboard — em construção")
-- [ ] **0.4.14** — Verificar que `ng serve` roda sem erros e que o layout PO-UI aparece corretamente
+- [x] **0.4.9** — Implementar `api.service.ts`: wrapper do HttpClient com `baseUrl` configurável via environment, métodos `get<T>`, `post<T>`, `put<T>`, `patch<T>`, `delete<T>`
+- [x] **0.4.10** — Implementar `auth.interceptor.ts`: injeta Bearer token no header Authorization de cada request
+- [x] **0.4.11** — Implementar `error.interceptor.ts`: captura erros HTTP, exibe `po-notification` (toast) para erros 4xx/5xx, redireciona para login em 401
+- [x] **0.4.12** — Configurar `environment.ts` e `environment.prod.ts` com `apiUrl`, `appName`, `version`
+- [x] **0.4.13** — Criar página placeholder para dashboard (com texto "Dashboard — em construção")
+- [x] **0.4.14** — Verificar que `ng serve` roda sem erros e que o layout PO-UI aparece corretamente
 
 ---
 
@@ -359,29 +361,30 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **0.5.1** — Criar `Dockerfile` para `apps/api`:
+- [x] **0.5.1** — Criar `Dockerfile` para `apps/api`:
   - Multi-stage build (builder + runner)
   - Node 22 Alpine
   - Copiar apenas `dist/` e `node_modules` para a imagem final
   - Healthcheck integrado
-- [ ] **0.5.2** — Criar `Dockerfile` para `apps/web`:
+- [x] **0.5.2** — Criar `Dockerfile` para `apps/web`:
   - Multi-stage: Angular build → Nginx Alpine servindo os estáticos
   - Nginx config com SPA fallback (try_files), gzip, cache headers
-- [ ] **0.5.3** — Criar `docker-compose.prod.yml` com todos os serviços (api, web, postgres, redis)
-- [ ] **0.5.4** — Criar `.github/workflows/ci.yml`:
+- [x] **0.5.3** — Criar `docker-compose.prod.yml` com todos os serviços (api, web, postgres, redis)
+- [x] **0.5.4** — Criar `.github/workflows/ci.yml`:
   ```yaml
   on: [push, pull_request]
   jobs:
-    lint:        # ESLint + Prettier check
-    type-check:  # tsc --noEmit em todos os packages
-    test:        # Jest/Vitest em todos os packages
-    build:       # turbo build para garantir que compila
+    lint: # ESLint + Prettier check
+    type-check: # tsc --noEmit em todos os packages
+    test: # Jest/Vitest em todos os packages
+    build: # turbo build para garantir que compila
   ```
-- [ ] **0.5.5** — Criar `.github/workflows/deploy.yml` (trigger em push na `main`):
+- [x] **0.5.5** — Criar `.github/workflows/deploy.yml` (trigger em push na `main`):
   - Build das imagens Docker
   - Push para ECR (ou Docker Hub)
   - Deploy no servidor (EC2 via SSH, ou ECS)
 - [ ] **0.5.6** — Configurar GitHub branch protection: require PR, require CI pass, require 1 approval
+  - Procedimento manual documentado em `docs/deployment.md`
 
 ---
 
@@ -391,45 +394,118 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **0.6.1** — Criar enums em `packages/shared/src/enums/`:
+- [x] **0.6.1** — Criar enums em `packages/shared/src/enums/`:
+
   ```typescript
   // plan.enum.ts
-  export enum PlanType { ESSENTIAL = 'ESSENTIAL', PROFESSIONAL = 'PROFESSIONAL', ENTERPRISE = 'ENTERPRISE' }
+  export enum PlanType {
+    ESSENTIAL = 'ESSENTIAL',
+    PROFESSIONAL = 'PROFESSIONAL',
+    ENTERPRISE = 'ENTERPRISE',
+  }
 
   // tenant-status.enum.ts
-  export enum TenantStatus { TRIAL = 'TRIAL', ACTIVE = 'ACTIVE', SUSPENDED = 'SUSPENDED', CANCELLED = 'CANCELLED' }
+  export enum TenantStatus {
+    TRIAL = 'TRIAL',
+    ACTIVE = 'ACTIVE',
+    SUSPENDED = 'SUSPENDED',
+    CANCELLED = 'CANCELLED',
+  }
 
   // user-role.enum.ts
-  export enum UserRole { OWNER = 'OWNER', ADMIN = 'ADMIN', MANAGER = 'MANAGER', FINANCIAL = 'FINANCIAL', DRIVER = 'DRIVER', VIEWER = 'VIEWER' }
+  export enum UserRole {
+    OWNER = 'OWNER',
+    ADMIN = 'ADMIN',
+    MANAGER = 'MANAGER',
+    FINANCIAL = 'FINANCIAL',
+    DRIVER = 'DRIVER',
+    VIEWER = 'VIEWER',
+  }
 
   // vehicle-status.enum.ts
-  export enum VehicleStatus { ACTIVE = 'ACTIVE', MAINTENANCE = 'MAINTENANCE', RESERVE = 'RESERVE', DECOMMISSIONED = 'DECOMMISSIONED', INCIDENT = 'INCIDENT' }
+  export enum VehicleStatus {
+    ACTIVE = 'ACTIVE',
+    MAINTENANCE = 'MAINTENANCE',
+    RESERVE = 'RESERVE',
+    DECOMMISSIONED = 'DECOMMISSIONED',
+    INCIDENT = 'INCIDENT',
+  }
 
   // fuel-type.enum.ts
-  export enum FuelType { GASOLINE = 'GASOLINE', ETHANOL = 'ETHANOL', DIESEL = 'DIESEL', DIESEL_S10 = 'DIESEL_S10', GNV = 'GNV', ELECTRIC = 'ELECTRIC', HYBRID = 'HYBRID' }
+  export enum FuelType {
+    GASOLINE = 'GASOLINE',
+    ETHANOL = 'ETHANOL',
+    DIESEL = 'DIESEL',
+    DIESEL_S10 = 'DIESEL_S10',
+    GNV = 'GNV',
+    ELECTRIC = 'ELECTRIC',
+    HYBRID = 'HYBRID',
+  }
 
   // vehicle-category.enum.ts
-  export enum VehicleCategory { LIGHT = 'LIGHT', HEAVY = 'HEAVY', MOTORCYCLE = 'MOTORCYCLE', MACHINE = 'MACHINE', BUS = 'BUS' }
+  export enum VehicleCategory {
+    LIGHT = 'LIGHT',
+    HEAVY = 'HEAVY',
+    MOTORCYCLE = 'MOTORCYCLE',
+    MACHINE = 'MACHINE',
+    BUS = 'BUS',
+  }
 
   // maintenance-type.enum.ts
-  export enum MaintenanceType { PREVENTIVE = 'PREVENTIVE', CORRECTIVE = 'CORRECTIVE', PREDICTIVE = 'PREDICTIVE' }
+  export enum MaintenanceType {
+    PREVENTIVE = 'PREVENTIVE',
+    CORRECTIVE = 'CORRECTIVE',
+    PREDICTIVE = 'PREDICTIVE',
+  }
 
   // os-status.enum.ts
-  export enum ServiceOrderStatus { OPEN = 'OPEN', APPROVED = 'APPROVED', IN_PROGRESS = 'IN_PROGRESS', COMPLETED = 'COMPLETED', CANCELLED = 'CANCELLED' }
+  export enum ServiceOrderStatus {
+    OPEN = 'OPEN',
+    APPROVED = 'APPROVED',
+    IN_PROGRESS = 'IN_PROGRESS',
+    COMPLETED = 'COMPLETED',
+    CANCELLED = 'CANCELLED',
+  }
 
   // fine-severity.enum.ts
-  export enum FineSeverity { LIGHT = 'LIGHT', MEDIUM = 'MEDIUM', SERIOUS = 'SERIOUS', VERY_SERIOUS = 'VERY_SERIOUS' }
+  export enum FineSeverity {
+    LIGHT = 'LIGHT',
+    MEDIUM = 'MEDIUM',
+    SERIOUS = 'SERIOUS',
+    VERY_SERIOUS = 'VERY_SERIOUS',
+  }
 
   // incident-type.enum.ts
-  export enum IncidentType { COLLISION = 'COLLISION', THEFT = 'THEFT', VANDALISM = 'VANDALISM', NATURAL = 'NATURAL', OTHER = 'OTHER' }
+  export enum IncidentType {
+    COLLISION = 'COLLISION',
+    THEFT = 'THEFT',
+    VANDALISM = 'VANDALISM',
+    NATURAL = 'NATURAL',
+    OTHER = 'OTHER',
+  }
 
   // document-type.enum.ts
-  export enum DocumentType { IPVA = 'IPVA', LICENSING = 'LICENSING', INSURANCE = 'INSURANCE', ANTT = 'ANTT', AET = 'AET', MOPP = 'MOPP', INSPECTION = 'INSPECTION', OTHER = 'OTHER' }
+  export enum DocumentType {
+    IPVA = 'IPVA',
+    LICENSING = 'LICENSING',
+    INSURANCE = 'INSURANCE',
+    ANTT = 'ANTT',
+    AET = 'AET',
+    MOPP = 'MOPP',
+    INSPECTION = 'INSPECTION',
+    OTHER = 'OTHER',
+  }
 
   // checklist-status.enum.ts
-  export enum ChecklistItemStatus { OK = 'OK', ATTENTION = 'ATTENTION', NON_COMPLIANT = 'NON_COMPLIANT' }
+  export enum ChecklistItemStatus {
+    OK = 'OK',
+    ATTENTION = 'ATTENTION',
+    NON_COMPLIANT = 'NON_COMPLIANT',
+  }
   ```
-- [ ] **0.6.2** — Criar types base em `packages/shared/src/types/`:
+
+- [x] **0.6.2** — Criar types base em `packages/shared/src/types/`:
+
   ```typescript
   // api-response.type.ts
   export interface ApiResponse<T> {
@@ -448,7 +524,8 @@ Uma task só está **pronta** quando:
     search?: string;
   }
   ```
-- [ ] **0.6.3** — Criar DTOs base com zod em `packages/shared/src/dtos/`:
+
+- [x] **0.6.3** — Criar DTOs base com zod em `packages/shared/src/dtos/`:
   ```typescript
   // auth.dto.ts → LoginDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto
   // vehicle.dto.ts → CreateVehicleDto, UpdateVehicleDto
@@ -456,23 +533,29 @@ Uma task só está **pronta** quando:
   // fuel-record.dto.ts → CreateFuelRecordDto
   // (demais DTOs serão criados conforme os módulos forem implementados)
   ```
-- [ ] **0.6.4** — Criar constantes em `packages/shared/src/constants/`:
+- [x] **0.6.4** — Criar constantes em `packages/shared/src/constants/`:
   ```typescript
   // plan-limits.ts
   export const PLAN_LIMITS = {
     ESSENTIAL: { maxVehicles: 10, maxUsers: 3, hasAI: false, hasAPI: false, hasTires: false },
     PROFESSIONAL: { maxVehicles: 100, maxUsers: 20, hasAI: true, hasAPI: true, hasTires: true },
-    ENTERPRISE: { maxVehicles: Infinity, maxUsers: Infinity, hasAI: true, hasAPI: true, hasTires: true },
-  }
+    ENTERPRISE: {
+      maxVehicles: Infinity,
+      maxUsers: Infinity,
+      hasAI: true,
+      hasAPI: true,
+      hasTires: true,
+    },
+  };
   ```
-- [ ] **0.6.5** — Criar utilitários em `packages/shared/src/utils/`:
+- [x] **0.6.5** — Criar utilitários em `packages/shared/src/utils/`:
   ```typescript
   // format.utils.ts → formatCNPJ, formatCPF, formatPhone, formatPlate, formatCurrency
   // validation.utils.ts → isValidCNPJ, isValidCPF, isValidPlate (padrão antigo + Mercosul)
   // date.utils.ts → formatDateBR, daysBetween, isExpired, daysUntilExpiry
   ```
-- [ ] **0.6.6** — Configurar barrel exports em `packages/shared/src/index.ts`
-- [ ] **0.6.7** — Escrever testes unitários para todos os utilitários (format, validation, date)
+- [x] **0.6.6** — Configurar barrel exports em `packages/shared/src/index.ts`
+- [x] **0.6.7** — Escrever testes unitários para todos os utilitários (format, validation, date)
 
 ---
 
@@ -488,8 +571,8 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.1.1** — Instalar dependências: bcryptjs, jsonwebtoken, @types/jsonwebtoken
-- [ ] **1.1.2** — Criar módulo `apps/api/src/modules/auth/`:
+- [x] **1.1.1** — Instalar dependências: bcryptjs, jsonwebtoken, @types/jsonwebtoken
+- [x] **1.1.2** — Criar módulo `apps/api/src/modules/auth/`:
   ```
   auth/
   ├── auth.controller.ts
@@ -498,7 +581,7 @@ Uma task só está **pronta** quando:
   ├── auth.validators.ts    # Schemas zod para cada endpoint
   └── auth.types.ts          # TokenPayload, etc.
   ```
-- [ ] **1.1.3** — Implementar `POST /api/v1/auth/register`:
+- [x] **1.1.3** — Implementar `POST /api/v1/auth/register`:
   - Input: name, email, password, companyName, cnpj
   - Validar CNPJ (formato e dígitos verificadores)
   - Verificar se CNPJ já existe → ConflictError
@@ -508,7 +591,7 @@ Uma task só está **pronta** quando:
   - Criar User com role OWNER
   - Gerar access token (JWT, 15 min) e refresh token (JWT, 7 dias)
   - Retornar tokens + dados do user (sem passwordHash)
-- [ ] **1.1.4** — Implementar `POST /api/v1/auth/login`:
+- [x] **1.1.4** — Implementar `POST /api/v1/auth/login`:
   - Input: email, password
   - Buscar user por email (incluir tenant)
   - Verificar senha com bcrypt
@@ -516,41 +599,41 @@ Uma task só está **pronta** quando:
   - Verificar se tenant não está CANCELLED ou SUSPENDED
   - Gerar tokens, atualizar lastLoginAt
   - Retornar tokens + dados do user + dados do tenant
-- [ ] **1.1.5** — Implementar `POST /api/v1/auth/refresh`:
+- [x] **1.1.5** — Implementar `POST /api/v1/auth/refresh`:
   - Input: refreshToken
   - Verificar validade do refresh token
   - Gerar novos access + refresh tokens (rotação)
   - Invalidar refresh token anterior (blacklist no Redis, TTL 7 dias)
-- [ ] **1.1.6** — Implementar `POST /api/v1/auth/forgot-password`:
+- [x] **1.1.6** — Implementar `POST /api/v1/auth/forgot-password`:
   - Input: email
   - Gerar token de reset (UUID, salvar hash no banco, TTL 1 hora)
   - Enviar e-mail com link de reset (template HTML básico)
   - Sempre retornar 200 (não revelar se e-mail existe)
-- [ ] **1.1.7** — Implementar `POST /api/v1/auth/reset-password`:
+- [x] **1.1.7** — Implementar `POST /api/v1/auth/reset-password`:
   - Input: token, newPassword
   - Verificar token válido e não expirado
   - Atualizar senha, invalidar token
-- [ ] **1.1.8** — Implementar `POST /api/v1/auth/change-password`:
+- [x] **1.1.8** — Implementar `POST /api/v1/auth/change-password`:
   - Input: currentPassword, newPassword (requer auth)
   - Verificar senha atual, atualizar para nova
-- [ ] **1.1.9** — Implementar `GET /api/v1/auth/me`:
+- [x] **1.1.9** — Implementar `GET /api/v1/auth/me`:
   - Retornar dados do user autenticado + tenant + plano
-- [ ] **1.1.10** — Implementar middleware `auth.ts`:
+- [x] **1.1.10** — Implementar middleware `auth.ts`:
   - Extrair Bearer token do header
   - Verificar JWT (secret, expiração)
   - Buscar user no banco (ou cache Redis)
   - Setar `req.user` com { id, tenantId, role, email }
   - Lançar UnauthorizedError se inválido
-- [ ] **1.1.11** — Implementar middleware `tenant.ts`:
+- [x] **1.1.11** — Implementar middleware `tenant.ts`:
   - Ler `tenantId` do `req.user`
   - Buscar tenant no banco
   - Verificar status (bloquear se SUSPENDED ou CANCELLED)
   - Setar `req.tenant` com dados do tenant
-- [ ] **1.1.12** — Implementar middleware `authorize(...roles: UserRole[])`:
+- [x] **1.1.12** — Implementar middleware `authorize(...roles: UserRole[])`:
   - Verificar se `req.user.role` está na lista de roles permitidos
   - Lançar ForbiddenError se não autorizado
-- [ ] **1.1.13** — Escrever testes: register (sucesso, CNPJ duplicado, email duplicado, CNPJ inválido), login (sucesso, senha errada, user inativo), refresh, me
-- [ ] **1.1.14** — Implementar rate limiting específico para auth: 5 tentativas de login por minuto por IP, 3 tentativas de forgot-password por hora por email
+- [x] **1.1.13** — Escrever testes: register (sucesso, CNPJ duplicado, email duplicado, CNPJ inválido), login (sucesso, senha errada, user inativo), refresh, me
+- [x] **1.1.14** — Implementar rate limiting específico para auth: 5 tentativas de login por minuto por IP, 3 tentativas de forgot-password por hora por email
 
 ---
 
@@ -560,33 +643,33 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.2.1** — Criar `features/auth/auth.module.ts` e `auth-routing.module.ts`
-- [ ] **1.2.2** — Implementar tela de **Login** (`auth/login`):
+- [x] **1.2.1** — Criar `features/auth/auth.module.ts` e `auth-routing.module.ts`
+- [x] **1.2.2** — Implementar tela de **Login** (`auth/login`):
   - Formulário PO-UI: email (po-input), senha (po-password)
   - Botão "Entrar" com loading state
   - Link "Esqueci minha senha"
   - Link "Não tem conta? Cadastre-se grátis"
   - Validação no frontend (required, email format)
   - Chamar `POST /auth/login`, salvar tokens no localStorage, redirecionar para dashboard
-- [ ] **1.2.3** — Implementar tela de **Registro** (`auth/register`):
+- [x] **1.2.3** — Implementar tela de **Registro** (`auth/register`):
   - Formulário: nome, email, senha, confirmação de senha, nome da empresa, CNPJ
   - Máscara de CNPJ (po-input com mask)
   - Validação: senha mínimo 8 chars, confirmação match, CNPJ válido
   - Chamar `POST /auth/register`, salvar tokens, redirecionar para wizard de onboarding
-- [ ] **1.2.4** — Implementar tela de **Esqueci minha senha** (`auth/forgot-password`):
+- [x] **1.2.4** — Implementar tela de **Esqueci minha senha** (`auth/forgot-password`):
   - Input de e-mail
   - Exibir mensagem de sucesso (sempre, por segurança)
-- [ ] **1.2.5** — Implementar tela de **Redefinir senha** (`auth/reset-password?token=xxx`):
+- [x] **1.2.5** — Implementar tela de **Redefinir senha** (`auth/reset-password?token=xxx`):
   - Nova senha + confirmação
   - Validação de token via backend
-- [ ] **1.2.6** — Implementar `auth.service.ts`:
+- [x] **1.2.6** — Implementar `auth.service.ts`:
   - Métodos: login(), register(), forgotPassword(), resetPassword(), refreshToken(), logout(), getMe(), isAuthenticated()
   - Armazenar tokens no localStorage
   - Getter computado para currentUser (BehaviorSubject)
   - Auto-refresh do token quando faltam 2 minutos para expirar
-- [ ] **1.2.7** — Implementar `auth.guard.ts`: redirecionar para `/auth/login` se não autenticado
-- [ ] **1.2.8** — Implementar `role.guard.ts`: verificar role mínimo para acessar rota (data: { roles: ['OWNER', 'ADMIN'] })
-- [ ] **1.2.9** — Implementar lógica de logout: limpar tokens, redirecionar para login
+- [x] **1.2.7** — Implementar `auth.guard.ts`: redirecionar para `/auth/login` se não autenticado
+- [x] **1.2.8** — Implementar `role.guard.ts`: verificar role mínimo para acessar rota (data: { roles: ['OWNER', 'ADMIN'] })
+- [x] **1.2.9** — Implementar lógica de logout: limpar tokens, redirecionar para login
 
 ---
 
@@ -596,7 +679,8 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.3.1** — Criar migration Prisma para tabela `Vehicle`:
+- [x] **1.3.1** — Criar migration Prisma para tabela `Vehicle`:
+
   ```prisma
   model Vehicle {
     id              String          @id @default(uuid())
@@ -628,20 +712,21 @@ Uma task só está **pronta** quando:
     @@index([tenantId, status])
   }
   ```
-- [ ] **1.3.2** — Criar módulo `apps/api/src/modules/vehicles/`
-- [ ] **1.3.3** — Implementar `GET /api/v1/vehicles` — listagem com paginação, filtros (status, category, fuelType, search por placa/modelo), ordenação
-- [ ] **1.3.4** — Implementar `GET /api/v1/vehicles/:id` — detalhes do veículo com timeline de eventos
-- [ ] **1.3.5** — Implementar `POST /api/v1/vehicles` — criação com validação (placa única no tenant, placa formato válido, campos obrigatórios)
-- [ ] **1.3.6** — Implementar `PUT /api/v1/vehicles/:id` — atualização completa
-- [ ] **1.3.7** — Implementar `PATCH /api/v1/vehicles/:id/status` — alterar status (com validação de transição: não pode ir de DECOMMISSIONED para ACTIVE, etc.)
-- [ ] **1.3.8** — Implementar `PATCH /api/v1/vehicles/:id/mileage` — atualizar quilometragem (validar que novo valor >= atual)
-- [ ] **1.3.9** — Implementar `DELETE /api/v1/vehicles/:id` — soft delete (setar status DECOMMISSIONED) ou hard delete se nunca teve movimentação
-- [ ] **1.3.10** — Implementar `POST /api/v1/vehicles/import` — importação via CSV/Excel (upload de arquivo, parse, validação em batch, retorno de erros por linha)
-- [ ] **1.3.11** — Implementar `GET /api/v1/vehicles/export` — exportação da lista em CSV
-- [ ] **1.3.12** — Implementar `GET /api/v1/vehicles/stats` — resumo: total por status, total por categoria, média de idade da frota, km médio
-- [ ] **1.3.13** — Implementar verificação de limite do plano: antes de criar veículo, verificar se tenant não excedeu maxVehicles do plano
-- [ ] **1.3.14** — Implementar audit log: registrar criação, edição e exclusão de veículos na tabela AuditLog
-- [ ] **1.3.15** — Escrever testes: CRUD completo, filtros, paginação, import, limite de plano, validações de placa
+
+- [x] **1.3.2** — Criar módulo `apps/api/src/modules/vehicles/`
+- [x] **1.3.3** — Implementar `GET /api/v1/vehicles` — listagem com paginação, filtros (status, category, fuelType, search por placa/modelo), ordenação
+- [x] **1.3.4** — Implementar `GET /api/v1/vehicles/:id` — detalhes do veículo com timeline de eventos
+- [x] **1.3.5** — Implementar `POST /api/v1/vehicles` — criação com validação (placa única no tenant, placa formato válido, campos obrigatórios)
+- [x] **1.3.6** — Implementar `PUT /api/v1/vehicles/:id` — atualização completa
+- [x] **1.3.7** — Implementar `PATCH /api/v1/vehicles/:id/status` — alterar status (com validação de transição: não pode ir de DECOMMISSIONED para ACTIVE, etc.)
+- [x] **1.3.8** — Implementar `PATCH /api/v1/vehicles/:id/mileage` — atualizar quilometragem (validar que novo valor >= atual)
+- [x] **1.3.9** — Implementar `DELETE /api/v1/vehicles/:id` — soft delete (setar status DECOMMISSIONED) ou hard delete se nunca teve movimentação
+- [x] **1.3.10** — Implementar `POST /api/v1/vehicles/import` — importação via CSV/Excel (upload de arquivo, parse, validação em batch, retorno de erros por linha)
+- [x] **1.3.11** — Implementar `GET /api/v1/vehicles/export` — exportação da lista em CSV
+- [x] **1.3.12** — Implementar `GET /api/v1/vehicles/stats` — resumo: total por status, total por categoria, média de idade da frota, km médio
+- [x] **1.3.13** — Implementar verificação de limite do plano: antes de criar veículo, verificar se tenant não excedeu maxVehicles do plano
+- [x] **1.3.14** — Implementar audit log: registrar criação, edição e exclusão de veículos na tabela AuditLog
+- [x] **1.3.15** — Escrever testes: CRUD completo, filtros, paginação, import, limite de plano, validações de placa
 
 ---
 
@@ -651,31 +736,31 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.4.1** — Criar `features/vehicles/vehicles.module.ts` com roteamento
-- [ ] **1.4.2** — Implementar **listagem** (`vehicles/list`):
+- [x] **1.4.1** — Criar `features/vehicles/vehicles.module.ts` com roteamento
+- [x] **1.4.2** — Implementar **listagem** (`vehicles/list`):
   - `po-page-list` com `po-table` (colunas: placa, marca/modelo, ano, categoria, status, km, ações)
   - Filtros: `po-combo` para status, categoria, tipo combustível; `po-input` para busca textual
   - Ações por linha: Editar, Ver detalhes, Alterar status
   - Ação de página: "Novo Veículo", "Importar", "Exportar"
   - Paginação server-side via `po-table` com `p-service-api`
   - Badges coloridos para status (verde=ativo, amarelo=manutenção, cinza=reserva, vermelho=baixado)
-- [ ] **1.4.3** — Implementar **formulário de criação/edição** (`vehicles/form`):
+- [x] **1.4.3** — Implementar **formulário de criação/edição** (`vehicles/form`):
   - `po-page-edit` com `po-dynamic-form` ou formulário manual
   - Campos: placa (com máscara Mercosul), RENAVAM, chassi, marca, modelo, ano, ano modelo, cor, tipo combustível, categoria, km atual, consumo esperado, data aquisição, valor aquisição, observações
   - Upload de fotos (até 4, com preview)
   - Validação client-side: placa obrigatória e formato válido, ano entre 1950 e ano atual+1
-- [ ] **1.4.4** — Implementar **tela de detalhes** (`vehicles/:id`):
+- [x] **1.4.4** — Implementar **tela de detalhes** (`vehicles/:id`):
   - `po-page-detail` com informações do veículo
   - Tabs: Dados, Manutenções, Abastecimentos, Multas, Documentos, Timeline
   - (as tabs serão populadas conforme os módulos forem desenvolvidos)
   - Card de resumo: custo total acumulado, última manutenção, próximo vencimento
-- [ ] **1.4.5** — Implementar **modal de importação**:
+- [x] **1.4.5** — Implementar **modal de importação**:
   - Upload de arquivo CSV/Excel
   - Preview dos dados importados em tabela
   - Exibição de erros de validação por linha
   - Botão de confirmação da importação
   - Download de template de exemplo
-- [ ] **1.4.6** — Implementar `vehicles.service.ts` no frontend com métodos para todos os endpoints
+- [x] **1.4.6** — Implementar `vehicles.service.ts` no frontend com métodos para todos os endpoints
 
 ---
 
@@ -686,6 +771,7 @@ Uma task só está **pronta** quando:
 **Subtasks:**
 
 - [ ] **1.5.1** — Criar migration Prisma para tabela `Driver`:
+
   ```prisma
   model Driver {
     id                String    @id @default(uuid())
@@ -716,6 +802,7 @@ Uma task só está **pronta** quando:
     @@index([tenantId, isActive])
   }
   ```
+
 - [ ] **1.5.2** — Criar módulo `apps/api/src/modules/drivers/`
 - [ ] **1.5.3** — Implementar CRUD completo: `GET /drivers` (list + search + paginação), `GET /drivers/:id`, `POST /drivers`, `PUT /drivers/:id`, `DELETE /drivers/:id`
 - [ ] **1.5.4** — Implementar `GET /drivers/:id/history` — histórico de veículos que dirigiu, multas, sinistros, abastecimentos
@@ -753,7 +840,9 @@ Uma task só está **pronta** quando:
     "drivers": { "total": 30, "active": 28, "cnhExpiring": 3 },
     "alerts": { "maintenanceDue": 8, "documentsExpiring": 5, "pendingFines": 2 },
     "costs": { "currentMonth": 45200, "previousMonth": 41800, "variation": 8.1 },
-    "recentActivity": [ /* últimos 10 eventos */ ]
+    "recentActivity": [
+      /* últimos 10 eventos */
+    ]
   }
   ```
 - [ ] **1.7.2** — Frontend: criar `features/dashboard/dashboard.component.ts`
@@ -795,15 +884,17 @@ Uma task só está **pronta** quando:
 **Subtasks:**
 
 - [ ] **2.2.1** — Migration: tabelas `MaintenancePlan`, `ServiceOrder`, `ServiceOrderItem`
+
   ```
-  MaintenancePlan: id, tenantId, vehicleId, name (ex: "Troca de óleo"), type (PREVENTIVE/CORRECTIVE), 
+  MaintenancePlan: id, tenantId, vehicleId, name (ex: "Troca de óleo"), type (PREVENTIVE/CORRECTIVE),
     intervalKm, intervalDays, lastExecutedAt, lastExecutedMileage, nextDueAt, nextDueMileage, isActive
-  
+
   ServiceOrder: id, tenantId, vehicleId, driverId, planId?, type, status (OPEN→APPROVED→IN_PROGRESS→COMPLETED→CANCELLED),
     description, workshop, startDate, endDate, totalCost, laborCost, partsCost, notes, photos, approvedByUserId, createdByUserId
-  
+
   ServiceOrderItem: id, serviceOrderId, description, quantity, unitCost, totalCost, partNumber?
   ```
+
 - [ ] **2.2.2** — Backend CRUD de planos de manutenção
 - [ ] **2.2.3** — Backend CRUD de ordens de serviço com workflow de status (validar transições: OPEN→APPROVED ou CANCELLED, APPROVED→IN_PROGRESS, IN_PROGRESS→COMPLETED)
 - [ ] **2.2.4** — Backend: job agendado (BullMQ/cron) que roda diariamente verificando planos de manutenção vencidos → gera alerta
@@ -851,12 +942,14 @@ Uma task só está **pronta** quando:
 **Subtasks:**
 
 - [ ] **2.5.1** — Migration: tabelas `Tire` e `TireInspection`
+
   ```
   Tire: id, tenantId, brand, model, size, serialNumber, dot, status (NEW, IN_USE, RETREADED, DISCARDED),
     currentVehicleId?, position?, currentGrooveDepth, originalGrooveDepth, retreatCount, costNew, costRetreat, totalKm, createdAt
-  
+
   TireInspection: id, tireId, vehicleId, inspectedByUserId, date, grooveDepth, position, photos, notes, createdAt
   ```
+
 - [ ] **2.5.2** — Backend CRUD de pneus com ciclo de vida
 - [ ] **2.5.3** — Backend: registro de inspeção (sulcagem) com cálculo de desgaste
 - [ ] **2.5.4** — Backend: `PATCH /tires/:id/move` — movimentar pneu entre veículos/posições
@@ -905,14 +998,16 @@ Uma task só está **pronta** quando:
 **Subtasks:**
 
 - [ ] **2.8.1** — Migration: tabelas `ChecklistTemplate`, `ChecklistItem`, `ChecklistExecution`, `ChecklistExecutionItem`
+
   ```
   ChecklistTemplate: id, tenantId, name, vehicleCategory?, items (Json array of {label, required, photoRequired})
-  
-  ChecklistExecution: id, tenantId, templateId, vehicleId, driverId, executedAt, status (COMPLIANT, NON_COMPLIANT, ATTENTION), 
+
+  ChecklistExecution: id, tenantId, templateId, vehicleId, driverId, executedAt, status (COMPLIANT, NON_COMPLIANT, ATTENTION),
     signatureUrl, location, notes, createdByUserId
-  
+
   ChecklistExecutionItem: id, executionId, label, status (OK, ATTENTION, NON_COMPLIANT), photo?, notes?
   ```
+
 - [ ] **2.8.2** — Backend: CRUD de templates de checklist
 - [ ] **2.8.3** — Backend: `POST /checklists/execute` — registrar execução de checklist
 - [ ] **2.8.4** — Backend: quando item é NON_COMPLIANT → criar automaticamente uma OS de manutenção corretiva
@@ -1299,22 +1394,22 @@ Uma task só está **pronta** quando:
 
 ### Backlog Priorizado
 
-| Prioridade | Feature | Descrição |
-|:---:|---------|-----------|
-| P1 | Integração WhatsApp | Alertas via WhatsApp Business API |
-| P1 | Integração Tabela FIPE | Consulta automática para depreciação e renovação |
-| P1 | Integração Rastreadores GPS | Importar km automático de Sascar, Cobli, etc. |
-| P2 | Módulo de Viagens | Controle de viagens, adiantamentos, despesas |
-| P2 | Controle de Portaria | Registro de entrada/saída com tablet |
-| P2 | Multi-empresa/filial | Para plano Enterprise |
-| P2 | Integração ERP TOTVS Protheus | Sincronização com módulos financeiro/compras |
-| P3 | White-label | Personalização de marca para Enterprise |
-| P3 | SSO (SAML/OIDC) | Para grandes empresas |
-| P3 | App nativo (React Native) | Se PWA não atender requisitos específicos |
-| P3 | Integração cartões de combustível | Ticket Log, Shell Box, TruckPag |
-| P4 | Módulo ESG | Relatório de emissões de CO2 da frota |
-| P4 | Multi-idioma (Espanhol) | Expansão LATAM |
-| P4 | Marketplace de integrações | Conectores com Zapier/n8n |
+| Prioridade | Feature                           | Descrição                                        |
+| :--------: | --------------------------------- | ------------------------------------------------ |
+|     P1     | Integração WhatsApp               | Alertas via WhatsApp Business API                |
+|     P1     | Integração Tabela FIPE            | Consulta automática para depreciação e renovação |
+|     P1     | Integração Rastreadores GPS       | Importar km automático de Sascar, Cobli, etc.    |
+|     P2     | Módulo de Viagens                 | Controle de viagens, adiantamentos, despesas     |
+|     P2     | Controle de Portaria              | Registro de entrada/saída com tablet             |
+|     P2     | Multi-empresa/filial              | Para plano Enterprise                            |
+|     P2     | Integração ERP TOTVS Protheus     | Sincronização com módulos financeiro/compras     |
+|     P3     | White-label                       | Personalização de marca para Enterprise          |
+|     P3     | SSO (SAML/OIDC)                   | Para grandes empresas                            |
+|     P3     | App nativo (React Native)         | Se PWA não atender requisitos específicos        |
+|     P3     | Integração cartões de combustível | Ticket Log, Shell Box, TruckPag                  |
+|     P4     | Módulo ESG                        | Relatório de emissões de CO2 da frota            |
+|     P4     | Multi-idioma (Espanhol)           | Expansão LATAM                                   |
+|     P4     | Marketplace de integrações        | Conectores com Zapier/n8n                        |
 
 ---
 
@@ -1322,16 +1417,16 @@ Uma task só está **pronta** quando:
 
 ### Total de Tasks por Fase
 
-| Fase | Sprints | Tasks | Subtasks (aprox.) |
-|------|:---:|:---:|:---:|
-| **Fase 0** — Fundação | 1-3 | 6 | ~60 |
-| **Fase 1** — Core MVP | 4-8 | 7 | ~55 |
-| **Fase 2** — Módulos Operacionais | 9-12 | 9 | ~65 |
-| **Fase 3** — Inteligência Artificial | 13-15 | 6 | ~30 |
-| **Fase 4** — Mobile | 16-17 | 2 | ~15 |
-| **Fase 5** — Billing e Go-to-Market | 18-19 | 6 | ~40 |
-| **Fase 6** — Polish e Lançamento | 20 | 5 | ~30 |
-| **TOTAL** | **20** | **41** | **~295** |
+| Fase                                 | Sprints | Tasks  | Subtasks (aprox.) |
+| ------------------------------------ | :-----: | :----: | :---------------: |
+| **Fase 0** — Fundação                |   1-3   |   6    |        ~60        |
+| **Fase 1** — Core MVP                |   4-8   |   7    |        ~55        |
+| **Fase 2** — Módulos Operacionais    |  9-12   |   9    |        ~65        |
+| **Fase 3** — Inteligência Artificial |  13-15  |   6    |        ~30        |
+| **Fase 4** — Mobile                  |  16-17  |   2    |        ~15        |
+| **Fase 5** — Billing e Go-to-Market  |  18-19  |   6    |        ~40        |
+| **Fase 6** — Polish e Lançamento     |   20    |   5    |        ~30        |
+| **TOTAL**                            | **20**  | **41** |     **~295**      |
 
 ### Dependências Críticas
 
@@ -1356,10 +1451,11 @@ Uma task só está **pronta** quando:
 ---
 
 > **Dica para o Claude Code**: Ao iniciar cada task, comece pedindo ao Claude Code para ler este ROADMAP.MD e o IDEIA.MD para ter contexto completo. Exemplo:
+>
 > ```
 > "Leia os arquivos ROADMAP.MD e IDEIA.MD do projeto. Agora implemente a TASK 1.1 — Autenticação Backend, seguindo todas as subtasks listadas."
 > ```
 
 ---
 
-*Bora construir o Frota Leve! 🚛💨*
+_Bora construir o Frota Leve! 🚛💨_

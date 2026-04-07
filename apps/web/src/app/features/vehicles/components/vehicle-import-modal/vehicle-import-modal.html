@@ -1,0 +1,113 @@
+<po-modal
+  #importModal
+  p-title="Importar veículos"
+  [p-primary-action]="primaryAction"
+  [p-secondary-action]="secondaryAction"
+>
+  <section class="vehicle-import-modal">
+    <header class="vehicle-import-modal__hero">
+      <div>
+        <span class="vehicle-import-modal__eyebrow">Importação em lote</span>
+        <h2>Valide antes de confirmar</h2>
+        <p>
+          O arquivo passa por pré-análise no backend, mostra linhas válidas e retorna erros por
+          linha antes da gravação final.
+        </p>
+      </div>
+
+      <po-button
+        p-label="Baixar template"
+        p-icon="an an-download-simple"
+        (p-click)="downloadTemplate()"
+      ></po-button>
+    </header>
+
+    <po-upload
+      name="vehicle-import"
+      p-label="Arquivo CSV ou XLSX"
+      p-help="Use a planilha padrão para evitar problemas de mapeamento."
+      [ngModel]="uploadFiles"
+      (ngModelChange)="handleFilesChange($event)"
+      [p-restrictions]="fileRestrictions"
+      [p-multiple]="false"
+      [p-drag-drop]="true"
+      [p-hide-send-button]="true"
+      [p-required-url]="false"
+      [p-show-thumbnail]="false"
+    ></po-upload>
+
+    <section class="vehicle-import-modal__summary">
+      <article class="vehicle-import-modal__summary-card">
+        <span>Arquivo</span>
+        <strong>{{ selectedFileName }}</strong>
+      </article>
+
+      <article class="vehicle-import-modal__summary-card">
+        <span>Linhas prontas</span>
+        <strong>{{ previewResult?.readyCount ?? 0 }}</strong>
+      </article>
+
+      <article class="vehicle-import-modal__summary-card">
+        <span>Erros</span>
+        <strong>{{ previewResult?.errorCount ?? 0 }}</strong>
+      </article>
+    </section>
+
+    @if (previewResult) {
+      <section class="vehicle-import-modal__tables">
+        <div class="vehicle-import-modal__table-block">
+          <div class="vehicle-import-modal__table-header">
+            <div>
+              <span class="vehicle-import-modal__eyebrow">Prévia</span>
+              <h3>Itens válidos para importação</h3>
+            </div>
+            <small>{{ previewResult.readyCount ?? 0 }} linha(s)</small>
+          </div>
+
+          <po-table
+            [p-columns]="previewColumns"
+            [p-items]="previewResult.items"
+            p-container="shadow"
+            p-spacing="extraSmall"
+            [p-hide-columns-manager]="true"
+            [p-hide-batch-actions]="true"
+            [p-hide-table-search]="true"
+          >
+            <ng-template
+              p-table-column-template
+              [p-property]="mileageColumnProperty"
+              let-value
+            >
+              {{ formatMileage(value) }}
+            </ng-template>
+          </po-table>
+        </div>
+
+        @if (previewResult.errorCount > 0) {
+          <div class="vehicle-import-modal__table-block">
+            <div class="vehicle-import-modal__table-header">
+              <div>
+                <span class="vehicle-import-modal__eyebrow vehicle-import-modal__eyebrow--danger">
+                  Críticas
+                </span>
+                <h3>Linhas com bloqueio</h3>
+              </div>
+              <small>{{ previewResult.errorCount }} ocorrência(s)</small>
+            </div>
+
+            <po-table
+              [p-columns]="errorColumns"
+              [p-items]="errorRows"
+              p-container="shadow"
+              p-spacing="extraSmall"
+              [p-hide-columns-manager]="true"
+              [p-hide-batch-actions]="true"
+              [p-hide-table-search]="true"
+              [p-text-wrap]="true"
+            ></po-table>
+          </div>
+        }
+      </section>
+    }
+  </section>
+</po-modal>

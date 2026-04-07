@@ -63,3 +63,11 @@ export class PlanLimitError extends AppError {
     this.name = 'PlanLimitError';
   }
 }
+
+/** 429 — muitas requisições em uma janela curta */
+export class TooManyRequestsError extends AppError {
+  constructor(message = 'Muitas requisições', details?: unknown) {
+    super(message, 429, 'TOO_MANY_REQUESTS', details);
+    this.name = 'TooManyRequestsError';
+  }
+}

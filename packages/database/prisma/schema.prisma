@@ -1,0 +1,190 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  schemas    = ["public"]
+  extensions = [vector]
+}
+
+model Tenant {
+  id                   String       @id @default(uuid()) @db.Uuid
+  name                 String
+  tradeName            String?      @map("trade_name")
+  cnpj                 String       @unique
+  email                String
+  phone                String?
+  address              Json?
+  logoUrl              String?      @map("logo_url")
+  plan                 PlanType     @default(ESSENTIAL)
+  status               TenantStatus @default(TRIAL)
+  trialEndsAt          DateTime?    @map("trial_ends_at")
+  stripeCustomerId     String?      @map("stripe_customer_id")
+  stripeSubscriptionId String?      @map("stripe_subscription_id")
+  settings             Json?
+  createdAt            DateTime     @default(now()) @map("created_at")
+  updatedAt            DateTime     @updatedAt @map("updated_at")
+  users                User[]
+  vehicles             Vehicle[]
+
+  @@map("tenants")
+  @@schema("public")
+}
+
+enum PlanType {
+  ESSENTIAL
+  PROFESSIONAL
+  ENTERPRISE
+
+  @@map("plan_type")
+  @@schema("public")
+}
+
+enum TenantStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+
+  @@map("tenant_status")
+  @@schema("public")
+}
+
+model User {
+  id                  String               @id @default(uuid()) @db.Uuid
+  tenantId            String               @map("tenant_id") @db.Uuid
+  tenant              Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name                String
+  email               String               @unique
+  passwordHash        String               @map("password_hash")
+  role                UserRole             @default(VIEWER)
+  isActive            Boolean              @default(true) @map("is_active")
+  lastLoginAt         DateTime?            @map("last_login_at")
+  avatarUrl           String?              @map("avatar_url")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+  passwordResetTokens PasswordResetToken[]
+  assignedVehicles    Vehicle[]            @relation("CurrentDriverVehicles")
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("users")
+  @@schema("public")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
+  @@schema("public")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MANAGER
+  FINANCIAL
+  DRIVER
+  VIEWER
+
+  @@map("user_role")
+  @@schema("public")
+}
+
+enum FuelType {
+  GASOLINE
+  ETHANOL
+  DIESEL
+  DIESEL_S10
+  GNV
+  ELECTRIC
+  HYBRID
+
+  @@map("fuel_type")
+  @@schema("public")
+}
+
+enum VehicleCategory {
+  LIGHT
+  HEAVY
+  MOTORCYCLE
+  MACHINE
+  BUS
+
+  @@map("vehicle_category")
+  @@schema("public")
+}
+
+enum VehicleStatus {
+  ACTIVE
+  MAINTENANCE
+  RESERVE
+  DECOMMISSIONED
+  INCIDENT
+
+  @@map("vehicle_status")
+  @@schema("public")
+}
+
+model Vehicle {
+  id                  String          @id @default(uuid()) @db.Uuid
+  tenantId            String          @map("tenant_id") @db.Uuid
+  tenant              Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plate               String
+  renavam             String?
+  chassis             String?
+  brand               String
+  model               String
+  year                Int
+  yearModel           Int             @map("year_model")
+  color               String?
+  fuelType            FuelType        @map("fuel_type")
+  category            VehicleCategory
+  status              VehicleStatus   @default(ACTIVE)
+  currentMileage      Int             @default(0) @map("current_mileage")
+  averageConsumption  Float?          @map("average_consumption")
+  expectedConsumption Float?          @map("expected_consumption")
+  acquisitionDate     DateTime?       @map("acquisition_date")
+  acquisitionValue    Float?          @map("acquisition_value")
+  photos              Json?
+  notes               String?
+  currentDriverId     String?         @map("current_driver_id") @db.Uuid
+  currentDriver       User?           @relation("CurrentDriverVehicles", fields: [currentDriverId], references: [id], onDelete: SetNull)
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  @@unique([tenantId, plate])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("vehicles")
+  @@schema("public")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  action    String
+  entity    String
+  entityId  String   @map("entity_id")
+  changes   Json?
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId])
+  @@index([tenantId, entity])
+  @@map("audit_logs")
+  @@schema("public")
+}

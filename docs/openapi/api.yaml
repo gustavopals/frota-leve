@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: Frota Leve API
+  version: 0.0.1
+  description: Documentação inicial da API do backend Express.
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Ambiente local
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Verifica se a API está disponível
+      operationId: getHealth
+      responses:
+        '200':
+          description: API operacional
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+        - version
+        - uptime
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+          example: ok
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-04-07T13:00:00.000Z'
+        version:
+          type: string
+          example: 0.0.1
+        uptime:
+          type: integer
+          example: 128

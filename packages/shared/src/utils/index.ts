@@ -1,2 +1,3 @@
-// Funções utilitárias puras — populado na TASK 0.6
-export {};
+export * from './format.utils';
+export * from './validation.utils';
+export * from './date.utils';

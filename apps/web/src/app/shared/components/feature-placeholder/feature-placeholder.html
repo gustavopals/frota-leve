@@ -1,0 +1,14 @@
+<po-page-default [p-title]="title" [p-subtitle]="subtitle">
+  <section class="feature-placeholder">
+    <header class="feature-placeholder__header">
+      <span class="feature-placeholder__eyebrow">{{ eyebrow }}</span>
+      @if (description) {
+        <p class="feature-placeholder__description">{{ description }}</p>
+      }
+    </header>
+
+    <po-widget p-title="Status do modulo">
+      <ng-content></ng-content>
+    </po-widget>
+  </section>
+</po-page-default>

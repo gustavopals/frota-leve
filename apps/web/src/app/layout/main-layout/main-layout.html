@@ -1,0 +1,28 @@
+<div class="po-wrapper main-layout">
+  <div class="main-layout__toolbar-shell">
+    <po-toolbar
+      [p-title]="appName"
+      [p-profile]="toolbarProfile"
+      [p-profile-actions]="profileActions"
+    ></po-toolbar>
+
+    <div class="main-layout__context">
+      <div>
+        <span class="main-layout__eyebrow">Operacao conectada</span>
+        <strong>{{ currentTenantName }}</strong>
+      </div>
+
+      <div class="main-layout__meta">
+        <span class="main-layout__pill">Angular 21</span>
+        <span class="main-layout__pill">PO-UI 21</span>
+        <span class="main-layout__pill">v{{ appVersion }}</span>
+      </div>
+    </div>
+  </div>
+
+  <po-menu [p-menus]="menus"></po-menu>
+
+  <main class="main-layout__content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

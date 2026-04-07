@@ -1,0 +1,23 @@
+<app-feature-placeholder
+  title="Dashboard"
+  subtitle="Visao operacional inicial"
+  eyebrow="Primeira entrega"
+  description="Dashboard - em construcao. A base do shell, roteamento, autenticacao e tema ja esta pronta para receber os indicadores reais."
+>
+  <div class="dashboard-page__grid">
+    <article class="dashboard-page__card">
+      <span class="dashboard-page__label">API base</span>
+      <strong>{{ apiUrl }}</strong>
+      <p>Endereco padrao usado pelo wrapper HttpClient do frontend.</p>
+    </article>
+
+    <article class="dashboard-page__card">
+      <span class="dashboard-page__label">Proximos passos</span>
+      <ul>
+        @for (milestone of milestones; track milestone) {
+          <li>{{ milestone }}</li>
+        }
+      </ul>
+    </article>
+  </div>
+</app-feature-placeholder>

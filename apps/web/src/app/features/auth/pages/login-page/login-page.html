@@ -1,0 +1,54 @@
+<section class="login-page">
+  <span class="login-page__eyebrow">Acesso seguro</span>
+  <h2>Acessar {{ appName }}</h2>
+  <p>Entre com sua conta para acessar a operacao da frota e continuar de onde parou.</p>
+
+  <form
+    class="login-page__form"
+    [formGroup]="form"
+    novalidate
+  >
+    <div class="login-page__field">
+      <po-input
+        formControlName="email"
+        name="email"
+        p-label="E-mail"
+      ></po-input>
+      @for (error of emailErrors; track error) {
+        <small class="login-page__error">{{ error }}</small>
+      }
+    </div>
+
+    <div class="login-page__field">
+      <po-password
+        formControlName="password"
+        name="password"
+        p-label="Senha"
+      ></po-password>
+      @for (error of passwordErrors; track error) {
+        <small class="login-page__error">{{ error }}</small>
+      }
+    </div>
+  </form>
+
+  <div class="login-page__actions">
+    <po-button
+      p-kind="primary"
+      p-label="Entrar"
+      [p-disabled]="form.invalid || isSubmitting"
+      [p-loading]="isSubmitting"
+      (p-click)="submit()"
+    ></po-button>
+  </div>
+
+  <nav class="login-page__links">
+    <a routerLink="/auth/forgot-password">Esqueci minha senha</a>
+    <a routerLink="/auth/register">Nao tem conta? Cadastre-se gratis</a>
+  </nav>
+
+  <footer class="login-page__hint">
+    <strong>Primeiro acesso?</strong>
+    <span>Crie sua conta, inicie o trial e entre direto no painel operacional.</span>
+    <small>Versao {{ version }}</small>
+  </footer>
+</section>
