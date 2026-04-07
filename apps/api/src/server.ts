@@ -1,6 +1,6 @@
-import 'dotenv/config';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
+import './config/load-env';
 import { createApp } from './app';
 import { env } from './config/env';
 import { logger } from './config/logger';
