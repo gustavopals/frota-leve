@@ -419,12 +419,12 @@ Com base no TCO, histórico de manutenção, depreciação e dados de mercado, a
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    MONOREPO (NX ou Turborepo)            │
+│                    MONOREPO (Turborepo)                  │
 ├──────────────────┬──────────────────┬───────────────────┤
 │   apps/web       │   apps/api       │   apps/mobile     │
-│   (Angular 18+)  │   (Node.js +     │   (Angular PWA)   │
-│   PO-UI          │    Express +     │   PO-UI Mobile    │
-│                  │    Prisma)       │                   │
+│ (Angular 21+ SA) │  (Node.js +      │(Angular 21+ SA)   │
+│   PO-UI          │   Express +      │   PWA + PO-UI     │
+│                  │   Prisma)        │                   │
 ├──────────────────┴──────────────────┴───────────────────┤
 │                  packages/shared                         │
 │          (tipos, validações, constantes, DTOs)           │
@@ -434,13 +434,14 @@ Com base no TCO, histórico de manutenção, depreciação e dados de mercado, a
 │  Stripe Billing | Claude API | Bull (filas) | Resend    │
 └─────────────────────────────────────────────────────────┘
 ```
+**Nota**: SA = Standalone Architecture (sem NgModules)
 
 ### 6.2 Detalhamento
 
 | Camada | Tecnologia | Justificativa |
 |--------|-----------|---------------|
-| **Frontend Web** | Angular 18+ com PO-UI | Framework enterprise-grade; PO-UI oferece componentes de gestão corporativa prontos (tabelas, filtros, formulários dinâmicos, menus, dashboards) |
-| **Frontend Mobile** | Angular PWA com PO-UI | Compartilha codebase com o web; funciona offline; instalável sem app store |
+| **Frontend Web** | Angular 21+ (Standalone) com PO-UI | Framework enterprise-grade; PO-UI oferece componentes de gestão corporativa prontos (tabelas, filtros, formulários dinâmicos, menus, dashboards); arquitetura standalone-first (sem NgModules) para melhor tree-shaking e performance |
+| **Frontend Mobile** | Angular 21+ (Standalone) PWA com PO-UI | Compartilha codebase com o web; funciona offline; instalável sem app store; mesma arquitetura standalone |
 | **Backend API** | Node.js 22 + Express + TypeScript | Performance, familiaridade, ecossistema maduro |
 | **ORM** | Prisma | Type-safe, migrations, seeding, studio |
 | **Banco de Dados** | PostgreSQL 16 (AWS RDS) + pgvector | Robusto, escalável, extensão vetorial para embeddings IA |
@@ -462,9 +463,9 @@ Com base no TCO, histórico de manutenção, depreciação e dados de mercado, a
 ```
 frota-leve/
 ├── apps/
-│   ├── web/                    # Angular + PO-UI (painel do gestor)
+│   ├── web/                    # Angular 21+ (Standalone) + PO-UI (painel do gestor)
 │   ├── api/                    # Node.js + Express + Prisma (API REST)
-│   └── mobile/                 # Angular PWA (app do motorista)
+│   └── mobile/                 # Angular 21+ (Standalone) PWA (app do motorista)
 ├── packages/
 │   ├── shared/                 # Tipos TypeScript, DTOs, validações, enums
 │   ├── database/               # Prisma schema, migrations, seeds
