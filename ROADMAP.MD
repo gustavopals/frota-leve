@@ -136,12 +136,12 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **0.2.1** — Inicializar `apps/api` com `package.json` e dependências:
+- [x] **0.2.1** — Inicializar `apps/api` com `package.json` e dependências:
   - express, cors, helmet, compression, morgan, dotenv
   - typescript, ts-node-dev, @types/express, @types/node
   - zod, winston, uuid
-- [ ] **0.2.2** — Configurar `tsconfig.json` do api (paths, strict, decorators se necessário)
-- [ ] **0.2.3** — Criar estrutura de pastas do backend:
+- [x] **0.2.2** — Configurar `tsconfig.json` do api (paths, strict, decorators se necessário)
+- [x] **0.2.3** — Criar estrutura de pastas do backend:
   ```
   apps/api/src/
   ├── config/            # Configurações (env, database, redis, etc.)
@@ -167,16 +167,16 @@ Uma task só está **pronta** quando:
   ├── app.ts             # Configuração do Express (middlewares, routes)
   └── server.ts          # Entry point (listen)
   ```
-- [ ] **0.2.4** — Implementar `config/env.ts`: schema zod validando todas as env vars no boot (PORT, DATABASE_URL, JWT_SECRET, REDIS_URL, CLAUDE_API_KEY, STRIPE_SECRET_KEY, etc.) — crash early se faltar algo
-- [ ] **0.2.5** — Implementar `config/logger.ts`: Winston com níveis, formato JSON em produção, colorido em dev, correlationId por request
-- [ ] **0.2.6** — Implementar `shared/errors/app-error.ts`: classe AppError com (message, statusCode, code, details) e subclasses: NotFoundError, ValidationError, UnauthorizedError, ForbiddenError, ConflictError
-- [ ] **0.2.7** — Implementar middleware `error-handler.ts`: catch global que formata AppError em JSON padronizado `{ success: false, error: { code, message, details } }`
-- [ ] **0.2.8** — Implementar middleware `request-id.ts`: gera UUID v4 por request, seta no header `X-Request-Id` e disponibiliza via `req.requestId`
-- [ ] **0.2.9** — Implementar middleware `validate.ts`: recebe schema zod e valida `req.body`, `req.params`, `req.query` — lança ValidationError se inválido
-- [ ] **0.2.10** — Implementar `app.ts`: montar Express com helmet, cors, compression, morgan, requestId, JSON body parser (limite 10mb), rotas e error handler
-- [ ] **0.2.11** — Implementar `server.ts`: graceful shutdown (SIGTERM, SIGINT), log de porta no boot
-- [ ] **0.2.12** — Implementar módulo `health`: GET `/api/v1/health` retornando `{ status: 'ok', timestamp, version, uptime }`
-- [ ] **0.2.13** — Configurar `ts-node-dev` para hot reload em desenvolvimento
+- [x] **0.2.4** — Implementar `config/env.ts`: schema zod validando todas as env vars no boot (PORT, DATABASE_URL, JWT_SECRET, REDIS_URL, CLAUDE_API_KEY, STRIPE_SECRET_KEY, etc.) — crash early se faltar algo
+- [x] **0.2.5** — Implementar `config/logger.ts`: Winston com níveis, formato JSON em produção, colorido em dev, correlationId por request
+- [x] **0.2.6** — Implementar `shared/errors/app-error.ts`: classe AppError com (message, statusCode, code, details) e subclasses: NotFoundError, ValidationError, UnauthorizedError, ForbiddenError, ConflictError
+- [x] **0.2.7** — Implementar middleware `error-handler.ts`: catch global que formata AppError em JSON padronizado `{ success: false, error: { code, message, details } }`
+- [x] **0.2.8** — Implementar middleware `request-id.ts`: gera UUID v4 por request, seta no header `X-Request-Id` e disponibiliza via `req.requestId`
+- [x] **0.2.9** — Implementar middleware `validate.ts`: recebe schema zod e valida `req.body`, `req.params`, `req.query` — lança ValidationError se inválido
+- [x] **0.2.10** — Implementar `app.ts`: montar Express com helmet, cors, compression, morgan, requestId, JSON body parser (limite 10mb), rotas e error handler
+- [x] **0.2.11** — Implementar `server.ts`: graceful shutdown (SIGTERM, SIGINT), log de porta no boot
+- [x] **0.2.12** — Implementar módulo `health`: GET `/api/v1/health` retornando `{ status: 'ok', timestamp, version, uptime }`
+- [x] **0.2.13** — Configurar `ts-node-dev` para hot reload em desenvolvimento
 - [ ] **0.2.14** — Criar script `dev` no turbo que sobe api + banco simultaneamente
 
 ---
