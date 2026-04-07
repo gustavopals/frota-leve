@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Frota Leve</string>
-    <string name="title_activity_main">Frota Leve</string>
-    <string name="package_name">com.frotaleve.app</string>
-    <string name="custom_url_scheme">com.frotaleve.app</string>
-</resources>
