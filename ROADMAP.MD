@@ -361,16 +361,16 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **0.5.1** — Criar `Dockerfile` para `apps/api`:
+- [x] **0.5.1** — Criar `Dockerfile` para `apps/api`:
   - Multi-stage build (builder + runner)
   - Node 22 Alpine
   - Copiar apenas `dist/` e `node_modules` para a imagem final
   - Healthcheck integrado
-- [ ] **0.5.2** — Criar `Dockerfile` para `apps/web`:
+- [x] **0.5.2** — Criar `Dockerfile` para `apps/web`:
   - Multi-stage: Angular build → Nginx Alpine servindo os estáticos
   - Nginx config com SPA fallback (try_files), gzip, cache headers
-- [ ] **0.5.3** — Criar `docker-compose.prod.yml` com todos os serviços (api, web, postgres, redis)
-- [ ] **0.5.4** — Criar `.github/workflows/ci.yml`:
+- [x] **0.5.3** — Criar `docker-compose.prod.yml` com todos os serviços (api, web, postgres, redis)
+- [x] **0.5.4** — Criar `.github/workflows/ci.yml`:
   ```yaml
   on: [push, pull_request]
   jobs:
@@ -379,11 +379,12 @@ Uma task só está **pronta** quando:
     test: # Jest/Vitest em todos os packages
     build: # turbo build para garantir que compila
   ```
-- [ ] **0.5.5** — Criar `.github/workflows/deploy.yml` (trigger em push na `main`):
+- [x] **0.5.5** — Criar `.github/workflows/deploy.yml` (trigger em push na `main`):
   - Build das imagens Docker
   - Push para ECR (ou Docker Hub)
   - Deploy no servidor (EC2 via SSH, ou ECS)
 - [ ] **0.5.6** — Configurar GitHub branch protection: require PR, require CI pass, require 1 approval
+  - Procedimento manual documentado em `docs/deployment.md`
 
 ---
 
@@ -393,7 +394,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **0.6.1** — Criar enums em `packages/shared/src/enums/`:
+- [x] **0.6.1** — Criar enums em `packages/shared/src/enums/`:
 
   ```typescript
   // plan.enum.ts
@@ -503,7 +504,7 @@ Uma task só está **pronta** quando:
   }
   ```
 
-- [ ] **0.6.2** — Criar types base em `packages/shared/src/types/`:
+- [x] **0.6.2** — Criar types base em `packages/shared/src/types/`:
 
   ```typescript
   // api-response.type.ts
@@ -524,7 +525,7 @@ Uma task só está **pronta** quando:
   }
   ```
 
-- [ ] **0.6.3** — Criar DTOs base com zod em `packages/shared/src/dtos/`:
+- [x] **0.6.3** — Criar DTOs base com zod em `packages/shared/src/dtos/`:
   ```typescript
   // auth.dto.ts → LoginDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto
   // vehicle.dto.ts → CreateVehicleDto, UpdateVehicleDto
@@ -532,7 +533,7 @@ Uma task só está **pronta** quando:
   // fuel-record.dto.ts → CreateFuelRecordDto
   // (demais DTOs serão criados conforme os módulos forem implementados)
   ```
-- [ ] **0.6.4** — Criar constantes em `packages/shared/src/constants/`:
+- [x] **0.6.4** — Criar constantes em `packages/shared/src/constants/`:
   ```typescript
   // plan-limits.ts
   export const PLAN_LIMITS = {
@@ -547,14 +548,14 @@ Uma task só está **pronta** quando:
     },
   };
   ```
-- [ ] **0.6.5** — Criar utilitários em `packages/shared/src/utils/`:
+- [x] **0.6.5** — Criar utilitários em `packages/shared/src/utils/`:
   ```typescript
   // format.utils.ts → formatCNPJ, formatCPF, formatPhone, formatPlate, formatCurrency
   // validation.utils.ts → isValidCNPJ, isValidCPF, isValidPlate (padrão antigo + Mercosul)
   // date.utils.ts → formatDateBR, daysBetween, isExpired, daysUntilExpiry
   ```
-- [ ] **0.6.6** — Configurar barrel exports em `packages/shared/src/index.ts`
-- [ ] **0.6.7** — Escrever testes unitários para todos os utilitários (format, validation, date)
+- [x] **0.6.6** — Configurar barrel exports em `packages/shared/src/index.ts`
+- [x] **0.6.7** — Escrever testes unitários para todos os utilitários (format, validation, date)
 
 ---
 

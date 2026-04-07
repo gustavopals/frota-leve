@@ -1,2 +1,2 @@
-// Tipos TypeScript globais — populado na TASK 0.6
-export {};
+export * from './api-response.type';
+export * from './pagination.type';

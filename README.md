@@ -4,11 +4,13 @@ Plataforma SaaS multi-tenant de gestão de frotas para empresas brasileiras.
 
 ## Status Atual
 
-O monorepo base e o backend Express da Fase 0 estão prontos.
+As tasks `0.1` até `0.5.5` da Fase 0 estão implementadas no repositório.
 
-- `apps/api`: funcional, com health check, middlewares base, testes e OpenAPI inicial
+- `apps/api`: backend Express funcional, com health check, middlewares base, testes e OpenAPI inicial
 - `packages/database`: Prisma, migration inicial, seed e serviços locais de PostgreSQL + Redis
-- `apps/web` e `apps/mobile`: ainda são placeholders das próximas tasks
+- `apps/web`: frontend Angular 21 + PO-UI 21 com shell inicial, autenticação base e lazy loading
+- `CI/CD`: workflows de validação contínua, Dockerfiles de produção e `docker-compose.prod.yml`
+- `apps/mobile`: ainda placeholder das próximas tasks
 
 ## Pré-requisitos
 
@@ -50,6 +52,7 @@ curl http://localhost:3000/api/v1/health
 
 - Especificação OpenAPI inicial: [docs/openapi/api.yaml](./docs/openapi/api.yaml)
 - Prisma inicial em `packages/database/prisma/schema.prisma`
+- Deploy e CI/CD: [docs/deployment.md](./docs/deployment.md)
 
 ## Comandos Principais
 
@@ -105,12 +108,12 @@ npm run format
 frota-leve/
 ├── apps/
 │   ├── api/          # Backend Node.js + Express + Prisma (TASK 0.2)
-│   ├── web/          # Frontend Angular 18 + PO-UI (TASK 0.4)
+│   ├── web/          # Frontend Angular 21 + PO-UI 21 (TASK 0.4)
 │   └── mobile/       # PWA Angular para motoristas (TASK 4.1)
 ├── packages/
 │   ├── shared/       # Tipos, DTOs, validações, constantes e utils
 │   ├── database/     # Prisma schema, migrations, seeds (TASK 0.3)
-│   └── ai/           # Integração Claude API (TASK 3.1)
+│   └── ai/           # Integração de IA (TASK 3.1)
 ├── docs/             # Documentação técnica
 ├── tools/            # Scripts de automação
 └── .github/
@@ -153,6 +156,20 @@ npm run db:studio
 ```
 
 O `docker-compose.yml` também expõe um `pgadmin` opcional via profile `pgadmin`.
+
+## Produção
+
+Os artefatos de produção estão versionados e prontos para uso:
+
+- `apps/api/Dockerfile`
+- `apps/web/Dockerfile`
+- `apps/web/nginx/default.conf`
+- `docker-compose.prod.yml`
+- `.env.prod.example`
+- `.github/workflows/ci.yml`
+- `.github/workflows/deploy.yml`
+
+O passo a passo de bootstrap do servidor, secrets do GitHub e estratégia de deploy está em [docs/deployment.md](./docs/deployment.md).
 
 ## Variáveis de Ambiente
 
