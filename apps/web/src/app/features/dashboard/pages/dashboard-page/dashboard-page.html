@@ -1,23 +1,240 @@
-<app-feature-placeholder
-  title="Dashboard"
-  subtitle="Visao operacional inicial"
-  eyebrow="Primeira entrega"
-  description="Dashboard - em construcao. A base do shell, roteamento, autenticacao e tema ja esta pronta para receber os indicadores reais."
+<po-page-default
+  p-title="Dashboard principal"
+  [p-subtitle]="pageSubtitle"
+  [p-actions]="pageActions"
 >
-  <div class="dashboard-page__grid">
-    <article class="dashboard-page__card">
-      <span class="dashboard-page__label">API base</span>
-      <strong>{{ apiUrl }}</strong>
-      <p>Endereco padrao usado pelo wrapper HttpClient do frontend.</p>
-    </article>
+  <!-- Banda de comando: identidade + KPIs + ações em uma única linha -->
+  <section class="dashboard-page__hero">
+    <div class="dashboard-page__hero-identity">
+      <span class="dashboard-page__eyebrow">Painel operacional</span>
+      <h2>{{ heroTitle }}</h2>
+    </div>
 
-    <article class="dashboard-page__card">
-      <span class="dashboard-page__label">Proximos passos</span>
-      <ul>
-        @for (milestone of milestones; track milestone) {
-          <li>{{ milestone }}</li>
+    <div class="dashboard-page__hero-kpis">
+      @for (item of heroSnapshot; track item.label) {
+        <div class="dashboard-page__hero-kpi" [attr.data-tone]="item.tone">
+          <strong>{{ item.value }}</strong>
+          <span>{{ item.label }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="dashboard-page__hero-end">
+      <div class="dashboard-page__hero-ctas">
+        @for (action of heroActions; track action.link) {
+          <po-button
+            [p-kind]="action.kind"
+            [p-label]="action.label"
+            (p-click)="openInternalLink(action.link)"
+          ></po-button>
         }
-      </ul>
-    </article>
-  </div>
-</app-feature-placeholder>
+      </div>
+      <small class="dashboard-page__sync">
+        @if (isLoading && summary) { Atualizando... } @else { Sinc: {{ lastUpdatedLabel }} }
+      </small>
+    </div>
+  </section>
+
+  @if (!summary && isLoading) {
+    <section class="dashboard-page__state">
+      <div>
+        <span class="dashboard-page__state-label">Carregando painel</span>
+        <h3>Buscando indicadores da {{ tenantName }}</h3>
+      </div>
+    </section>
+  } @else if (!summary && hasLoadError) {
+    <section class="dashboard-page__state dashboard-page__state--error">
+      <div>
+        <span class="dashboard-page__state-label">Falha ao carregar</span>
+        <h3>Nao foi possivel montar o dashboard</h3>
+      </div>
+      <po-button
+        p-kind="primary"
+        p-label="Tentar novamente"
+        [p-loading]="isLoading"
+        (p-click)="reload()"
+      ></po-button>
+    </section>
+  }
+
+  @if (summary; as currentSummary) {
+    <!-- Faixa de KPIs: 4 cartões compactos -->
+    <section class="dashboard-page__metrics">
+      <po-widget p-title="Frota" class="dashboard-page__metric">
+        <strong>{{ currentSummary.vehicles.total }}</strong>
+        <span>veiculos</span>
+        <div class="dashboard-page__pills">
+          @for (item of vehicleBreakdown; track item.label) {
+            <span [class]="getVehiclePillClass(item.tone)">{{ item.value }} {{ item.label }}</span>
+          }
+        </div>
+      </po-widget>
+
+      <po-widget p-title="Motoristas" class="dashboard-page__metric">
+        <strong>{{ currentSummary.drivers.total }}</strong>
+        <span>condutores</span>
+        <div class="dashboard-page__pills">
+          @for (item of driverBreakdown; track item.label) {
+            <span [class]="getDriverPillClass(item.tone)">{{ item.value }} {{ item.label }}</span>
+          }
+        </div>
+      </po-widget>
+
+      <po-widget p-title="Alertas" class="dashboard-page__metric">
+        <strong>{{ currentSummary.alerts.totalPending }}</strong>
+        <span>pendentes</span>
+        <div class="dashboard-page__pills">
+          @for (item of alertBreakdown; track item.label) {
+            <span [class]="getAlertPillClass(item.tone)">{{ item.value }} {{ item.label }}</span>
+          }
+        </div>
+      </po-widget>
+
+      <po-widget p-title="Custo do mes" class="dashboard-page__metric">
+        <strong>{{ formatCurrency(currentSummary.costs.currentMonth) }}</strong>
+        <span>{{ costVariationLabel }}</span>
+        <div class="dashboard-page__pills">
+          @for (item of currentMonthCostBreakdown; track item.label) {
+            <span [class]="getCostPillClass(item.tone)">{{ item.label }}: {{ item.value }}</span>
+          }
+        </div>
+      </po-widget>
+    </section>
+
+    <!-- Grade principal: alertas + custo / atividade + frota -->
+    <section class="dashboard-page__content">
+      <div class="dashboard-page__column">
+
+        <po-widget p-title="Alertas operacionais" class="dashboard-page__panel">
+          <div class="dashboard-page__panel-header">
+            <strong>{{ currentSummary.alerts.totalPending }} pendencias mapeadas</strong>
+            <span class="dashboard-page__panel-meta">{{ alerts.length }} destacados</span>
+          </div>
+
+          @if (alerts.length > 0) {
+            <div class="dashboard-page__alert-list">
+              @for (alert of alerts; track alert.id) {
+                <article class="dashboard-page__alert-row">
+                  <div class="dashboard-page__alert-row-main">
+                    <span class="dashboard-page__card-kicker">{{ getAlertTypeLabel(alert) }}</span>
+                    <h4>{{ alert.title }}</h4>
+                  </div>
+                  <div class="dashboard-page__alert-row-meta">
+                    <po-tag
+                      [p-value]="getAlertSeverityMeta(alert).label"
+                      [p-type]="getAlertSeverityMeta(alert).type"
+                    ></po-tag>
+                    <small>{{ formatAlertDueAt(alert.dueAt) }}</small>
+                    @if (alert.link) {
+                      <po-button
+                        p-kind="tertiary"
+                        p-label="Ver"
+                        (p-click)="openInternalLink(alert.link)"
+                      ></po-button>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <p class="dashboard-page__empty">Nenhum alerta prioritario no momento.</p>
+          }
+        </po-widget>
+
+        <po-widget p-title="Custo mensal" class="dashboard-page__panel">
+          <div class="dashboard-page__panel-header">
+            <strong>{{ formatCurrency(currentSummary.costs.currentMonth) }}</strong>
+            <span class="dashboard-page__panel-meta">
+              Anterior: {{ formatCurrency(currentSummary.costs.previousMonth) }}
+            </span>
+          </div>
+
+          @if (!hasCostData) {
+            <p class="dashboard-page__chart-note">
+              Serie pronta — aguardando modulos financeiros (tasks 2.x).
+            </p>
+          }
+
+          <po-chart
+            [p-type]="costChartType"
+            [p-categories]="costCategories"
+            [p-series]="costSeries"
+            [p-options]="costChartOptions"
+            [p-height]="240"
+          ></po-chart>
+        </po-widget>
+      </div>
+
+      <div class="dashboard-page__column">
+
+        <po-widget p-title="Atividade recente" class="dashboard-page__panel">
+          <div class="dashboard-page__panel-header">
+            <strong>{{ recentActivity.length }} eventos recentes</strong>
+          </div>
+
+          @if (recentActivity.length > 0) {
+            <div class="dashboard-page__feed">
+              @for (activity of recentActivity; track activity.id) {
+                <article class="dashboard-page__feed-row">
+                  <div class="dashboard-page__feed-dot"></div>
+                  <div class="dashboard-page__feed-body">
+                    <div class="dashboard-page__feed-main">
+                      <span class="dashboard-page__card-kicker">
+                        {{ getActivityActionLabel(activity.action) }}
+                      </span>
+                      <span class="dashboard-page__feed-desc">{{ activity.description }}</span>
+                    </div>
+                    <div class="dashboard-page__feed-meta">
+                      <span>{{ activity.actorName ?? 'Sistema' }}</span>
+                      <small>{{ formatDateTime(activity.occurredAt) }}</small>
+                      @if (activity.link) {
+                        <po-button
+                          p-kind="tertiary"
+                          p-label="Ver"
+                          (p-click)="openInternalLink(activity.link)"
+                        ></po-button>
+                      }
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <p class="dashboard-page__empty">Nenhum evento auditado ainda.</p>
+          }
+        </po-widget>
+
+        <po-widget p-title="Distribuicao por status" class="dashboard-page__panel">
+          @if (hasVehicleStatusData) {
+            <po-chart
+              [p-type]="statusChartType"
+              [p-series]="statusChartSeries"
+              [p-options]="statusChartOptions"
+              [p-height]="240"
+            ></po-chart>
+
+            <div class="dashboard-page__status-legend">
+              @for (item of statusLegend; track item.label) {
+                @if (item.value > 0) {
+                  <div class="dashboard-page__status-row">
+                    <span
+                      class="dashboard-page__status-dot"
+                      [style.background]="item.color"
+                    ></span>
+                    <span class="dashboard-page__status-label">{{ item.label }}</span>
+                    <span class="dashboard-page__status-count">{{ item.value }}</span>
+                    <span class="dashboard-page__status-share">{{ item.share }}</span>
+                  </div>
+                }
+              }
+            </div>
+          } @else {
+            <p class="dashboard-page__empty">
+              Cadastre veiculos para liberar a visao de status operacional.
+            </p>
+          }
+        </po-widget>
+      </div>
+    </section>
+  }
+</po-page-default>

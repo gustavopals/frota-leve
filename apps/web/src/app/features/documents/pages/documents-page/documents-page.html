@@ -1,8 +1,153 @@
-<app-feature-placeholder
-  title="Documentos"
-  subtitle="Controle de licencas, seguros e vencimentos"
-  eyebrow="Feature lazy"
-  description="Estrutura pronta para documentos da frota, anexos e agenda de renovacoes."
+<po-page-default
+  p-title="Documentos e vencimentos"
+  [p-subtitle]="pageSubtitle"
+  [p-actions]="pageActions"
 >
-  <p>Documentos - em construcao.</p>
-</app-feature-placeholder>
+  <section class="documents-page__hero">
+    <div class="documents-page__hero-copy">
+      <span class="documents-page__eyebrow">Radar documental</span>
+      <h2>{{ heroTitle }}</h2>
+      <p>{{ heroDescription }}</p>
+    </div>
+
+    <div class="documents-page__hero-kpis">
+      @for (item of heroMetrics; track item.label) {
+        <div class="documents-page__hero-kpi" [attr.data-tone]="item.tone">
+          <strong>{{ item.value }}</strong>
+          <span>{{ item.label }}</span>
+        </div>
+      }
+    </div>
+
+    <small class="documents-page__hero-sync">Sinc: {{ lastSyncLabel }}</small>
+  </section>
+
+  @if (isLoading && !hasLoadedOnce) {
+    <section class="documents-page__state">
+      <div>
+        <span class="documents-page__state-label">Carregando painel</span>
+        <h3>Buscando documentos, tipos e vencimentos da operacao</h3>
+      </div>
+    </section>
+  } @else if (hasLoadError && !hasLoadedOnce) {
+    <section class="documents-page__state documents-page__state--error">
+      <div>
+        <span class="documents-page__state-label">Falha na leitura</span>
+        <h3>Nao foi possivel montar o painel de documentos</h3>
+      </div>
+
+      <po-button
+        p-kind="primary"
+        p-label="Tentar novamente"
+        [p-loading]="isLoading"
+        (p-click)="reload()"
+      ></po-button>
+    </section>
+  }
+
+  @if (hasLoadedOnce) {
+    <section class="documents-page__metrics">
+      @for (card of metricCards; track card.title) {
+        <po-widget class="documents-page__metric" [attr.data-tone]="card.tone" [p-title]="card.title">
+          <strong>{{ card.value }}</strong>
+          <span>{{ card.helper }}</span>
+        </po-widget>
+      }
+    </section>
+
+    <section class="documents-page__content">
+      <po-widget p-title="Semaforo por tipo" class="documents-page__panel documents-page__panel--types">
+        <div class="documents-page__panel-header">
+          <div>
+            <strong>{{ typeCards.length }} tipos monitorados</strong>
+            <p>O card assume o pior status do tipo: vermelho para vencido, amarelo para proximo e verde para em dia.</p>
+          </div>
+          <span class="documents-page__panel-meta">{{ documents.length }} documentos</span>
+        </div>
+
+        @if (typeCards.length > 0) {
+          <div class="documents-page__type-grid">
+            @for (card of typeCards; track card.type) {
+              <article class="documents-page__type-card" [attr.data-tone]="card.tone">
+                <div class="documents-page__type-card-top">
+                  <div>
+                    <span class="documents-page__card-kicker">Tipo monitorado</span>
+                    <h3>{{ card.label }}</h3>
+                  </div>
+
+                  <div class="documents-page__semaphore" [attr.data-tone]="card.tone" [attr.aria-label]="'Semaforo ' + card.toneLabel">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+
+                <div class="documents-page__type-card-copy">
+                  <strong>{{ card.total }}</strong>
+                  <span>{{ card.toneLabel }}</span>
+                  <p>{{ card.focusLabel }}</p>
+                </div>
+
+                <div class="documents-page__pills">
+                  <span class="documents-page__pill documents-page__pill--success">{{ card.validCount }} em dia</span>
+                  <span class="documents-page__pill documents-page__pill--warning">{{ card.expiringCount }} proximos</span>
+                  <span class="documents-page__pill documents-page__pill--danger">{{ card.expiredCount }} vencidos</span>
+                </div>
+
+                <footer class="documents-page__type-card-footer">
+                  <span>{{ card.targetSummary }}</span>
+                  @if (card.totalCost > 0) {
+                    <small>Custo declarado: {{ formatCurrency(card.totalCost) }}</small>
+                  }
+                </footer>
+              </article>
+            }
+          </div>
+        } @else {
+          <section class="documents-page__empty-panel">
+            <h3>Sem tipos cadastrados ainda</h3>
+            <p>Assim que os primeiros documentos entrarem no modulo, os cards passam a consolidar o semaforo por tipo.</p>
+          </section>
+        }
+      </po-widget>
+
+      <po-widget p-title="Fila prioritaria" class="documents-page__panel">
+        <div class="documents-page__panel-header">
+          <div>
+            <strong>{{ priorityItems.length }} itens destacados</strong>
+            <p>Lista unificada com vencidos e documentos que entram na janela de 90 dias.</p>
+          </div>
+          <span class="documents-page__panel-meta">{{ formatCurrency(totalTrackedCost) }} em custos</span>
+        </div>
+
+        @if (priorityItems.length > 0) {
+          <div class="documents-page__priority-list">
+            @for (item of priorityItems; track item.id) {
+              <article class="documents-page__priority-row" [attr.data-tone]="item.tone">
+                <div class="documents-page__priority-main">
+                  <span class="documents-page__card-kicker">{{ item.typeLabel }}</span>
+                  <h4>{{ item.description }}</h4>
+                  <small>{{ item.targetLabel }}</small>
+                </div>
+
+                <div class="documents-page__priority-meta">
+                  <po-tag
+                    [p-value]="item.statusLabel"
+                    [p-type]="getTagType(item.tone)"
+                  ></po-tag>
+                  <strong>{{ item.deadlineLabel }}</strong>
+                  <small>{{ item.bucketLabel }} - {{ formatDate(item.expirationDate) }}</small>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <section class="documents-page__empty-panel">
+            <h3>Nenhum item critico no momento</h3>
+            <p>Quando houver vencidos ou documentos entrando nas proximas janelas, eles aparecem nesta fila.</p>
+          </section>
+        }
+      </po-widget>
+    </section>
+  }
+</po-page-default>

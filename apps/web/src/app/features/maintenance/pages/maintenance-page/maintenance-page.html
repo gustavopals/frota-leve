@@ -1,8 +1,233 @@
-<app-feature-placeholder
-  title="Manutencao"
-  subtitle="Planos preventivos e corretivos"
-  eyebrow="Feature lazy"
-  description="Base preparada para ordens de servico, historico mecanico e alertas de vencimento."
+<po-page-list
+  p-title="Planos de manutenção"
+  p-subtitle="Cadência preventiva, corretiva e preditiva com leitura visual imediata de vencimento."
+  [p-breadcrumb]="breadcrumb"
+  [p-actions]="pageActions"
+  p-components-size="medium"
 >
-  <p>Manutencao - em construcao.</p>
-</app-feature-placeholder>
+  <section class="maintenance-page__metrics">
+    <po-widget
+      p-title="Planos na página"
+      class="maintenance-page__metric"
+    >
+      <strong>{{ totalPlansOnPage }}</strong>
+      <span>recorte atual carregado</span>
+    </po-widget>
+
+    <po-widget
+      p-title="Em dia"
+      class="maintenance-page__metric maintenance-page__metric--healthy"
+    >
+      <strong>{{ healthyPlansCount }}</strong>
+      <span>zona verde na página</span>
+    </po-widget>
+
+    <po-widget
+      p-title="Próximos"
+      class="maintenance-page__metric maintenance-page__metric--upcoming"
+    >
+      <strong>{{ upcomingPlansCount }}</strong>
+      <span>janela de até 30 dias ou 1.000 km</span>
+    </po-widget>
+
+    <po-widget
+      p-title="Vencidos"
+      class="maintenance-page__metric maintenance-page__metric--overdue"
+    >
+      <strong>{{ overduePlansCount }}</strong>
+      <span>{{ coverageRateLabel }}</span>
+    </po-widget>
+  </section>
+
+  <section class="maintenance-page__filters">
+    <div class="maintenance-page__filters-header">
+      <div>
+        <span class="maintenance-page__eyebrow">Leitura operacional</span>
+        <h2>Filtre por plano, veículo e atividade</h2>
+      </div>
+
+      <div class="maintenance-page__filters-meta">
+        <span>{{ activeFiltersCount }} filtros ativos</span>
+        <small>verde = em dia • amarelo = próximo • vermelho = vencido</small>
+      </div>
+    </div>
+
+    <form
+      class="maintenance-page__filters-grid"
+      [formGroup]="filtersForm"
+      novalidate
+    >
+      <po-input
+        formControlName="search"
+        name="search"
+        p-label="Buscar plano"
+        p-placeholder="Troca de óleo, freio, revisão..."
+        (p-enter)="applyFilters()"
+      ></po-input>
+
+      <po-combo
+        formControlName="vehicleId"
+        name="vehicleId"
+        p-label="Veículo"
+        [p-options]="vehicleOptions"
+        [p-disabled]="isLoadingOptions"
+      ></po-combo>
+
+      <po-combo
+        formControlName="type"
+        name="type"
+        p-label="Tipo"
+        [p-options]="typeOptions"
+      ></po-combo>
+
+      <po-combo
+        formControlName="activity"
+        name="activity"
+        p-label="Atividade"
+        [p-options]="activityOptions"
+      ></po-combo>
+
+      <div class="maintenance-page__filter-actions">
+        <po-button
+          p-kind="primary"
+          p-label="Aplicar"
+          [p-disabled]="isLoading"
+          (p-click)="applyFilters()"
+        ></po-button>
+
+        <po-button
+          p-label="Limpar"
+          [p-disabled]="isLoading"
+          (p-click)="clearFilters()"
+        ></po-button>
+      </div>
+    </form>
+  </section>
+
+  <section class="maintenance-page__legend">
+    <article class="maintenance-page__legend-item maintenance-page__legend-item--healthy">
+      <strong>Em dia</strong>
+      <span>sem gatilho crítico próximo</span>
+    </article>
+
+    <article class="maintenance-page__legend-item maintenance-page__legend-item--upcoming">
+      <strong>Próximo</strong>
+      <span>exige atenção preventiva</span>
+    </article>
+
+    <article class="maintenance-page__legend-item maintenance-page__legend-item--overdue">
+      <strong>Vencido</strong>
+      <span>fora da janela planejada</span>
+    </article>
+  </section>
+
+  @if (hasItems) {
+    <section class="maintenance-page__table-shell">
+      <po-table
+        [p-columns]="columns"
+        [p-items]="tableItems"
+        p-container="shadow"
+        p-spacing="extraSmall"
+        [p-hide-columns-manager]="true"
+        [p-hide-batch-actions]="true"
+        [p-hide-table-search]="true"
+        [p-text-wrap]="true"
+      >
+        <ng-template
+          p-table-column-template
+          [p-property]="planColumnProperty"
+          let-value
+        >
+          <div
+            class="maintenance-page__plan-cell"
+            [class.maintenance-page__status-accent--healthy]="value.status === 'healthy'"
+            [class.maintenance-page__status-accent--upcoming]="value.status === 'upcoming'"
+            [class.maintenance-page__status-accent--overdue]="value.status === 'overdue'"
+            [class.maintenance-page__status-accent--inactive]="value.status === 'inactive'"
+          >
+            <strong>{{ value.title }}</strong>
+            <small>{{ value.subtitle }}</small>
+            <span>{{ value.activityLabel }}</span>
+          </div>
+        </ng-template>
+
+        <ng-template
+          p-table-column-template
+          [p-property]="vehicleColumnProperty"
+          let-value
+        >
+          <div class="maintenance-page__stack-cell">
+            <strong>{{ value.title }}</strong>
+            <small>{{ value.subtitle }}</small>
+          </div>
+        </ng-template>
+
+        <ng-template
+          p-table-column-template
+          [p-property]="scheduleColumnProperty"
+          let-value
+        >
+          <div class="maintenance-page__stack-cell">
+            <strong>{{ value.primary }}</strong>
+            <small>{{ value.secondary }}</small>
+          </div>
+        </ng-template>
+
+        <ng-template
+          p-table-column-template
+          [p-property]="nextDueColumnProperty"
+          let-value
+        >
+          <div class="maintenance-page__stack-cell">
+            <strong>{{ value.primary }}</strong>
+            <small>{{ value.secondary }}</small>
+          </div>
+        </ng-template>
+
+        <ng-template
+          p-table-column-template
+          [p-property]="statusColumnProperty"
+          let-value
+        >
+          <div class="maintenance-page__status-cell">
+            <po-tag
+              [p-value]="value.label"
+              [p-type]="value.type"
+            ></po-tag>
+            <small>{{ value.helper }}</small>
+          </div>
+        </ng-template>
+      </po-table>
+    </section>
+  } @else {
+    <section class="maintenance-page__empty-panel">
+      <h3>{{ isLoading ? 'Carregando planos...' : 'Nenhum plano encontrado' }}</h3>
+      <p>
+        {{
+          isLoading
+            ? 'A lista está sendo atualizada com base no filtro atual.'
+            : 'Ajuste os filtros ou cadastre planos de manutenção para visualizar o semáforo operacional.'
+        }}
+      </p>
+    </section>
+  }
+
+  <section class="maintenance-page__pagination">
+    <small>{{ paginationSummary }}</small>
+
+    <div class="maintenance-page__pagination-actions">
+      <po-button
+        p-label="Anterior"
+        [p-disabled]="!canGoBack"
+        (p-click)="previousPage()"
+      ></po-button>
+
+      <po-button
+        p-kind="primary"
+        p-label="Próxima"
+        [p-disabled]="!canGoForward"
+        (p-click)="nextPage()"
+      ></po-button>
+    </div>
+  </section>
+</po-page-list>

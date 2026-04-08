@@ -1,8 +1,463 @@
-<app-feature-placeholder
-  title="Combustivel"
-  subtitle="Abastecimentos, consumo e alertas de custo"
-  eyebrow="Feature lazy"
-  description="Fluxo inicial reservado para lancamentos de abastecimento e leitura de eficiencia."
+<po-page-list
+  p-title="Combustível e abastecimentos"
+  p-subtitle="Lançamentos operacionais com foco em custo, eficiência e detecção rápida de consumo fora do padrão."
+  [p-breadcrumb]="breadcrumb"
+  [p-actions]="pageActions"
+  p-components-size="medium"
 >
-  <p>Combustivel - em construcao.</p>
-</app-feature-placeholder>
+  <section class="fuel-page__metrics">
+    <po-widget
+      p-title="Gasto total"
+      class="fuel-page__metric"
+    >
+      <strong>{{ formatCurrency(stats.totalCost) }}</strong>
+      <span>recorte atual de abastecimentos</span>
+    </po-widget>
+
+    <po-widget
+      p-title="Volume lançado"
+      class="fuel-page__metric"
+    >
+      <strong>{{ formatNumber(stats.totalLiters, ' l') }}</strong>
+      <span>{{ stats.totalRecords }} lançamentos no período</span>
+    </po-widget>
+
+    <po-widget
+      p-title="Média de eficiência"
+      class="fuel-page__metric"
+    >
+      <strong>{{ formatNumber(stats.averageKmPerLiter, ' km/l') }}</strong>
+      <span>apenas registros com tanque cheio</span>
+    </po-widget>
+
+    <po-widget
+      p-title="Anomalias"
+      class="fuel-page__metric"
+    >
+      <strong>{{ stats.anomalyCount }}</strong>
+      <span>{{ anomalySummaryLabel }}</span>
+    </po-widget>
+  </section>
+
+  <section class="fuel-page__insights">
+    <po-widget
+      p-title="Custo mensal"
+      class="fuel-page__panel"
+    >
+      <header class="fuel-page__panel-header">
+        <div>
+          <strong>{{ formatCurrency(stats.totalCost) }}</strong>
+          <p>
+            Consolidação por mês com base no filtro atual. O custo por km no recorte está em
+            {{ formatNumber(stats.costPerKm, ' R$/km') }}.
+          </p>
+        </div>
+      </header>
+
+      @if (hasMonthlyCostChart) {
+        <po-chart
+          [p-type]="chartType"
+          [p-categories]="monthlyCostCategories"
+          [p-series]="monthlyCostSeries"
+          [p-options]="monthlyCostChartOptions"
+          [p-height]="260"
+        ></po-chart>
+      } @else {
+        <section class="fuel-page__empty-panel">
+          <h3>Sem base suficiente para consolidar custo</h3>
+          <p>Os gráficos aparecem assim que o módulo recebe lançamentos dentro do filtro aplicado.</p>
+        </section>
+      }
+    </po-widget>
+
+    <po-widget
+      p-title="Consumo recente"
+      class="fuel-page__panel"
+    >
+      <header class="fuel-page__panel-header">
+        <div>
+          <strong>{{ formatNumber(stats.averageKmPerLiter, ' km/l') }}</strong>
+          <p>Evolução dos últimos abastecimentos completos para leitura rápida de tendência.</p>
+        </div>
+      </header>
+
+      @if (hasEfficiencyChart) {
+        <po-chart
+          [p-type]="efficiencyChartType"
+          [p-categories]="efficiencyTrendCategories"
+          [p-series]="efficiencyTrendSeries"
+          [p-options]="efficiencyChartOptions"
+          [p-height]="260"
+        ></po-chart>
+      } @else {
+        <section class="fuel-page__empty-panel">
+          <h3>Sem série histórica de consumo ainda</h3>
+          <p>
+            O gráfico exige registros com tanque cheio e km/l calculado. Abastecimentos parciais não
+            entram nessa curva.
+          </p>
+        </section>
+      }
+    </po-widget>
+  </section>
+
+  <section class="fuel-page__ranking">
+    <po-widget
+      p-title="Melhores eficiências"
+      class="fuel-page__panel"
+    >
+      @for (item of bestRanking; track item.vehicleId) {
+        <article class="fuel-page__ranking-item">
+          <div>
+            <strong>{{ formatRankingVehicle(item) }}</strong>
+            <small>{{ item.totalRecords }} registros • {{ formatCurrency(item.totalCost) }}</small>
+          </div>
+
+          <po-tag
+            [p-value]="formatNumber(item.averageKmPerLiter, ' km/l')"
+            [p-type]="rankingBestTagType"
+          ></po-tag>
+        </article>
+      } @empty {
+        <section class="fuel-page__empty-panel">
+          <h3>Ranking indisponível</h3>
+          <p>Quando o módulo acumular registros com km/l calculado, o ranking aparece aqui.</p>
+        </section>
+      }
+    </po-widget>
+
+    <po-widget
+      p-title="Piores eficiências"
+      class="fuel-page__panel"
+    >
+      @for (item of worstRanking; track item.vehicleId) {
+        <article class="fuel-page__ranking-item">
+          <div>
+            <strong>{{ formatRankingVehicle(item) }}</strong>
+            <small>{{ item.totalRecords }} registros • {{ formatCurrency(item.totalCost) }}</small>
+          </div>
+
+          <po-tag
+            [p-value]="formatNumber(item.averageKmPerLiter, ' km/l')"
+            [p-type]="rankingWorstTagType"
+          ></po-tag>
+        </article>
+      } @empty {
+        <section class="fuel-page__empty-panel">
+          <h3>Sem veículos suficientes para comparação</h3>
+          <p>Cadastre mais abastecimentos completos para liberar a leitura dos extremos da frota.</p>
+        </section>
+      }
+    </po-widget>
+  </section>
+
+  <section class="fuel-page__filters">
+    <div class="fuel-page__filters-header">
+      <div>
+        <span class="fuel-page__eyebrow">Filtro operacional</span>
+        <h2>Refine custo, veículo, condutor e posto</h2>
+      </div>
+
+      <div class="fuel-page__filters-meta">
+        <span>{{ activeFiltersCount }} filtros ativos</span>
+        <small>{{ filterMetaLabel }}</small>
+      </div>
+    </div>
+
+    <form
+      class="fuel-page__filters-grid"
+      [formGroup]="filtersForm"
+      novalidate
+    >
+      <po-combo
+        formControlName="vehicleId"
+        name="vehicleId"
+        p-label="Veículo"
+        [p-options]="vehicleOptions"
+      ></po-combo>
+
+      <po-combo
+        formControlName="driverId"
+        name="driverId"
+        p-label="Motorista"
+        [p-options]="driverOptions"
+      ></po-combo>
+
+      <po-combo
+        formControlName="fuelType"
+        name="fuelType"
+        p-label="Combustível"
+        [p-options]="fuelTypeOptions"
+      ></po-combo>
+
+      <po-input
+        formControlName="gasStation"
+        name="gasStation"
+        p-label="Posto"
+        p-placeholder="Shell, Ipiranga..."
+        (p-enter)="applyFilters()"
+      ></po-input>
+
+      <po-datepicker
+        formControlName="dateFrom"
+        name="dateFrom"
+        p-label="De"
+        p-format="dd/mm/yyyy"
+      ></po-datepicker>
+
+      <po-datepicker
+        formControlName="dateTo"
+        name="dateTo"
+        p-label="Até"
+        p-format="dd/mm/yyyy"
+      ></po-datepicker>
+
+      <po-combo
+        formControlName="anomaly"
+        name="anomaly"
+        p-label="Anomalia"
+        [p-options]="anomalyOptions"
+      ></po-combo>
+
+      <div class="fuel-page__filter-actions">
+        <po-button
+          p-kind="primary"
+          p-label="Aplicar"
+          [p-disabled]="isLoading"
+          (p-click)="applyFilters()"
+        ></po-button>
+
+        <po-button
+          p-label="Limpar"
+          [p-disabled]="isLoading"
+          (p-click)="clearFilters()"
+        ></po-button>
+      </div>
+    </form>
+  </section>
+
+  <section class="fuel-page__table-shell">
+    <po-table
+      [p-columns]="columns"
+      [p-items]="tableItems"
+      [p-actions]="rowActions"
+      p-container="shadow"
+      p-spacing="extraSmall"
+      [p-hide-columns-manager]="true"
+      [p-hide-batch-actions]="true"
+      [p-hide-table-search]="true"
+      [p-text-wrap]="true"
+    >
+      <ng-template
+        p-table-column-template
+        [p-property]="vehicleColumnProperty"
+        let-value
+      >
+        <div
+          class="fuel-page__vehicle-cell"
+          [class.fuel-page__vehicle-cell--anomaly]="value.anomaly"
+        >
+          <strong>{{ value.title }}</strong>
+          <small>{{ value.subtitle }}</small>
+        </div>
+      </ng-template>
+
+      <ng-template
+        p-table-column-template
+        [p-property]="volumeColumnProperty"
+        let-value
+      >
+        <div class="fuel-page__volume-cell">
+          <strong>{{ value.liters }}</strong>
+          <small>{{ value.pricePerLiter }}</small>
+          <span>{{ value.station }}</span>
+        </div>
+      </ng-template>
+
+      <ng-template
+        p-table-column-template
+        [p-property]="efficiencyColumnProperty"
+        let-value
+      >
+        <div
+          class="fuel-page__efficiency-cell"
+          [class.fuel-page__efficiency-cell--anomaly]="value.anomaly"
+        >
+          <strong>{{ value.value }}</strong>
+          <small>{{ value.helper }}</small>
+        </div>
+      </ng-template>
+
+      <ng-template
+        p-table-column-template
+        [p-property]="anomalyColumnProperty"
+        let-value
+      >
+        <div class="fuel-page__status-cell">
+          <po-tag
+            [p-value]="value.label"
+            [p-type]="value.type"
+          ></po-tag>
+          <small>{{ value.helper }}</small>
+        </div>
+      </ng-template>
+    </po-table>
+  </section>
+
+  <section class="fuel-page__pagination">
+    <small>{{ paginationSummary }}</small>
+
+    <div class="fuel-page__pagination-actions">
+      <po-button
+        p-label="Anterior"
+        [p-disabled]="!canGoBack"
+        (p-click)="previousPage()"
+      ></po-button>
+
+      <po-button
+        p-kind="primary"
+        p-label="Próxima"
+        [p-disabled]="!canGoForward"
+        (p-click)="nextPage()"
+      ></po-button>
+    </div>
+  </section>
+</po-page-list>
+
+<po-modal
+  #formModal
+  [p-title]="modalTitle"
+  [p-primary-action]="formPrimaryAction"
+  [p-secondary-action]="formSecondaryAction"
+>
+  <section class="fuel-page__modal">
+    <div class="fuel-page__modal-summary">
+      <span class="fuel-page__eyebrow">Prévia do lançamento</span>
+      <strong>{{ totalCostPreviewLabel }}</strong>
+      <p>{{ modalSubtitle }}</p>
+      <small>{{ selectedVehicleHelper }}</small>
+    </div>
+
+    <form
+      class="fuel-page__modal-form"
+      [formGroup]="form"
+      novalidate
+    >
+      <div class="fuel-page__modal-grid">
+        <div class="fuel-page__field">
+          <po-combo
+            formControlName="vehicleId"
+            name="vehicleId"
+            p-label="Veículo"
+            [p-options]="vehicleOptions"
+          ></po-combo>
+          @for (error of getControlErrors('vehicleId'); track error) {
+            <small class="fuel-page__error">{{ error }}</small>
+          }
+        </div>
+
+        <po-combo
+          formControlName="driverId"
+          name="driverId"
+          p-label="Motorista"
+          [p-options]="driverOptions"
+        ></po-combo>
+
+        <div class="fuel-page__field">
+          <po-datepicker
+            formControlName="date"
+            name="date"
+            p-label="Data"
+            p-format="dd/mm/yyyy"
+          ></po-datepicker>
+          @for (error of getControlErrors('date'); track error) {
+            <small class="fuel-page__error">{{ error }}</small>
+          }
+        </div>
+
+        <div class="fuel-page__field">
+          <po-number
+            formControlName="mileage"
+            name="mileage"
+            p-label="Quilometragem"
+            [p-min]="0"
+          ></po-number>
+          @for (error of getControlErrors('mileage'); track error) {
+            <small class="fuel-page__error">{{ error }}</small>
+          }
+        </div>
+
+        <div class="fuel-page__field">
+          <po-decimal
+            formControlName="liters"
+            name="liters"
+            p-label="Litros"
+            [p-decimals-length]="2"
+            [p-min]="0.01"
+          ></po-decimal>
+          @for (error of getControlErrors('liters'); track error) {
+            <small class="fuel-page__error">{{ error }}</small>
+          }
+        </div>
+
+        <div class="fuel-page__field">
+          <po-decimal
+            formControlName="pricePerLiter"
+            name="pricePerLiter"
+            p-label="Preço por litro"
+            [p-decimals-length]="3"
+            [p-min]="0.01"
+          ></po-decimal>
+          @for (error of getControlErrors('pricePerLiter'); track error) {
+            <small class="fuel-page__error">{{ error }}</small>
+          }
+        </div>
+
+        <div class="fuel-page__field">
+          <po-combo
+            formControlName="fuelType"
+            name="fuelType"
+            p-label="Combustível"
+            [p-options]="fuelTypeOptions"
+          ></po-combo>
+          @for (error of getControlErrors('fuelType'); track error) {
+            <small class="fuel-page__error">{{ error }}</small>
+          }
+        </div>
+
+        <po-select
+          formControlName="tankMode"
+          name="tankMode"
+          p-label="Tipo de abastecimento"
+          [p-options]="tankModeOptions"
+        ></po-select>
+
+        <po-input
+          formControlName="gasStation"
+          name="gasStation"
+          p-label="Posto"
+        ></po-input>
+
+        <div class="fuel-page__field">
+          <po-input
+            formControlName="receiptUrl"
+            name="receiptUrl"
+            p-label="URL do comprovante"
+          ></po-input>
+          @for (error of getControlErrors('receiptUrl'); track error) {
+            <small class="fuel-page__error">{{ error }}</small>
+          }
+        </div>
+      </div>
+
+      <po-divider p-label="Observações"></po-divider>
+
+      <po-textarea
+        formControlName="notes"
+        name="notes"
+        p-label="Notas"
+        [p-rows]="4"
+      ></po-textarea>
+    </form>
+  </section>
+</po-modal>
