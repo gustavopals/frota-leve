@@ -33,6 +33,10 @@ COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/packages/database/package.json ./packages/database/package.json
 COPY --from=builder /app/packages/database/dist ./packages/database/dist
+COPY --from=builder /app/packages/database/prisma ./packages/database/prisma
+COPY apps/api/docker/start-prod.sh ./apps/api/docker/start-prod.sh
+
+RUN chmod +x /app/apps/api/docker/start-prod.sh
 
 EXPOSE 3000
 
@@ -42,4 +46,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=5 \
 WORKDIR /app/apps/api
 USER node
 
-CMD ["node", "dist/server.js"]
+CMD ["/bin/sh", "/app/apps/api/docker/start-prod.sh"]
