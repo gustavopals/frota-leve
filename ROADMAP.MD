@@ -927,11 +927,11 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.4.1** — Migration: tabela `Fine` (id, tenantId, vehicleId, driverId?, date, autoNumber, location, description, severity, points, amount, discountAmount?, dueDate, status [PENDING, DRIVER_IDENTIFIED, APPEALED, PAID, PAYROLL_DEDUCTED], payrollDeduction, notes, fileUrl, createdAt)
-- [ ] **2.4.2** — Backend CRUD com fluxo de status
-- [ ] **2.4.3** — Backend: `POST /fines/import` — importação de planilha de multas
-- [ ] **2.4.4** — Backend: `GET /fines/stats` — total de multas por período, por motorista, por tipo, valor total
-- [ ] **2.4.5** — Frontend: listagem com filtros e ações de workflow (identificar condutor, registrar recurso, registrar pagamento)
+- [x] **2.4.1** — Migration: tabela `Fine` (id, tenantId, vehicleId, driverId?, date, autoNumber, location, description, severity, points, amount, discountAmount?, dueDate, status [PENDING, DRIVER_IDENTIFIED, APPEALED, PAID, PAYROLL_DEDUCTED], payrollDeduction, notes, fileUrl, createdAt)
+- [x] **2.4.2** — Backend CRUD com fluxo de status
+- [x] **2.4.3** — Backend: `POST /fines/import` — importação de planilha de multas
+- [x] **2.4.4** — Backend: `GET /fines/stats` — total de multas por período, por motorista, por tipo, valor total
+- [x] **2.4.5** — Frontend: listagem com filtros e ações de workflow (identificar condutor, registrar recurso, registrar pagamento)
 - [ ] **2.4.6** — Frontend: modal de identificação do condutor (selecionar motorista + data de entrega ao DETRAN)
 - [ ] **2.4.7** — Frontend: dashboard de multas (ranking de motoristas, tipos mais frequentes, custo acumulado)
 
@@ -941,7 +941,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.5.1** — Migration: tabelas `Tire` e `TireInspection`
+- [x] **2.5.1** — Migration: tabelas `Tire` e `TireInspection`
 
   ```
   Tire: id, tenantId, brand, model, size, serialNumber, dot, status (NEW, IN_USE, RETREADED, DISCARDED),
@@ -950,11 +950,11 @@ Uma task só está **pronta** quando:
   TireInspection: id, tireId, vehicleId, inspectedByUserId, date, grooveDepth, position, photos, notes, createdAt
   ```
 
-- [ ] **2.5.2** — Backend CRUD de pneus com ciclo de vida
-- [ ] **2.5.3** — Backend: registro de inspeção (sulcagem) com cálculo de desgaste
-- [ ] **2.5.4** — Backend: `PATCH /tires/:id/move` — movimentar pneu entre veículos/posições
-- [ ] **2.5.5** — Backend: alerta de troca quando sulco < limite configurável (ex: 3mm)
-- [ ] **2.5.6** — Backend: cálculo de custo por km rodado por pneu e comparativo entre marcas
+- [x] **2.5.2** — Backend CRUD de pneus com ciclo de vida
+- [x] **2.5.3** — Backend: registro de inspeção (sulcagem) com cálculo de desgaste
+- [x] **2.5.4** — Backend: `PATCH /tires/:id/move` — movimentar pneu entre veículos/posições
+- [x] **2.5.5** — Backend: alerta de troca quando sulco < limite configurável (ex: 3mm)
+- [x] **2.5.6** — Backend: cálculo de custo por km rodado por pneu e comparativo entre marcas
 - [ ] **2.5.7** — Frontend: mapa visual do veículo mostrando posição dos pneus (SVG interativo com eixos)
 - [ ] **2.5.8** — Frontend: histórico de inspeções com gráfico de desgaste ao longo do tempo
 - [ ] **2.5.9** — Gate de plano: middleware que bloqueia acesso ao módulo de pneus para plano ESSENTIAL

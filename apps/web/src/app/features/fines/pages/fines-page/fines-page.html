@@ -1,8 +1,151 @@
-<app-feature-placeholder
-  title="Multas"
-  subtitle="Gestao de infracoes e responsaveis"
-  eyebrow="Feature lazy"
-  description="Area inicial para registrar multas, anexos e trilha de responsabilizacao."
+<po-page-list
+  p-title="Multas e infrações"
+  p-subtitle="Gestão de autuações, identificação de condutores e registro de pagamentos."
+  [p-actions]="pageActions"
 >
-  <p>Multas - em construcao.</p>
-</app-feature-placeholder>
+  <!-- Input oculto para importação de planilha -->
+  <input
+    #importInput
+    type="file"
+    accept=".csv,.xls,.xlsx"
+    style="display:none"
+    (change)="onImportFileSelected($event)"
+  />
+
+  <!-- Filtros -->
+  <section class="fines-page__filters" [formGroup]="filtersForm">
+    <div class="fines-page__filter-row">
+      <po-input
+        class="fines-page__filter-field fines-page__filter-field--wide"
+        p-label="Buscar"
+        p-placeholder="Número do auto, descrição ou local..."
+        formControlName="search"
+        (p-change-model)="applyFilters()"
+      ></po-input>
+
+      <po-combo
+        class="fines-page__filter-field"
+        p-label="Status"
+        [p-options]="statusOptions"
+        formControlName="status"
+        (p-change)="applyFilters()"
+      ></po-combo>
+
+      <po-combo
+        class="fines-page__filter-field"
+        p-label="Gravidade"
+        [p-options]="severityOptions"
+        formControlName="severity"
+        (p-change)="applyFilters()"
+      ></po-combo>
+
+      <po-datepicker
+        class="fines-page__filter-field"
+        p-label="Data de"
+        formControlName="dateFrom"
+        (p-change-model)="applyFilters()"
+      ></po-datepicker>
+
+      <po-datepicker
+        class="fines-page__filter-field"
+        p-label="Data até"
+        formControlName="dateTo"
+        (p-change-model)="applyFilters()"
+      ></po-datepicker>
+
+      <po-button
+        class="fines-page__filter-clear"
+        p-kind="tertiary"
+        p-label="Limpar filtros"
+        p-icon="an an-x"
+        (p-click)="clearFilters()"
+      ></po-button>
+    </div>
+  </section>
+
+  <!-- Estado de carregamento inicial -->
+  @if (isLoading && !hasLoadedOnce) {
+    <section class="fines-page__state">
+      <po-loading-overlay [p-screen-lock]="false"></po-loading-overlay>
+      <p>Carregando multas...</p>
+    </section>
+  }
+
+  <!-- Tabela -->
+  @if (hasLoadedOnce) {
+    <section class="fines-page__table-section">
+      <po-table
+        [p-columns]="columns"
+        [p-items]="items"
+        [p-actions]="tableActions"
+        [p-loading]="isLoading"
+        [p-striped]="true"
+        [p-sort]="true"
+        [p-hide-detail]="true"
+      >
+        <!-- Coluna: Gravidade -->
+        <ng-template p-table-cell-template let-column="column" let-row="row">
+          @if (column.property === '_severityLabel') {
+            <po-tag [p-value]="row._severityLabel" [p-type]="row._severityTagType"></po-tag>
+          }
+          @if (column.property === '_amountLabel') {
+            <div class="fines-page__amount-cell">
+              <strong>{{ row._amountLabel }}</strong>
+              @if (row.discountAmount != null) {
+                <small class="fines-page__discount">desc. {{ row._discountLabel }}</small>
+              }
+            </div>
+          }
+          @if (column.property === '_dueDateLabel') {
+            <span [class.fines-page__overdue]="row._isOverdue">{{ row._dueDateLabel }}</span>
+          }
+          @if (column.property === '_statusLabel') {
+            <po-tag [p-value]="row._statusLabel" [p-type]="row._statusTagType"></po-tag>
+          }
+        </ng-template>
+      </po-table>
+
+      <!-- Paginação -->
+      @if (totalItems > 0) {
+        <footer class="fines-page__pagination">
+          <span class="fines-page__pagination-label">{{ paginationLabel }}</span>
+          <div class="fines-page__pagination-controls">
+            <po-button
+              p-kind="tertiary"
+              p-label="Anterior"
+              p-icon="an an-caret-left"
+              [p-disabled]="!hasPreviousPage || isLoading"
+              (p-click)="goToPreviousPage()"
+            ></po-button>
+            <span class="fines-page__pagination-page">{{ currentPage }} / {{ totalPages }}</span>
+            <po-button
+              p-kind="tertiary"
+              p-label="Próxima"
+              p-icon="an an-caret-right"
+              [p-disabled]="!hasNext || isLoading"
+              (p-click)="goToNextPage()"
+            ></po-button>
+          </div>
+        </footer>
+      }
+
+      @if (hasLoadedOnce && items.length === 0) {
+        <section class="fines-page__empty">
+          <h3>Nenhuma multa encontrada</h3>
+          <p>Tente ajustar os filtros ou importe uma planilha de autuações.</p>
+        </section>
+      }
+    </section>
+  }
+
+  @if (isImporting) {
+    <div class="fines-page__import-overlay">
+      <po-loading-overlay p-screen-lock="true" p-text="Importando planilha..."></po-loading-overlay>
+    </div>
+  }
+</po-page-list>
+
+<app-fine-identify-driver-modal
+  #identifyDriverModal
+  (identified)="reload()"
+></app-fine-identify-driver-modal>

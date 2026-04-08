@@ -6,6 +6,7 @@ import { env } from './config/env';
 import { logger } from './config/logger';
 import { documentAlertScheduler } from './modules/documents/document-alert.scheduler';
 import { maintenancePlanAlertScheduler } from './modules/maintenance/maintenance-plan-alert.scheduler';
+import { tireReplacementAlertScheduler } from './modules/tires/tire-replacement-alert.scheduler';
 
 const shutdownSignals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];
 const shutdownTimeoutMs = 10000;
@@ -42,6 +43,7 @@ function shutdown(signal: NodeJS.Signals): void {
 
     documentAlertScheduler.stop();
     maintenancePlanAlertScheduler.stop();
+    tireReplacementAlertScheduler.stop();
     logger.info('Servidor HTTP encerrado com sucesso.');
     process.exit(0);
   });
@@ -57,6 +59,7 @@ server.listen(env.PORT, () => {
 
   documentAlertScheduler.start();
   maintenancePlanAlertScheduler.start();
+  tireReplacementAlertScheduler.start();
 });
 
 for (const signal of shutdownSignals) {
