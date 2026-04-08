@@ -29,6 +29,7 @@ model Tenant {
   updatedAt            DateTime     @updatedAt @map("updated_at")
   users                User[]
   vehicles             Vehicle[]
+  drivers              Driver[]
 
   @@map("tenants")
   @@schema("public")
@@ -68,6 +69,7 @@ model User {
   updatedAt           DateTime             @updatedAt @map("updated_at")
   passwordResetTokens PasswordResetToken[]
   assignedVehicles    Vehicle[]            @relation("CurrentDriverVehicles")
+  driverProfile       Driver?
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -186,5 +188,38 @@ model AuditLog {
   @@index([tenantId])
   @@index([tenantId, entity])
   @@map("audit_logs")
+  @@schema("public")
+}
+
+model Driver {
+  id               String    @id @default(uuid()) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name             String
+  cpf              String
+  phone            String?
+  email            String?
+  birthDate        DateTime? @map("birth_date")
+  cnhNumber        String?   @map("cnh_number")
+  cnhCategory      String?   @map("cnh_category")
+  cnhExpiration    DateTime? @map("cnh_expiration")
+  cnhPoints        Int?      @default(0) @map("cnh_points")
+  emergencyContact String?   @map("emergency_contact")
+  emergencyPhone   String?   @map("emergency_phone")
+  department       String?
+  isActive         Boolean   @default(true) @map("is_active")
+  photoUrl         String?   @map("photo_url")
+  hireDate         DateTime? @map("hire_date")
+  score            Float?    @default(100)
+  notes            String?
+  userId           String?   @unique @map("user_id") @db.Uuid
+  user             User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@unique([tenantId, cpf])
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+  @@map("drivers")
   @@schema("public")
 }

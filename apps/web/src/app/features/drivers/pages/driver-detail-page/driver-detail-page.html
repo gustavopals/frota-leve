@@ -1,0 +1,247 @@
+@if (driver) {
+  <po-page-detail
+    [p-breadcrumb]="breadcrumb"
+    [p-title]="title"
+    [p-subtitle]="subtitle"
+    (p-back)="goBack()"
+    (p-edit)="editDriver()"
+  >
+    <section class="driver-detail-page__hero">
+      <div class="driver-detail-page__identity">
+        <span class="driver-detail-page__eyebrow">Operação dedicada</span>
+        <h2>{{ driver.name }}</h2>
+        <div class="driver-detail-page__identity-meta">
+          <po-tag
+            [p-value]="statusMeta.label"
+            [p-type]="statusMeta.type"
+          ></po-tag>
+          <po-tag
+            [p-value]="cnhMeta.label"
+            [p-type]="cnhMeta.type"
+          ></po-tag>
+          <span>{{ formatCpf(driver.cpf) }}</span>
+          <span>{{ driver.department ?? 'Sem departamento' }}</span>
+        </div>
+      </div>
+
+      <div class="driver-detail-page__hero-grid">
+        <po-widget p-title="Score atual">
+          <strong>{{ driver.score !== null && driver.score !== undefined ? driver.score.toFixed(1) : 'Sem score' }}</strong>
+          <small>{{ scoreMeta.label }}</small>
+        </po-widget>
+
+        <po-widget p-title="Pontos CNH">
+          <strong>{{ driver.cnhPoints ?? 0 }}</strong>
+          <small>{{ cnhMeta.helper }}</small>
+        </po-widget>
+
+        <po-widget p-title="Conta vinculada">
+          <strong>{{ driver.user ? driver.user.name : 'Sem usuário' }}</strong>
+          <small>{{ driver.user?.email ?? 'Vínculo necessário para definir condutor ativo.' }}</small>
+        </po-widget>
+      </div>
+    </section>
+
+    <po-tabs p-size="medium">
+      <po-tab
+        p-label="Dados"
+        [p-active]="true"
+      >
+        <section class="driver-detail-page__info-grid">
+          <po-info
+            p-label="CPF"
+            [p-value]="formatCpf(driver.cpf)"
+          ></po-info>
+          <po-info
+            p-label="Telefone"
+            [p-value]="formatPhone(driver.phone)"
+          ></po-info>
+          <po-info
+            p-label="E-mail"
+            [p-value]="driver.email ?? 'Não informado'"
+          ></po-info>
+          <po-info
+            p-label="Departamento"
+            [p-value]="driver.department ?? 'Não informado'"
+          ></po-info>
+          <po-info
+            p-label="Nascimento"
+            [p-value]="formatDate(driver.birthDate)"
+          ></po-info>
+          <po-info
+            p-label="Contratação"
+            [p-value]="formatDate(driver.hireDate)"
+          ></po-info>
+          <po-info
+            p-label="CNH"
+            [p-value]="driver.cnhNumber ?? 'Não informado'"
+          ></po-info>
+          <po-info
+            p-label="Categoria"
+            [p-value]="driver.cnhCategory ?? 'Não informada'"
+          ></po-info>
+          <po-info
+            p-label="Validade CNH"
+            [p-value]="formatDate(driver.cnhExpiration)"
+          ></po-info>
+          <po-info
+            p-label="Pontos CNH"
+            [p-value]="driver.cnhPoints !== null && driver.cnhPoints !== undefined ? driver.cnhPoints.toString() : '0'"
+          ></po-info>
+          <po-info
+            p-label="Contato emergência"
+            [p-value]="driver.emergencyContact ?? 'Não informado'"
+          ></po-info>
+          <po-info
+            p-label="Telefone emergência"
+            [p-value]="formatPhone(driver.emergencyPhone)"
+          ></po-info>
+          <po-info
+            p-label="Status"
+            [p-value]="statusMeta.label"
+          ></po-info>
+          <po-info
+            p-label="Usuário vinculado"
+            [p-value]="driver.user?.email ?? 'Nenhum usuário vinculado'"
+          ></po-info>
+          <po-info
+            p-label="Atualizado em"
+            [p-value]="formatDateTime(driver.updatedAt)"
+          ></po-info>
+        </section>
+
+        <po-divider p-label="Observações"></po-divider>
+
+        <section class="driver-detail-page__notes">
+          <p>{{ driver.notes ?? 'Sem observações registradas para este motorista.' }}</p>
+        </section>
+      </po-tab>
+
+      <po-tab p-label="Veículos Vinculados">
+        <section class="driver-detail-page__link-shell">
+          <div class="driver-detail-page__link-panel">
+            <span class="driver-detail-page__eyebrow">Vínculo operacional</span>
+            <h3>Defina o condutor ativo do veículo</h3>
+            <p>
+              O vínculo atual usa a conta de usuário do motorista para atualizar o condutor ativo
+              nos veículos.
+            </p>
+
+            @if (driver.userId) {
+              <form
+                class="driver-detail-page__link-form"
+                [formGroup]="linkForm"
+                novalidate
+              >
+                <po-combo
+                  formControlName="vehicleId"
+                  name="vehicleId"
+                  p-label="Selecionar veículo"
+                  [p-options]="vehicleOptions"
+                ></po-combo>
+
+                <po-button
+                  p-kind="primary"
+                  p-label="Vincular veículo"
+                  [p-disabled]="!canLinkVehicle"
+                  [p-loading]="isLinkingVehicle"
+                  (p-click)="linkVehicle()"
+                ></po-button>
+              </form>
+
+              <small>
+                {{ isLoadingVehicles ? 'Atualizando lista de veículos...' : 'Apenas veículos ainda não vinculados aparecem aqui.' }}
+              </small>
+            } @else {
+              <div class="driver-detail-page__placeholder">
+                <h3>Conta de usuário necessária</h3>
+                <p>
+                  Este motorista ainda não tem `userId` vinculado. O backend exige uma conta para
+                  marcá-lo como condutor ativo do veículo.
+                </p>
+              </div>
+            }
+          </div>
+
+          <div class="driver-detail-page__vehicle-grid">
+            @for (vehicle of driver.history.assignedVehicles; track vehicle.id) {
+              <article class="driver-detail-page__vehicle-card">
+                <strong>{{ formatVehicleLabel(vehicle) }}</strong>
+                <small>{{ vehicle.year }} • {{ formatVehicleStatus(vehicle.status) }}</small>
+              </article>
+            } @empty {
+              <div class="driver-detail-page__placeholder">
+                <h3>Nenhum veículo vinculado agora</h3>
+                <p>Assim que um veículo apontar para este condutor, ele aparece aqui.</p>
+              </div>
+            }
+          </div>
+        </section>
+      </po-tab>
+
+      <po-tab p-label="Multas">
+        <section class="driver-detail-page__placeholder">
+          <h3>Multas entram nesta ficha</h3>
+          <p>A estrutura da aba já está pronta para consolidar infrações e pontos por condutor.</p>
+        </section>
+      </po-tab>
+
+      <po-tab p-label="Sinistros">
+        <section class="driver-detail-page__placeholder">
+          <h3>Sinistros centralizados</h3>
+          <p>Ocorrências e histórico de incidentes serão exibidos aqui nas próximas tasks.</p>
+        </section>
+      </po-tab>
+
+      <po-tab p-label="Score">
+        <section class="driver-detail-page__score-grid">
+          <po-widget p-title="Faixa de score">
+            <strong>{{ scoreMeta.label }}</strong>
+            <small>{{ scoreMeta.helper }}</small>
+          </po-widget>
+
+          <po-widget p-title="Estado da CNH">
+            <strong>{{ cnhMeta.label }}</strong>
+            <small>{{ cnhMeta.helper }}</small>
+          </po-widget>
+
+          <po-widget p-title="Trilha auditada">
+            <strong>{{ driver.history.auditLog.length }}</strong>
+            <small>eventos registrados para este motorista</small>
+          </po-widget>
+        </section>
+
+        <po-divider p-label="Timeline operacional"></po-divider>
+
+        <section class="driver-detail-page__timeline">
+          @for (entry of driver.history.auditLog; track entry.id) {
+            <article class="driver-detail-page__timeline-item">
+              <header>
+                <strong>{{ getTimelineAction(entry.action) }}</strong>
+                <small>{{ formatDateTime(entry.createdAt) }}</small>
+              </header>
+
+              <p>{{ getTimelineSummary(entry) }}</p>
+
+              <footer>
+                <span>IP: {{ entry.ipAddress ?? 'Não informado' }}</span>
+                <span>Usuário: {{ entry.userId ?? 'Sistema' }}</span>
+              </footer>
+            </article>
+          } @empty {
+            <section class="driver-detail-page__placeholder">
+              <h3>Nenhum evento auditado ainda</h3>
+              <p>O histórico aparece conforme o perfil recebe alterações operacionais.</p>
+            </section>
+          }
+        </section>
+      </po-tab>
+    </po-tabs>
+  </po-page-detail>
+} @else {
+  <section class="driver-detail-page__loading">
+    <span class="driver-detail-page__eyebrow">Ficha do motorista</span>
+    <h2>{{ isLoading ? 'Carregando dados...' : 'Motorista não encontrado' }}</h2>
+    <p>Buscando a visão operacional completa do condutor solicitado.</p>
+  </section>
+}

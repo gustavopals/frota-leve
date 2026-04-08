@@ -15,7 +15,9 @@ import type {
   VehicleStatsResponse,
 } from './vehicles.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class VehiclesService {
   private readonly apiService = inject(ApiService);
   private readonly httpClient = inject(HttpClient);

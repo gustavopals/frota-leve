@@ -9,6 +9,7 @@ import { rateLimiter } from './middlewares/rate-limiter';
 import { authRouter } from './modules/auth/auth.routes';
 import { healthRouter } from './modules/health/health.routes';
 import { vehiclesRouter } from './modules/vehicles/vehicles.routes';
+import { driversRouter } from './modules/drivers/drivers.routes';
 import { logger } from './config/logger';
 import { env } from './config/env';
 import { NotFoundError } from './shared/errors';
@@ -54,6 +55,7 @@ export function createApp() {
   app.use('/api/v1/health', healthRouter);
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/vehicles', vehiclesRouter);
+  app.use('/api/v1/drivers', driversRouter);
 
   // TODO: demais rotas serão registradas aqui conforme as tasks avançam
 

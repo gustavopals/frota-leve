@@ -1,0 +1,144 @@
+:host {
+  display: block;
+}
+
+.driver-form-page {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 2.3fr) minmax(260px, 0.9fr);
+}
+
+.driver-form-page__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.driver-form-page__section {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(23, 49, 59, 0.08);
+  border-radius: 24px;
+  padding: 1rem 1.05rem;
+}
+
+.driver-form-page__section-head {
+  margin-bottom: 0.9rem;
+
+  h2 {
+    margin: 0.15rem 0 0;
+  }
+}
+
+.driver-form-page__eyebrow {
+  color: var(--fl-accent);
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.driver-form-page__grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.driver-form-page__grid--identity {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.driver-form-page__grid--operation {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.driver-form-page__grid--contact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.driver-form-page__field {
+  min-width: 0;
+}
+
+.driver-form-page__error {
+  color: #a93a2a;
+  display: block;
+  font-size: 0.76rem;
+  margin-top: 0.3rem;
+}
+
+.driver-form-page__aside {
+  display: grid;
+  gap: 1rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.driver-form-page__preview-name {
+  color: var(--fl-accent);
+  display: inline-block;
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  font-size: 1.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.driver-form-page__aside strong {
+  color: var(--fl-ink);
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.driver-form-page__aside small {
+  color: var(--fl-muted);
+}
+
+.driver-form-page__preview-cnh {
+  background: rgba(23, 49, 59, 0.04);
+  border-radius: 18px;
+  display: grid;
+  gap: 0.15rem;
+  margin-top: 0.85rem;
+  padding: 0.8rem 0.9rem;
+
+  span {
+    color: var(--fl-ink);
+    font-weight: 700;
+  }
+}
+
+.driver-form-page__photo-card {
+  margin: 0;
+
+  img {
+    border-radius: 18px;
+    display: block;
+    height: 220px;
+    object-fit: cover;
+    width: 100%;
+  }
+}
+
+.driver-form-page__checklist {
+  color: var(--fl-ink);
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+@media (max-width: 1100px) {
+  .driver-form-page {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-form-page__aside {
+    position: static;
+  }
+}
+
+@media (max-width: 820px) {
+  .driver-form-page__grid--identity,
+  .driver-form-page__grid--operation,
+  .driver-form-page__grid--contact {
+    grid-template-columns: 1fr;
+  }
+}
