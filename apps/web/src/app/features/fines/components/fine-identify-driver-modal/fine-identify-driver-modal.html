@@ -55,9 +55,9 @@
           formControlName="driverId"
           [p-options]="driverOptions"
           [p-loading]="isLoadingDrivers"
-          [p-filter-mode]="'contains'"
+          [p-filter-mode]="comboFilterMode.contains"
           (p-change)="onDriverSearch($event)"
-          p-required="true"
+          [p-required]="true"
         ></po-combo>
 
         <po-datepicker

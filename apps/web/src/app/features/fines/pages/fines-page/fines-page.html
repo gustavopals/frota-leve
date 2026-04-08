@@ -91,7 +91,7 @@
           @if (column.property === '_amountLabel') {
             <div class="fines-page__amount-cell">
               <strong>{{ row._amountLabel }}</strong>
-              @if (row.discountAmount != null) {
+              @if (row.discountAmount !== null && row.discountAmount !== undefined) {
                 <small class="fines-page__discount">desc. {{ row._discountLabel }}</small>
               }
             </div>
@@ -140,7 +140,10 @@
 
   @if (isImporting) {
     <div class="fines-page__import-overlay">
-      <po-loading-overlay p-screen-lock="true" p-text="Importando planilha..."></po-loading-overlay>
+      <po-loading-overlay
+        [p-screen-lock]="true"
+        p-text="Importando planilha..."
+      ></po-loading-overlay>
     </div>
   }
 </po-page-list>

@@ -9,7 +9,13 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FineStatus } from '@frota-leve/shared/src/enums/fine-status.enum';
 import type { PoComboOption, PoModalAction } from '@po-ui/ng-components';
-import { PoFieldModule, PoModalComponent, PoModalModule, PoTagModule } from '@po-ui/ng-components';
+import {
+  PoComboFilterMode,
+  PoFieldModule,
+  PoModalComponent,
+  PoModalModule,
+  PoTagModule,
+} from '@po-ui/ng-components';
 import { finalize } from 'rxjs';
 import { NotificationService } from '../../../../core/services/notification';
 import { FinesService } from '../../fines.service';
@@ -25,6 +31,7 @@ import { formatFineAmount, formatFineDate } from '../../fines.utils';
 })
 export class FineIdentifyDriverModal {
   readonly identified = output<void>();
+  protected readonly comboFilterMode = PoComboFilterMode;
 
   private readonly modal = viewChild.required<PoModalComponent>('identifyModal');
   private readonly formBuilder = inject(FormBuilder);
