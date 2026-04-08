@@ -1,6 +1,10 @@
 import { DocumentStatus } from '@frota-leve/shared/src/enums/document-status.enum';
 import { DocumentType } from '@frota-leve/shared/src/enums/document-type.enum';
 import type {
+  DocumentCalendarDay,
+  DocumentCalendarItem,
+  DocumentCalendarMonth,
+  DocumentCalendarWeek,
   DocumentPriorityItem,
   DocumentRecord,
   DocumentSemaphoreTone,
@@ -12,12 +16,6 @@ import type {
   PendingDocumentsResponse,
 } from './documents.types';
 
-const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-});
-
 const dateTimeFormatter = new Intl.DateTimeFormat('pt-BR', {
   day: '2-digit',
   month: '2-digit',
@@ -25,6 +23,27 @@ const dateTimeFormatter = new Intl.DateTimeFormat('pt-BR', {
   hour: '2-digit',
   minute: '2-digit',
 });
+
+const monthFormatter = new Intl.DateTimeFormat('pt-BR', {
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+const longDateFormatter = new Intl.DateTimeFormat('pt-BR', {
+  weekday: 'long',
+  day: '2-digit',
+  month: 'long',
+  timeZone: 'UTC',
+});
+
+const DOCUMENT_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})/;
+
+type DocumentDateParts = {
+  year: number;
+  month: number;
+  day: number;
+};
 
 const documentTypeLabels: Record<DocumentTypeValue, string> = {
   [DocumentType.IPVA]: 'IPVA',
@@ -56,6 +75,23 @@ const statusRank: Record<DocumentStatusType, number> = {
   [DocumentStatus.VALID]: 2,
 };
 
+const toneRank: Record<DocumentTone, number> = {
+  danger: 0,
+  warning: 1,
+  success: 2,
+  neutral: 3,
+};
+
+export const DOCUMENT_CALENDAR_WEEKDAY_LABELS = [
+  'Dom',
+  'Seg',
+  'Ter',
+  'Qua',
+  'Qui',
+  'Sex',
+  'Sab',
+] as const;
+
 export function createEmptyPendingDocumentsResponse(): PendingDocumentsResponse {
   return {
     generatedAt: '',
@@ -74,11 +110,13 @@ export function createEmptyPendingDocumentsResponse(): PendingDocumentsResponse 
 }
 
 export function formatDocumentDate(value: string | null | undefined): string {
-  if (!value) {
+  const parts = getDocumentDateParts(value);
+
+  if (!parts) {
     return 'Sem data';
   }
 
-  return dateFormatter.format(new Date(value));
+  return formatDocumentDateParts(parts);
 }
 
 export function formatDocumentDateTime(value: string | null | undefined): string {
@@ -87,6 +125,43 @@ export function formatDocumentDateTime(value: string | null | undefined): string
   }
 
   return dateTimeFormatter.format(new Date(value));
+}
+
+export function formatDocumentMonthLabel(value: string | Date): string {
+  const parts = getDocumentDateParts(value);
+
+  if (!parts) {
+    return '';
+  }
+
+  return capitalizeText(monthFormatter.format(createUtcDateFromParts(parts)));
+}
+
+export function formatDocumentLongDate(value: string | Date | null | undefined): string {
+  const parts = getDocumentDateParts(value);
+
+  if (!parts) {
+    return 'Sem data';
+  }
+
+  return capitalizeText(longDateFormatter.format(createUtcDateFromParts(parts)));
+}
+
+export function toIsoDateInputValue(value: string | Date | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === 'string') {
+    const parts = getDocumentDateParts(value);
+    return parts ? toDocumentDateKey(parts) : null;
+  }
+
+  if (Number.isNaN(value.getTime())) {
+    return null;
+  }
+
+  return value.toISOString().slice(0, 10);
 }
 
 export function getDocumentTypeLabel(type: DocumentTypeValue): string {
@@ -216,6 +291,124 @@ export function buildPriorityItems(
     });
 }
 
+export function startOfDocumentMonth(value: Date): Date {
+  return new Date(value.getFullYear(), value.getMonth(), 1);
+}
+
+export function shiftDocumentMonth(value: Date, amount: number): Date {
+  return new Date(value.getFullYear(), value.getMonth() + amount, 1);
+}
+
+export function getDocumentDateKey(value: string | Date | null | undefined): string {
+  const parts = getDocumentDateParts(value);
+  return parts ? toDocumentDateKey(parts) : '';
+}
+
+export function buildDocumentCalendarMonth(
+  documents: DocumentRecord[],
+  referenceDate: Date,
+  today = new Date(),
+): DocumentCalendarMonth {
+  const normalizedReferenceDate = startOfDocumentMonth(referenceDate);
+  const firstDayOfMonth = startOfDocumentMonth(normalizedReferenceDate);
+  const lastDayOfMonth = new Date(
+    normalizedReferenceDate.getFullYear(),
+    normalizedReferenceDate.getMonth() + 1,
+    0,
+  );
+  const calendarStart = new Date(
+    normalizedReferenceDate.getFullYear(),
+    normalizedReferenceDate.getMonth(),
+    1 - firstDayOfMonth.getDay(),
+  );
+  const calendarEnd = new Date(
+    normalizedReferenceDate.getFullYear(),
+    normalizedReferenceDate.getMonth() + 1,
+    lastDayOfMonth.getDate() + (6 - lastDayOfMonth.getDay()),
+  );
+  const itemsByDateKey = new Map<string, DocumentCalendarItem[]>();
+
+  for (const document of documents) {
+    const dateKey = getDocumentDateKey(document.expirationDate);
+
+    if (!dateKey) {
+      continue;
+    }
+
+    const items = itemsByDateKey.get(dateKey) ?? [];
+    items.push(toCalendarItem(document));
+    itemsByDateKey.set(dateKey, items);
+  }
+
+  const days: DocumentCalendarDay[] = [];
+  const todayKey = getDocumentDateKey(today);
+
+  for (
+    const cursor = new Date(calendarStart);
+    cursor.getTime() <= calendarEnd.getTime();
+    cursor.setDate(cursor.getDate() + 1)
+  ) {
+    const isoDate = getDocumentDateKey(cursor);
+    const items = [...(itemsByDateKey.get(isoDate) ?? [])].sort(compareCalendarItemsByPriority);
+
+    days.push({
+      dateKey: isoDate,
+      isoDate,
+      dayOfMonth: cursor.getDate(),
+      isCurrentMonth: cursor.getMonth() === normalizedReferenceDate.getMonth(),
+      isToday: isoDate === todayKey,
+      total: items.length,
+      tone: resolveCalendarDayTone(items),
+      items,
+    });
+  }
+
+  const weeks: DocumentCalendarWeek[] = [];
+
+  for (let index = 0; index < days.length; index += 7) {
+    weeks.push({
+      id: `week-${index / 7 + 1}`,
+      days: days.slice(index, index + 7),
+    });
+  }
+
+  const currentMonthItems = documents.filter((document) => {
+    const documentDate = getDocumentDateParts(document.expirationDate);
+
+    if (!documentDate) {
+      return false;
+    }
+
+    return (
+      documentDate.year === normalizedReferenceDate.getFullYear() &&
+      documentDate.month === normalizedReferenceDate.getMonth() + 1
+    );
+  });
+  const chronologicalMonthItems = [...currentMonthItems].sort((left, right) =>
+    compareDateStrings(left.expirationDate, right.expirationDate),
+  );
+
+  return {
+    monthKey: `${normalizedReferenceDate.getFullYear()}-${String(
+      normalizedReferenceDate.getMonth() + 1,
+    ).padStart(2, '0')}`,
+    monthLabel: formatDocumentMonthLabel(normalizedReferenceDate),
+    totalItems: currentMonthItems.length,
+    daysWithItems: new Set(
+      currentMonthItems.map((document) => getDocumentDateKey(document.expirationDate)),
+    ).size,
+    expiredItems: currentMonthItems.filter((document) => document.status === DocumentStatus.EXPIRED)
+      .length,
+    expiringItems: currentMonthItems.filter(
+      (document) => document.status === DocumentStatus.EXPIRING,
+    ).length,
+    firstDueDate: chronologicalMonthItems[0]?.expirationDate ?? null,
+    lastDueDate:
+      chronologicalMonthItems[chronologicalMonthItems.length - 1]?.expirationDate ?? null,
+    weeks,
+  };
+}
+
 function resolveSemaphoreTone(documents: DocumentRecord[]): DocumentSemaphoreTone {
   if (documents.some((item) => item.status === DocumentStatus.EXPIRED)) {
     return 'red';
@@ -287,22 +480,25 @@ function compareDocumentsByPriority(left: DocumentRecord, right: DocumentRecord)
 }
 
 function compareDateStrings(
-  left: string | null | undefined,
-  right: string | null | undefined,
+  left: string | Date | null | undefined,
+  right: string | Date | null | undefined,
 ): number {
-  if (!left && !right) {
+  const leftValue = getComparableDocumentDateValue(left);
+  const rightValue = getComparableDocumentDateValue(right);
+
+  if (leftValue == null && rightValue == null) {
     return 0;
   }
 
-  if (!left) {
+  if (leftValue == null) {
     return 1;
   }
 
-  if (!right) {
+  if (rightValue == null) {
     return -1;
   }
 
-  return new Date(left).getTime() - new Date(right).getTime();
+  return leftValue - rightValue;
 }
 
 function resolvePriorityBucketLabel(document: DocumentRecord): string {
@@ -335,4 +531,111 @@ function formatDeadlineLabel(daysUntilExpiration: number): string {
   }
 
   return `Vence em ${daysUntilExpiration} dias`;
+}
+
+function toCalendarItem(document: DocumentRecord): DocumentCalendarItem {
+  const statusMeta = getDocumentStatusMeta(document.status);
+
+  return {
+    id: document.id,
+    type: document.type,
+    typeLabel: getDocumentTypeLabel(document.type),
+    description: document.description,
+    expirationDate: document.expirationDate,
+    daysUntilExpiration: document.daysUntilExpiration,
+    status: document.status,
+    statusLabel: statusMeta.label,
+    tone: statusMeta.tone,
+    targetLabel: formatDocumentTargetLabel(document),
+  };
+}
+
+function compareCalendarItemsByPriority(
+  left: DocumentCalendarItem,
+  right: DocumentCalendarItem,
+): number {
+  return (
+    toneRank[left.tone] - toneRank[right.tone] ||
+    left.daysUntilExpiration - right.daysUntilExpiration ||
+    compareDateStrings(left.expirationDate, right.expirationDate) ||
+    left.description.localeCompare(right.description, 'pt-BR')
+  );
+}
+
+function resolveCalendarDayTone(items: DocumentCalendarItem[]): DocumentTone {
+  if (items.length === 0) {
+    return 'neutral';
+  }
+
+  return [...items].sort(compareCalendarItemsByPriority)[0]?.tone ?? 'neutral';
+}
+
+function capitalizeText(value: string): string {
+  if (!value) {
+    return value;
+  }
+
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function getDocumentDateParts(value: string | Date | null | undefined): DocumentDateParts | null {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === 'string') {
+    const match = DOCUMENT_DATE_PATTERN.exec(value);
+
+    if (match) {
+      return {
+        year: Number(match[1]),
+        month: Number(match[2]),
+        day: Number(match[3]),
+      };
+    }
+
+    const parsed = new Date(value);
+
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+
+    return {
+      year: parsed.getUTCFullYear(),
+      month: parsed.getUTCMonth() + 1,
+      day: parsed.getUTCDate(),
+    };
+  }
+
+  if (Number.isNaN(value.getTime())) {
+    return null;
+  }
+
+  return {
+    year: value.getFullYear(),
+    month: value.getMonth() + 1,
+    day: value.getDate(),
+  };
+}
+
+function formatDocumentDateParts(parts: DocumentDateParts): string {
+  return `${String(parts.day).padStart(2, '0')}/${String(parts.month).padStart(2, '0')}/${parts.year}`;
+}
+
+function createUtcDateFromParts(parts: DocumentDateParts): Date {
+  return new Date(Date.UTC(parts.year, parts.month - 1, parts.day));
+}
+
+function toDocumentDateKey(parts: DocumentDateParts): string {
+  return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`;
+}
+
+function getComparableDocumentDateValue(value: string | Date | null | undefined): number | null {
+  const parts = getDocumentDateParts(value);
+
+  if (!parts) {
+    return null;
+  }
+
+  return Date.UTC(parts.year, parts.month - 1, parts.day);
 }

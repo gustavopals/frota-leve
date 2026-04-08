@@ -1,14 +1,29 @@
 import { MaintenanceType } from '@frota-leve/shared/src/enums/maintenance-type.enum';
+import { ServiceOrderStatus } from '@frota-leve/shared/src/enums/os-status.enum';
 import type {
   MaintenancePlanRecord,
   MaintenancePlanVehicle,
   MaintenancePlanVisualStatus,
+  ServiceOrderRecord,
 } from './maintenance.types';
+
+const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+});
 
 const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
   day: '2-digit',
   month: '2-digit',
   year: 'numeric',
+});
+
+const dateTimeFormatter = new Intl.DateTimeFormat('pt-BR', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
 });
 
 const numberFormatter = new Intl.NumberFormat('pt-BR', {
@@ -18,12 +33,28 @@ const numberFormatter = new Intl.NumberFormat('pt-BR', {
 export const MAINTENANCE_UPCOMING_DAYS_THRESHOLD = 30;
 export const MAINTENANCE_UPCOMING_KM_THRESHOLD = 1000;
 
-export function formatMaintenanceDate(value: string | null): string {
+export function formatMaintenanceCurrency(value: number | null | undefined): string {
+  if (value == null) {
+    return 'Não informado';
+  }
+
+  return currencyFormatter.format(value);
+}
+
+export function formatMaintenanceDate(value: string | Date | null): string {
   if (!value) {
     return 'Sem data';
   }
 
   return dateFormatter.format(new Date(value));
+}
+
+export function formatMaintenanceDateTime(value: string | Date | null): string {
+  if (!value) {
+    return 'Sem data';
+  }
+
+  return dateTimeFormatter.format(new Date(value));
 }
 
 export function formatMaintenanceMileage(value: number | null): string {
@@ -44,6 +75,23 @@ export function formatMaintenanceType(type: MaintenanceType): string {
       return 'Preditiva';
     default:
       return type;
+  }
+}
+
+export function formatServiceOrderStatus(status: ServiceOrderStatus): string {
+  switch (status) {
+    case ServiceOrderStatus.OPEN:
+      return 'Aberta';
+    case ServiceOrderStatus.APPROVED:
+      return 'Aprovada';
+    case ServiceOrderStatus.IN_PROGRESS:
+      return 'Em execução';
+    case ServiceOrderStatus.COMPLETED:
+      return 'Concluída';
+    case ServiceOrderStatus.CANCELLED:
+      return 'Cancelada';
+    default:
+      return status;
   }
 }
 
@@ -81,6 +129,76 @@ export function formatLastExecution(
   }
 
   return parts.length > 0 ? `Última execução: ${parts.join(' • ')}` : 'Sem histórico de execução';
+}
+
+export function formatServiceOrderTimeline(order: ServiceOrderRecord): {
+  primary: string;
+  secondary: string;
+} {
+  const primary = `Criada em ${formatMaintenanceDateTime(order.createdAt)}`;
+
+  if (order.status === ServiceOrderStatus.COMPLETED && order.endDate) {
+    return {
+      primary,
+      secondary: `Concluída em ${formatMaintenanceDateTime(order.endDate)}`,
+    };
+  }
+
+  if (order.status === ServiceOrderStatus.IN_PROGRESS && order.startDate) {
+    return {
+      primary,
+      secondary: `Iniciada em ${formatMaintenanceDateTime(order.startDate)}`,
+    };
+  }
+
+  if (order.status === ServiceOrderStatus.APPROVED) {
+    return {
+      primary,
+      secondary: 'Aguardando início da execução',
+    };
+  }
+
+  if (order.status === ServiceOrderStatus.CANCELLED) {
+    return {
+      primary,
+      secondary: 'Fluxo encerrado sem execução',
+    };
+  }
+
+  return {
+    primary,
+    secondary: 'Aguardando aprovação',
+  };
+}
+
+export function formatServiceOrderCostHelper(
+  order: Pick<ServiceOrderRecord, 'laborCost' | 'partsCost' | 'items'>,
+): string {
+  const breakdown = [
+    `Mão de obra ${formatMaintenanceCurrency(order.laborCost ?? 0)}`,
+    `Peças ${formatMaintenanceCurrency(order.partsCost ?? 0)}`,
+  ];
+
+  if (order.items.length > 0) {
+    breakdown.push(`${order.items.length} item(ns)`);
+  }
+
+  return breakdown.join(' • ');
+}
+
+export function formatServiceOrderContext(
+  order: Pick<ServiceOrderRecord, 'plan' | 'driver' | 'createdByUser'>,
+): string {
+  const parts = [
+    order.plan?.name ? `Plano: ${order.plan.name}` : 'Sem plano vinculado',
+    order.driver?.name ? `Motorista: ${order.driver.name}` : 'Motorista não informado',
+  ];
+
+  if (order.createdByUser?.name) {
+    parts.push(`Criada por ${order.createdByUser.name}`);
+  }
+
+  return parts.join(' • ');
 }
 
 export function getRemainingDays(

@@ -155,8 +155,6 @@ npm run db:reset
 npm run db:studio
 ```
 
-O `docker-compose.yml` também expõe um `pgadmin` opcional via profile `pgadmin`.
-
 ## Produção
 
 Os artefatos de produção estão versionados e prontos para uso:

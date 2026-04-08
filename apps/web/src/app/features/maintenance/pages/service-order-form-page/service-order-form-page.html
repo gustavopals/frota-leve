@@ -1,0 +1,412 @@
+<po-page-edit
+  [p-breadcrumb]="breadcrumb"
+  [p-title]="title"
+  [p-subtitle]="subtitle"
+  [p-disable-submit]="!canSave"
+  (p-cancel)="cancel()"
+  (p-save)="save()"
+  (p-save-new)="saveAndCreateNew()"
+>
+  <section class="service-order-form-page">
+    <div class="service-order-form-page__main">
+      <form class="service-order-form-page__form" [formGroup]="form" novalidate>
+        <section class="service-order-form-page__section">
+          <div class="service-order-form-page__section-head">
+            <span class="service-order-form-page__eyebrow">Cadastro essencial</span>
+            <h2>Contexto da ordem</h2>
+          </div>
+
+          <div class="service-order-form-page__grid service-order-form-page__grid--identity">
+            <div class="service-order-form-page__field">
+              <po-combo
+                formControlName="vehicleId"
+                name="vehicleId"
+                p-label="Veículo"
+                p-placeholder="Selecione um veículo"
+                [p-options]="vehicleOptions"
+              ></po-combo>
+              @for (error of getControlErrors('vehicleId'); track error) {
+                <small class="service-order-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <po-combo
+              formControlName="driverId"
+              name="driverId"
+              p-label="Motorista"
+              p-placeholder="Selecione um motorista"
+              [p-options]="driverOptions"
+            ></po-combo>
+
+            <po-combo
+              formControlName="planId"
+              name="planId"
+              p-label="Plano vinculado"
+              p-placeholder="Opcional"
+              [p-options]="filteredPlanOptions"
+            ></po-combo>
+
+            <div class="service-order-form-page__field">
+              <po-combo
+                formControlName="type"
+                name="type"
+                p-label="Tipo"
+                [p-options]="typeOptions"
+                [p-disabled]="isTypeLockedByPlan"
+              ></po-combo>
+              @for (error of getControlErrors('type'); track error) {
+                <small class="service-order-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="service-order-form-page__field service-order-form-page__field--wide">
+              <po-input
+                formControlName="description"
+                name="description"
+                p-label="Descrição da OS"
+                p-placeholder="Ex: troca de kit de embreagem e revisão da suspensão dianteira"
+              ></po-input>
+              @for (error of getControlErrors('description'); track error) {
+                <small class="service-order-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="service-order-form-page__field service-order-form-page__field--wide">
+              <po-input
+                formControlName="workshop"
+                name="workshop"
+                p-label="Oficina / fornecedor"
+                p-placeholder="Ex: Oficina Centro Diesel"
+              ></po-input>
+              @for (error of getControlErrors('workshop'); track error) {
+                <small class="service-order-form-page__error">{{ error }}</small>
+              }
+            </div>
+          </div>
+        </section>
+
+        <po-divider p-label="Itens e peças"></po-divider>
+
+        <section class="service-order-form-page__section">
+          <div
+            class="service-order-form-page__section-head service-order-form-page__section-head--inline"
+          >
+            <div>
+              <span class="service-order-form-page__eyebrow">Peças lançadas</span>
+              <h2>Itens dinâmicos da OS</h2>
+            </div>
+
+            <po-button p-kind="primary" p-label="Adicionar item" (p-click)="addItem()"></po-button>
+          </div>
+
+          <div class="service-order-form-page__items" formArrayName="items">
+            @for (item of itemControls; track item; let i = $index) {
+              <article class="service-order-form-page__item-card" [formGroupName]="i">
+                <div class="service-order-form-page__item-grid">
+                  <div class="service-order-form-page__field service-order-form-page__field--wide">
+                    <po-input
+                      formControlName="description"
+                      name="item-description-{{ i }}"
+                      p-label="Descrição do item"
+                      p-placeholder="Ex: kit de embreagem"
+                    ></po-input>
+                    @for (error of getItemControlErrors(i, 'description'); track error) {
+                      <small class="service-order-form-page__error">{{ error }}</small>
+                    }
+                  </div>
+
+                  <div class="service-order-form-page__field">
+                    <po-number
+                      formControlName="quantity"
+                      name="item-quantity-{{ i }}"
+                      p-label="Quantidade"
+                      [p-min]="0.01"
+                    ></po-number>
+                    @for (error of getItemControlErrors(i, 'quantity'); track error) {
+                      <small class="service-order-form-page__error">{{ error }}</small>
+                    }
+                  </div>
+
+                  <div class="service-order-form-page__field">
+                    <po-decimal
+                      formControlName="unitCost"
+                      name="item-unit-cost-{{ i }}"
+                      p-label="Custo unitário"
+                      [p-min]="0"
+                      [p-decimals-length]="2"
+                    ></po-decimal>
+                    @for (error of getItemControlErrors(i, 'unitCost'); track error) {
+                      <small class="service-order-form-page__error">{{ error }}</small>
+                    }
+                  </div>
+
+                  <po-input
+                    formControlName="partNumber"
+                    name="item-part-number-{{ i }}"
+                    p-label="Part number"
+                    p-placeholder="Opcional"
+                  ></po-input>
+                </div>
+
+                <div class="service-order-form-page__item-footer">
+                  <div>
+                    <strong>{{ getItemTotalLabel(i) }}</strong>
+                    <small>Total calculado automaticamente para o item.</small>
+                  </div>
+
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Remover"
+                    (p-click)="removeItem(i)"
+                  ></po-button>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+
+        <po-divider p-label="Anexos e custo"></po-divider>
+
+        <section class="service-order-form-page__section">
+          <div class="service-order-form-page__attachments-grid">
+            <section class="service-order-form-page__attachment-column">
+              <div
+                class="service-order-form-page__section-head service-order-form-page__section-head--compact"
+              >
+                <div>
+                  <span class="service-order-form-page__eyebrow">Fluxo fotográfico</span>
+                  <h2>Fotos da OS</h2>
+                </div>
+              </div>
+
+              <po-upload
+                name="service-order-photos"
+                p-label="Enviar fotos"
+                p-help="Adicione imagens da entrada, execução ou conclusão do serviço."
+                [ngModel]="photoUploadFiles"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="handlePhotoFilesChange($event)"
+                [p-restrictions]="photoRestrictions"
+                [p-drag-drop]="true"
+                [p-hide-send-button]="true"
+                [p-required-url]="false"
+              ></po-upload>
+
+              <div class="service-order-form-page__attachment-actions">
+                @if (canRestorePhotos) {
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Restaurar fotos originais"
+                    (p-click)="restoreInitialPhotos()"
+                  ></po-button>
+                }
+              </div>
+
+              @if (isReadingPhotos) {
+                <p class="service-order-form-page__hint">
+                  Processando as fotos selecionadas para anexar na OS...
+                </p>
+              }
+
+              <div class="service-order-form-page__photo-grid">
+                @for (photo of photoAttachments; track photo.url; let i = $index) {
+                  <figure class="service-order-form-page__photo-card">
+                    <img [src]="photo.url" [alt]="photo.name" />
+                    <figcaption>
+                      <strong>{{ photo.name }}</strong>
+                      <small>
+                        {{ photo.source === 'uploaded' ? 'Upload local' : 'Anexo persistido' }}
+                      </small>
+                    </figcaption>
+                    <div class="service-order-form-page__photo-actions">
+                      <po-button
+                        p-kind="tertiary"
+                        p-label="Abrir"
+                        (p-click)="openPhoto(photo.url)"
+                      ></po-button>
+                      <po-button
+                        p-kind="tertiary"
+                        p-label="Remover"
+                        (p-click)="removePhoto(i)"
+                      ></po-button>
+                    </div>
+                  </figure>
+                } @empty {
+                  <section
+                    class="service-order-form-page__empty-state service-order-form-page__empty-state--inline"
+                  >
+                    <h3>Nenhuma foto preparada</h3>
+                    <p>As imagens da execução, peças e avarias ficam reunidas aqui.</p>
+                  </section>
+                }
+              </div>
+            </section>
+
+            <section class="service-order-form-page__attachment-column">
+              <div
+                class="service-order-form-page__section-head service-order-form-page__section-head--compact"
+              >
+                <div>
+                  <span class="service-order-form-page__eyebrow">Comprovação</span>
+                  <h2>Nota fiscal</h2>
+                </div>
+              </div>
+
+              <po-upload
+                name="service-order-invoice"
+                p-label="Enviar NF"
+                p-help="PDF ou imagem da nota fiscal do serviço ou das peças utilizadas."
+                [ngModel]="invoiceUploadFiles"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="handleInvoiceFilesChange($event)"
+                [p-restrictions]="invoiceRestrictions"
+                [p-drag-drop]="true"
+                [p-hide-send-button]="true"
+                [p-required-url]="false"
+              ></po-upload>
+
+              <div class="service-order-form-page__attachment-actions">
+                @if (hasInvoice) {
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Abrir NF"
+                    (p-click)="openInvoice()"
+                  ></po-button>
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Remover NF"
+                    (p-click)="clearInvoice()"
+                  ></po-button>
+                }
+
+                @if (canRestoreInvoice) {
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Restaurar NF original"
+                    (p-click)="restoreInitialInvoice()"
+                  ></po-button>
+                }
+              </div>
+
+              @if (isReadingInvoice) {
+                <p class="service-order-form-page__hint">
+                  Processando a nota fiscal selecionada para anexar na OS...
+                </p>
+              }
+
+              @if (hasInvoice) {
+                @if (showInvoiceImagePreview) {
+                  <figure
+                    class="service-order-form-page__invoice-card service-order-form-page__invoice-card--image"
+                  >
+                    <img [src]="currentInvoiceUrl" [alt]="invoiceAttachmentName" />
+                    <figcaption>
+                      <strong>{{ invoiceAttachmentName }}</strong>
+                      <small>{{ invoiceAttachmentHelper }}</small>
+                    </figcaption>
+                  </figure>
+                } @else {
+                  <section class="service-order-form-page__invoice-card">
+                    <span class="service-order-form-page__invoice-icon">NF</span>
+                    <div>
+                      <strong>{{ invoiceAttachmentName }}</strong>
+                      <small>{{ invoiceAttachmentHelper }}</small>
+                    </div>
+                  </section>
+                }
+              } @else {
+                <section
+                  class="service-order-form-page__empty-state service-order-form-page__empty-state--inline"
+                >
+                  <h3>Sem nota fiscal</h3>
+                  <p>Use o upload local para manter a comprovação financeira junto da OS.</p>
+                </section>
+              }
+            </section>
+          </div>
+
+          <div class="service-order-form-page__grid service-order-form-page__grid--costs">
+            <div class="service-order-form-page__field">
+              <po-decimal
+                formControlName="laborCost"
+                name="laborCost"
+                p-label="Mão de obra"
+                [p-min]="0"
+                [p-decimals-length]="2"
+              ></po-decimal>
+              @for (error of getControlErrors('laborCost'); track error) {
+                <small class="service-order-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <po-textarea
+              formControlName="notes"
+              name="notes"
+              p-label="Observações"
+              [p-rows]="4"
+            ></po-textarea>
+          </div>
+        </section>
+      </form>
+    </div>
+
+    <aside class="service-order-form-page__aside">
+      <po-widget p-title="Prévia rápida">
+        <span class="service-order-form-page__preview-type">{{ currentTypeLabel }}</span>
+        <strong>{{ previewVehicleLabel }}</strong>
+        <small>{{ previewDriverLabel }}</small>
+        <div class="service-order-form-page__preview-meta">
+          <span>{{ previewPlanLabel }}</span>
+          <small>Status atual: {{ currentStatusLabel }}</small>
+        </div>
+      </po-widget>
+
+      <po-widget p-title="Custo consolidado">
+        <div class="service-order-form-page__summary-list">
+          <article>
+            <strong>{{ partsCostLabel }}</strong>
+            <small>Peças e itens</small>
+          </article>
+
+          <article>
+            <strong>{{ laborCostLabel }}</strong>
+            <small>Mão de obra</small>
+          </article>
+
+          <article>
+            <strong>{{ totalCostLabel }}</strong>
+            <small>Total da OS</small>
+          </article>
+        </div>
+      </po-widget>
+
+      <po-widget p-title="Checklist">
+        <ul class="service-order-form-page__checklist">
+          <li>Itens calculam o custo de peças automaticamente.</li>
+          <li>Selecionar um plano trava o tipo da OS para manter coerência.</li>
+          <li>Fotos e NF ficam anexadas no próprio registro da ordem.</li>
+          <li>O workflow continua sendo controlado na listagem operacional.</li>
+        </ul>
+      </po-widget>
+
+      <po-widget p-title="Volume lançado">
+        <div class="service-order-form-page__summary-list">
+          <article>
+            <strong>{{ totalItems }}</strong>
+            <small>itens cadastrados</small>
+          </article>
+
+          <article>
+            <strong>{{ totalPhotos }}</strong>
+            <small>fotos anexadas</small>
+          </article>
+
+          <article>
+            <strong>{{ hasInvoice ? '1' : '0' }}</strong>
+            <small>nota fiscal</small>
+          </article>
+        </div>
+      </po-widget>
+    </aside>
+  </section>
+</po-page-edit>

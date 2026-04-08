@@ -58,6 +58,7 @@ const serviceOrderBaseSchema = z.object({
   partsCost: optionalCoercedNonNegativeNumber(),
   notes: optionalTrimmedString(4000),
   photos: z.array(z.string().url('URL de foto inválida')).max(10).optional(),
+  invoiceUrl: z.string().url('URL da nota fiscal inválida').optional().nullable(),
   items: z.array(serviceOrderItemSchema).max(50).default([]),
 });
 

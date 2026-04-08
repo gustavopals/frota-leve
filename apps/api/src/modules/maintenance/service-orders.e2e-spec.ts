@@ -75,6 +75,7 @@ type MockServiceOrder = {
   partsCost: number | null;
   notes: string | null;
   photos: string[];
+  invoiceUrl: string | null;
   approvedByUserId: string | null;
   createdByUserId: string | null;
   createdAt: Date;
@@ -218,6 +219,7 @@ const SERVICE_ORDER: MockServiceOrder = {
   partsCost: 80,
   notes: 'Prioridade alta',
   photos: ['https://example.com/photo-1.jpg'],
+  invoiceUrl: null,
   approvedByUserId: null,
   createdByUserId: OWNER.id,
   createdAt: new Date('2026-04-08T10:00:00.000Z'),
@@ -309,25 +311,23 @@ describe('ServiceOrders E2E', () => {
   it('POST /maintenance/service-orders creates a service order', async () => {
     const txMock: MockTransactionClient = {
       serviceOrder: {
-        create: jest
-          .fn()
-          .mockImplementation(
-            (args: {
-              data: {
-                totalCost: number;
-                partsCost: number;
-                laborCost: number;
-                createdByUserId: string | null;
-              };
-            }) =>
-              Promise.resolve({
-                ...SERVICE_ORDER,
-                totalCost: args.data.totalCost,
-                partsCost: args.data.partsCost,
-                laborCost: args.data.laborCost,
-                createdByUserId: args.data.createdByUserId,
-              }),
-          ),
+        create: jest.fn().mockImplementation(
+          (args: {
+            data: {
+              totalCost: number;
+              partsCost: number;
+              laborCost: number;
+              createdByUserId: string | null;
+            };
+          }) =>
+            Promise.resolve({
+              ...SERVICE_ORDER,
+              totalCost: args.data.totalCost,
+              partsCost: args.data.partsCost,
+              laborCost: args.data.laborCost,
+              createdByUserId: args.data.createdByUserId,
+            }),
+        ),
         update: jest.fn(),
         delete: jest.fn(),
       },

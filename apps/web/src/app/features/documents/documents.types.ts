@@ -81,6 +81,38 @@ export type PendingDocumentsFilters = {
   driverId?: string;
 };
 
+export type DocumentDetail = DocumentRecord;
+
+export type DocumentFormPayload = {
+  vehicleId?: string | null;
+  driverId?: string | null;
+  type: DocumentType;
+  description: string;
+  expirationDate: string;
+  alertDaysBefore: number;
+  cost?: number | null;
+  fileUrl: string;
+  notes?: string | null;
+};
+
+export type DocumentVehicleOption = {
+  id: string;
+  label: string;
+  plate: string;
+  brand: string;
+  model: string;
+  status: string;
+};
+
+export type DocumentDriverOption = {
+  id: string;
+  label: string;
+  name: string;
+  cpf: string;
+  cnhNumber: string | null;
+  isActive: boolean;
+};
+
 export type DocumentTone = 'success' | 'warning' | 'danger' | 'neutral';
 
 export type DocumentSemaphoreTone = 'green' | 'yellow' | 'red';
@@ -113,4 +145,45 @@ export type DocumentPriorityItem = {
   targetLabel: string;
   bucketLabel: string;
   deadlineLabel: string;
+};
+
+export type DocumentCalendarItem = {
+  id: string;
+  type: DocumentType;
+  typeLabel: string;
+  description: string;
+  expirationDate: string;
+  daysUntilExpiration: number;
+  status: DocumentStatus;
+  statusLabel: string;
+  tone: DocumentTone;
+  targetLabel: string;
+};
+
+export type DocumentCalendarDay = {
+  dateKey: string;
+  isoDate: string;
+  dayOfMonth: number;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  total: number;
+  tone: DocumentTone;
+  items: DocumentCalendarItem[];
+};
+
+export type DocumentCalendarWeek = {
+  id: string;
+  days: DocumentCalendarDay[];
+};
+
+export type DocumentCalendarMonth = {
+  monthKey: string;
+  monthLabel: string;
+  totalItems: number;
+  daysWithItems: number;
+  expiredItems: number;
+  expiringItems: number;
+  firstDueDate: string | null;
+  lastDueDate: string | null;
+  weeks: DocumentCalendarWeek[];
 };

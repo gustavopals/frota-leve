@@ -902,10 +902,10 @@ Uma task só está **pronta** quando:
 - [x] **2.2.6** — Backend: cálculo de MTTR e MTBF por veículo
 - [x] **2.2.7** — Backend: `GET /maintenance/stats` — custos de manutenção por período, por veículo, preventiva vs corretiva
 - [x] **2.2.8** — Frontend: listagem de planos de manutenção com status visual (verde=em dia, amarelo=próximo, vermelho=vencido)
-- [ ] **2.2.9** — Frontend: listagem de ordens de serviço com filtros (status, veículo, período)
-- [ ] **2.2.10** — Frontend: formulário de OS com adição dinâmica de itens/peças, upload de fotos e NF
-- [ ] **2.2.11** — Frontend: workflow visual de aprovação (botões de ação conforme status atual e role do usuário)
-- [ ] **2.2.12** — Frontend: dashboard de manutenção (custos, OS abertas vs fechadas, veículos parados)
+- [x] **2.2.9** — Frontend: listagem de ordens de serviço com filtros (status, veículo, período)
+- [x] **2.2.10** — Frontend: formulário de OS com adição dinâmica de itens/peças, upload de fotos e NF
+- [x] **2.2.11** — Frontend: workflow visual de aprovação (botões de ação conforme status atual e role do usuário)
+- [x] **2.2.12** — Frontend: dashboard de manutenção (custos, OS abertas vs fechadas, veículos parados)
 
 ---
 
@@ -913,13 +913,13 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.3.1** — Migration: tabela `Document` (id, tenantId, vehicleId?, driverId?, type, description, expirationDate, alertDaysBefore, cost?, fileUrl, status, notes, createdAt)
-- [ ] **2.3.2** — Backend CRUD com filtros por tipo, veículo, motorista, status (vigente, vencido, próximo)
-- [ ] **2.3.3** — Backend: job diário para verificar vencimentos e gerar alertas (notificação + painel)
-- [ ] **2.3.4** — Backend: `GET /documents/pending` — documentos que vencem nos próximos 30/60/90 dias
-- [ ] **2.3.5** — Frontend: painel de documentos com cards por tipo e visual de semáforo (verde/amarelo/vermelho)
-- [ ] **2.3.6** — Frontend: formulário com upload de arquivo e configuração de alerta
-- [ ] **2.3.7** — Frontend: calendário de vencimentos (view mensal)
+- [x] **2.3.1** — Migration: tabela `Document` (id, tenantId, vehicleId?, driverId?, type, description, expirationDate, alertDaysBefore, cost?, fileUrl, status, notes, createdAt)
+- [x] **2.3.2** — Backend CRUD com filtros por tipo, veículo, motorista, status (vigente, vencido, próximo)
+- [x] **2.3.3** — Backend: job diário para verificar vencimentos e gerar alertas (notificação + painel)
+- [x] **2.3.4** — Backend: `GET /documents/pending` — documentos que vencem nos próximos 30/60/90 dias
+- [x] **2.3.5** — Frontend: painel de documentos com cards por tipo e visual de semáforo (verde/amarelo/vermelho)
+- [x] **2.3.6** — Frontend: formulário com upload de arquivo e configuração de alerta
+- [x] **2.3.7** — Frontend: calendário de vencimentos (view mensal)
 
 ---
 

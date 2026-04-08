@@ -391,6 +391,7 @@ model ServiceOrder {
   partsCost        Float?             @map("parts_cost")
   notes            String?
   photos           Json?
+  invoiceUrl       String?            @map("invoice_url")
   approvedByUserId String?            @map("approved_by_user_id") @db.Uuid
   approvedByUser   User?              @relation("ApprovedByUserServiceOrders", fields: [approvedByUserId], references: [id], onDelete: SetNull)
   createdByUserId  String?            @map("created_by_user_id") @db.Uuid
