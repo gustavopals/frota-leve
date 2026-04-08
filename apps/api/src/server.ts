@@ -4,6 +4,8 @@ import './config/load-env';
 import { createApp } from './app';
 import { env } from './config/env';
 import { logger } from './config/logger';
+import { documentAlertScheduler } from './modules/documents/document-alert.scheduler';
+import { maintenancePlanAlertScheduler } from './modules/maintenance/maintenance-plan-alert.scheduler';
 
 const shutdownSignals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];
 const shutdownTimeoutMs = 10000;
@@ -38,6 +40,8 @@ function shutdown(signal: NodeJS.Signals): void {
       return;
     }
 
+    documentAlertScheduler.stop();
+    maintenancePlanAlertScheduler.stop();
     logger.info('Servidor HTTP encerrado com sucesso.');
     process.exit(0);
   });
@@ -50,6 +54,9 @@ server.listen(env.PORT, () => {
     port: address?.port ?? env.PORT,
     environment: env.NODE_ENV,
   });
+
+  documentAlertScheduler.start();
+  maintenancePlanAlertScheduler.start();
 });
 
 for (const signal of shutdownSignals) {

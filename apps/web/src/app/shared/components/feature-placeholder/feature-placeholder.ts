@@ -1,14 +1,15 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
+import { PoPageModule, PoWidgetModule } from '@po-ui/ng-components';
 
 @Component({
   selector: 'app-feature-placeholder',
-  standalone: false,
+  imports: [PoPageModule, PoWidgetModule],
   templateUrl: './feature-placeholder.html',
   styleUrl: './feature-placeholder.scss',
 })
 export class FeaturePlaceholder {
-  @Input({ required: true }) title = '';
-  @Input() subtitle = '';
-  @Input() description = '';
-  @Input() eyebrow = 'Setup base';
+  readonly title = input.required<string>();
+  readonly subtitle = input('');
+  readonly description = input('');
+  readonly eyebrow = input('Setup base');
 }

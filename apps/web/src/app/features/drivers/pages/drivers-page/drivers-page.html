@@ -1,8 +1,194 @@
-<app-feature-placeholder
-  title="Motoristas"
-  subtitle="Cadastro, status e documentos de condutores"
-  eyebrow="Feature lazy"
-  description="Estrutura pronta para receber listagem, vinculos e validacoes do time de motoristas."
+<po-page-list
+  p-title="Motoristas e condutores"
+  p-subtitle="Listagem operacional com foco em CNH, score, status e acesso rápido à ficha do motorista."
+  [p-breadcrumb]="breadcrumb"
+  [p-actions]="pageActions"
+  p-components-size="medium"
 >
-  <p>Motoristas - em construcao.</p>
-</app-feature-placeholder>
+  <section class="drivers-page__metrics">
+    <po-widget
+      p-title="Base cadastrada"
+      class="drivers-page__metric"
+    >
+      <strong>{{ totalDrivers }}</strong>
+      <span>motoristas encontrados</span>
+    </po-widget>
+
+    <po-widget
+      p-title="Ativos"
+      class="drivers-page__metric"
+    >
+      <strong>{{ activeDriversCount }}</strong>
+      <span>na página atual</span>
+    </po-widget>
+
+    <po-widget
+      p-title="CNHs críticas"
+      class="drivers-page__metric"
+    >
+      <strong>{{ criticalCnhCount }}</strong>
+      <span>vencidas ou próximas</span>
+    </po-widget>
+
+    <po-widget
+      p-title="Score médio"
+      class="drivers-page__metric"
+    >
+      <strong>{{ averageScore }}</strong>
+      <span>qualidade operacional atual</span>
+    </po-widget>
+  </section>
+
+  <section class="drivers-page__filters">
+    <div class="drivers-page__filters-header">
+      <div>
+        <span class="drivers-page__eyebrow">Filtro operacional</span>
+        <h2>Encontre rápido o condutor certo</h2>
+      </div>
+
+      <div class="drivers-page__filters-meta">
+        <span>{{ activeFiltersCount }} filtros ativos</span>
+        <small>{{ isLoading ? 'Sincronizando com a API...' : paginationSummary }}</small>
+      </div>
+    </div>
+
+    <form
+      class="drivers-page__filters-grid"
+      [formGroup]="filterForm"
+      novalidate
+    >
+      <po-input
+        class="drivers-page__filter-search"
+        formControlName="search"
+        name="search"
+        p-label="Buscar"
+        p-placeholder="Nome, CPF ou e-mail"
+        (p-enter)="applyFilters()"
+      ></po-input>
+
+      <po-input
+        formControlName="department"
+        name="department"
+        p-label="Departamento"
+        p-placeholder="Operações, logística..."
+        (p-enter)="applyFilters()"
+      ></po-input>
+
+      <po-combo
+        formControlName="status"
+        name="status"
+        p-label="Status"
+        [p-options]="statusOptions"
+      ></po-combo>
+
+      <po-combo
+        formControlName="cnhAlert"
+        name="cnhAlert"
+        p-label="CNH"
+        [p-options]="cnhAlertOptions"
+      ></po-combo>
+
+      <div class="drivers-page__filter-actions">
+        <po-button
+          p-kind="primary"
+          p-label="Aplicar"
+          [p-disabled]="isLoading"
+          (p-click)="applyFilters()"
+        ></po-button>
+
+        <po-button
+          p-label="Limpar"
+          [p-disabled]="isLoading"
+          (p-click)="clearFilters()"
+        ></po-button>
+      </div>
+    </form>
+  </section>
+
+  <section class="drivers-page__table-shell">
+    <po-table
+      [p-columns]="columns"
+      [p-items]="tableItems"
+      [p-actions]="rowActions"
+      p-container="shadow"
+      p-spacing="extraSmall"
+      [p-hide-columns-manager]="true"
+      [p-hide-batch-actions]="true"
+      [p-hide-table-search]="true"
+      [p-text-wrap]="true"
+    >
+      <ng-template
+        p-table-column-template
+        [p-property]="identityColumnProperty"
+        let-value
+      >
+        <div class="drivers-page__identity-cell">
+          <strong>{{ value.name }}</strong>
+          <small>{{ value.email }}</small>
+        </div>
+      </ng-template>
+
+      <ng-template
+        p-table-column-template
+        [p-property]="cnhColumnProperty"
+        let-value
+      >
+        <div class="drivers-page__cnh-cell">
+          <div>
+            <strong>{{ value.category }}</strong>
+            <small>{{ value.expirationLabel }}</small>
+          </div>
+
+          <po-tag
+            [p-value]="value.badgeLabel"
+            [p-type]="value.badgeType"
+          ></po-tag>
+        </div>
+      </ng-template>
+
+      <ng-template
+        p-table-column-template
+        [p-property]="scoreColumnProperty"
+        let-value
+      >
+        <div class="drivers-page__score-cell">
+          <strong>{{ value.value }}</strong>
+          <po-tag
+            [p-value]="value.badgeLabel"
+            [p-type]="value.badgeType"
+          ></po-tag>
+        </div>
+      </ng-template>
+
+      <ng-template
+        p-table-column-template
+        [p-property]="statusColumnProperty"
+        let-value
+      >
+        <po-tag
+          [p-value]="value.badgeLabel"
+          [p-type]="value.badgeType"
+        ></po-tag>
+      </ng-template>
+    </po-table>
+  </section>
+
+  <section class="drivers-page__pagination">
+    <small>{{ paginationSummary }}</small>
+
+    <div class="drivers-page__pagination-actions">
+      <po-button
+        p-label="Anterior"
+        [p-disabled]="!canGoBack"
+        (p-click)="previousPage()"
+      ></po-button>
+
+      <po-button
+        p-kind="primary"
+        p-label="Próxima"
+        [p-disabled]="!canGoForward"
+        (p-click)="nextPage()"
+      ></po-button>
+    </div>
+  </section>
+</po-page-list>

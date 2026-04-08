@@ -1,11 +1,18 @@
-import { Component, EventEmitter, Output, ViewChild, inject } from '@angular/core';
+import { Component, output, viewChild, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import type {
   PoModalAction,
   PoTableColumn,
   PoUploadFile,
   PoUploadFileRestrictions,
 } from '@po-ui/ng-components';
-import { PoModalComponent } from '@po-ui/ng-components';
+import {
+  PoModalComponent,
+  PoModalModule,
+  PoTableModule,
+  PoButtonModule,
+  PoFieldModule,
+} from '@po-ui/ng-components';
 import { finalize } from 'rxjs';
 import { NotificationService } from '../../../../core/services/notification';
 import { VEHICLE_IMPORT_TEMPLATE, VEHICLE_STATUS_TABLE_LABELS } from '../../vehicles.constants';
@@ -21,13 +28,13 @@ type ImportErrorTableItem = {
 
 @Component({
   selector: 'app-vehicle-import-modal',
-  standalone: false,
+  imports: [FormsModule, PoModalModule, PoTableModule, PoButtonModule, PoFieldModule],
   templateUrl: './vehicle-import-modal.html',
   styleUrl: './vehicle-import-modal.scss',
 })
 export class VehicleImportModal {
-  @Output() readonly completed = new EventEmitter<void>();
-  @ViewChild('importModal', { static: true }) private readonly importModal?: PoModalComponent;
+  readonly completed = output<void>();
+  private readonly importModal = viewChild.required<PoModalComponent>('importModal');
 
   private readonly vehiclesService = inject(VehiclesService);
   private readonly notificationService = inject(NotificationService);
@@ -112,11 +119,11 @@ export class VehicleImportModal {
 
   open(): void {
     this.resetState();
-    this.importModal?.open();
+    this.importModal().open();
   }
 
   close(): void {
-    this.importModal?.close();
+    this.importModal().close();
   }
 
   handleFilesChange(files: PoUploadFile[] | null | undefined): void {

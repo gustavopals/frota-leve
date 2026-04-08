@@ -1,0 +1,228 @@
+<po-page-edit
+  [p-breadcrumb]="breadcrumb"
+  [p-title]="title"
+  [p-subtitle]="subtitle"
+  [p-disable-submit]="!canSave"
+  (p-cancel)="cancel()"
+  (p-save)="save()"
+  (p-save-new)="saveAndCreateNew()"
+>
+  <section class="driver-form-page">
+    <div class="driver-form-page__main">
+      <form
+        class="driver-form-page__form"
+        [formGroup]="form"
+        novalidate
+      >
+        <section class="driver-form-page__section">
+          <div class="driver-form-page__section-head">
+            <span class="driver-form-page__eyebrow">Cadastro essencial</span>
+            <h2>Identificação do condutor</h2>
+          </div>
+
+          <div class="driver-form-page__grid driver-form-page__grid--identity">
+            <div class="driver-form-page__field">
+              <po-input
+                formControlName="name"
+                name="name"
+                p-label="Nome completo"
+              ></po-input>
+              @for (error of getControlErrors('name'); track error) {
+                <small class="driver-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="driver-form-page__field">
+              <po-input
+                formControlName="cpf"
+                name="cpf"
+                p-label="CPF"
+                p-placeholder="000.000.000-00"
+              ></po-input>
+              @for (error of getControlErrors('cpf'); track error) {
+                <small class="driver-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="driver-form-page__field">
+              <po-input
+                formControlName="phone"
+                name="phone"
+                p-label="Telefone"
+                p-placeholder="(41) 99999-9999"
+              ></po-input>
+              @for (error of getControlErrors('phone'); track error) {
+                <small class="driver-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="driver-form-page__field">
+              <po-input
+                formControlName="email"
+                name="email"
+                p-label="E-mail"
+              ></po-input>
+              @for (error of getControlErrors('email'); track error) {
+                <small class="driver-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <po-input
+              formControlName="department"
+              name="department"
+              p-label="Departamento"
+            ></po-input>
+
+            <po-select
+              formControlName="status"
+              name="status"
+              p-label="Status"
+              [p-options]="statusOptions"
+            ></po-select>
+          </div>
+        </section>
+
+        <po-divider p-label="CNH e operação"></po-divider>
+
+        <section class="driver-form-page__section">
+          <div class="driver-form-page__grid driver-form-page__grid--operation">
+            <po-input
+              formControlName="cnhNumber"
+              name="cnhNumber"
+              p-label="Número da CNH"
+            ></po-input>
+
+            <po-combo
+              formControlName="cnhCategory"
+              name="cnhCategory"
+              p-label="Categoria da CNH"
+              [p-options]="cnhCategoryOptions"
+            ></po-combo>
+
+            <po-datepicker
+              formControlName="cnhExpiration"
+              name="cnhExpiration"
+              p-label="Validade da CNH"
+              p-format="dd/mm/yyyy"
+            ></po-datepicker>
+
+            <div class="driver-form-page__field">
+              <po-number
+                formControlName="cnhPoints"
+                name="cnhPoints"
+                p-label="Pontos CNH"
+                [p-min]="0"
+                [p-max]="40"
+              ></po-number>
+              @for (error of getControlErrors('cnhPoints'); track error) {
+                <small class="driver-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <po-datepicker
+              formControlName="birthDate"
+              name="birthDate"
+              p-label="Nascimento"
+              p-format="dd/mm/yyyy"
+            ></po-datepicker>
+
+            <po-datepicker
+              formControlName="hireDate"
+              name="hireDate"
+              p-label="Contratação"
+              p-format="dd/mm/yyyy"
+            ></po-datepicker>
+
+            <div class="driver-form-page__field">
+              <po-decimal
+                formControlName="score"
+                name="score"
+                p-label="Score"
+                [p-decimals-length]="1"
+                [p-min]="0"
+                [p-max]="100"
+              ></po-decimal>
+              @for (error of getControlErrors('score'); track error) {
+                <small class="driver-form-page__error">{{ error }}</small>
+              }
+            </div>
+          </div>
+        </section>
+
+        <po-divider p-label="Contato e observações"></po-divider>
+
+        <section class="driver-form-page__section">
+          <div class="driver-form-page__grid driver-form-page__grid--contact">
+            <po-input
+              formControlName="emergencyContact"
+              name="emergencyContact"
+              p-label="Contato de emergência"
+            ></po-input>
+
+            <div class="driver-form-page__field">
+              <po-input
+                formControlName="emergencyPhone"
+                name="emergencyPhone"
+                p-label="Telefone de emergência"
+                p-placeholder="(41) 99999-9999"
+              ></po-input>
+              @for (error of getControlErrors('emergencyPhone'); track error) {
+                <small class="driver-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="driver-form-page__field">
+              <po-input
+                formControlName="photoUrl"
+                name="photoUrl"
+                p-label="URL da foto"
+              ></po-input>
+              @for (error of getControlErrors('photoUrl'); track error) {
+                <small class="driver-form-page__error">{{ error }}</small>
+              }
+            </div>
+          </div>
+
+          <po-textarea
+            formControlName="notes"
+            name="notes"
+            p-label="Observações"
+            [p-rows]="4"
+          ></po-textarea>
+        </section>
+      </form>
+    </div>
+
+    <aside class="driver-form-page__aside">
+      <po-widget p-title="Prévia rápida">
+        <span class="driver-form-page__preview-name">{{ previewName }}</span>
+        <strong>{{ previewCpf }}</strong>
+        <small>{{ previewDepartment }}</small>
+        <div class="driver-form-page__preview-cnh">
+          <span>{{ previewCnhMeta.label }}</span>
+          <small>{{ previewCnhMeta.helper }}</small>
+        </div>
+      </po-widget>
+
+      @if (previewPhotoUrl) {
+        <po-widget p-title="Foto de perfil">
+          <figure class="driver-form-page__photo-card">
+            <img
+              [src]="previewPhotoUrl"
+              alt="Prévia da foto do motorista"
+            />
+          </figure>
+        </po-widget>
+      }
+
+      <po-widget p-title="Checklist">
+        <ul class="driver-form-page__checklist">
+          <li>Nome e CPF são obrigatórios.</li>
+          <li>Telefone com DDD e 10 ou 11 dígitos.</li>
+          <li>Score e pontos CNH ficam limitados.</li>
+          <li>Vínculo com veículo é feito na ficha do motorista.</li>
+        </ul>
+      </po-widget>
+    </aside>
+  </section>
+</po-page-edit>

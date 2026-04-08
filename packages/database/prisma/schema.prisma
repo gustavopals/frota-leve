@@ -29,6 +29,11 @@ model Tenant {
   updatedAt            DateTime     @updatedAt @map("updated_at")
   users                User[]
   vehicles             Vehicle[]
+  drivers              Driver[]
+  fuelRecords          FuelRecord[]
+  maintenancePlans     MaintenancePlan[]
+  serviceOrders        ServiceOrder[]
+  documents            Document[]
 
   @@map("tenants")
   @@schema("public")
@@ -68,6 +73,9 @@ model User {
   updatedAt           DateTime             @updatedAt @map("updated_at")
   passwordResetTokens PasswordResetToken[]
   assignedVehicles    Vehicle[]            @relation("CurrentDriverVehicles")
+  driverProfile       Driver?
+  approvedServiceOrders ServiceOrder[]     @relation("ApprovedByUserServiceOrders")
+  createdServiceOrders  ServiceOrder[]     @relation("CreatedByUserServiceOrders")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -112,6 +120,50 @@ enum FuelType {
   HYBRID
 
   @@map("fuel_type")
+  @@schema("public")
+}
+
+enum DocumentType {
+  IPVA
+  LICENSING
+  INSURANCE
+  CNH
+  ANTT
+  AET
+  MOPP
+  INSPECTION
+  OTHER
+
+  @@map("document_type")
+  @@schema("public")
+}
+
+enum DocumentStatus {
+  VALID
+  EXPIRING
+  EXPIRED
+
+  @@map("document_status")
+  @@schema("public")
+}
+
+enum MaintenanceType {
+  PREVENTIVE
+  CORRECTIVE
+  PREDICTIVE
+
+  @@map("maintenance_type")
+  @@schema("public")
+}
+
+enum ServiceOrderStatus {
+  OPEN
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+
+  @@map("service_order_status")
   @@schema("public")
 }
 
@@ -161,6 +213,10 @@ model Vehicle {
   notes               String?
   currentDriverId     String?         @map("current_driver_id") @db.Uuid
   currentDriver       User?           @relation("CurrentDriverVehicles", fields: [currentDriverId], references: [id], onDelete: SetNull)
+  fuelRecords         FuelRecord[]
+  maintenancePlans    MaintenancePlan[]
+  serviceOrders       ServiceOrder[]
+  documents           Document[]
   createdAt           DateTime        @default(now()) @map("created_at")
   updatedAt           DateTime        @updatedAt @map("updated_at")
 
@@ -186,5 +242,185 @@ model AuditLog {
   @@index([tenantId])
   @@index([tenantId, entity])
   @@map("audit_logs")
+  @@schema("public")
+}
+
+model Driver {
+  id               String    @id @default(uuid()) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name             String
+  cpf              String
+  phone            String?
+  email            String?
+  birthDate        DateTime? @map("birth_date")
+  cnhNumber        String?   @map("cnh_number")
+  cnhCategory      String?   @map("cnh_category")
+  cnhExpiration    DateTime? @map("cnh_expiration")
+  cnhPoints        Int?      @default(0) @map("cnh_points")
+  emergencyContact String?   @map("emergency_contact")
+  emergencyPhone   String?   @map("emergency_phone")
+  department       String?
+  isActive         Boolean   @default(true) @map("is_active")
+  photoUrl         String?   @map("photo_url")
+  hireDate         DateTime? @map("hire_date")
+  score            Float?    @default(100)
+  notes            String?
+  userId           String?    @unique @map("user_id") @db.Uuid
+  user             User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  fuelRecords      FuelRecord[]
+  serviceOrders    ServiceOrder[]
+  documents        Document[]
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  @@unique([tenantId, cpf])
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+  @@map("drivers")
+  @@schema("public")
+}
+
+model Document {
+  id              String         @id @default(uuid()) @db.Uuid
+  tenantId        String         @map("tenant_id") @db.Uuid
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vehicleId       String?        @map("vehicle_id") @db.Uuid
+  vehicle         Vehicle?       @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  driverId        String?        @map("driver_id") @db.Uuid
+  driver          Driver?        @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  type            DocumentType
+  description     String
+  expirationDate  DateTime       @map("expiration_date")
+  alertDaysBefore Int            @map("alert_days_before")
+  cost            Float?
+  fileUrl         String         @map("file_url")
+  status          DocumentStatus
+  notes           String?
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  @@index([tenantId])
+  @@index([tenantId, vehicleId])
+  @@index([tenantId, driverId])
+  @@index([tenantId, type])
+  @@index([tenantId, status])
+  @@index([tenantId, expirationDate])
+  @@map("documents")
+  @@schema("public")
+}
+
+model FuelRecord {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vehicleId       String    @map("vehicle_id") @db.Uuid
+  vehicle         Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driverId        String?   @map("driver_id") @db.Uuid
+  driver          Driver?   @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  date            DateTime
+  mileage         Int
+  liters          Float
+  pricePerLiter   Float     @map("price_per_liter")
+  totalCost       Float     @map("total_cost")
+  fuelType        FuelType  @map("fuel_type")
+  fullTank        Boolean   @default(true) @map("full_tank")
+  gasStation      String?   @map("gas_station")
+  notes           String?
+  receiptUrl      String?   @map("receipt_url")
+  kmPerLiter      Float?    @map("km_per_liter")
+  anomaly         Boolean   @default(false)
+  anomalyReason   String?   @map("anomaly_reason")
+  createdByUserId String?   @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([tenantId, vehicleId])
+  @@index([tenantId, driverId])
+  @@index([tenantId, date])
+  @@map("fuel_records")
+  @@schema("public")
+}
+
+model MaintenancePlan {
+  id                  String          @id @default(uuid()) @db.Uuid
+  tenantId            String          @map("tenant_id") @db.Uuid
+  tenant              Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vehicleId           String          @map("vehicle_id") @db.Uuid
+  vehicle             Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  serviceOrders       ServiceOrder[]
+  name                String
+  type                MaintenanceType
+  intervalKm          Int?            @map("interval_km")
+  intervalDays        Int?            @map("interval_days")
+  lastExecutedAt      DateTime?       @map("last_executed_at")
+  lastExecutedMileage Int?            @map("last_executed_mileage")
+  nextDueAt           DateTime?       @map("next_due_at")
+  nextDueMileage      Int?            @map("next_due_mileage")
+  isActive            Boolean         @default(true) @map("is_active")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([tenantId, vehicleId])
+  @@index([tenantId, isActive])
+  @@index([tenantId, nextDueAt])
+  @@index([tenantId, nextDueMileage])
+  @@map("maintenance_plans")
+  @@schema("public")
+}
+
+model ServiceOrder {
+  id               String             @id @default(uuid()) @db.Uuid
+  tenantId         String             @map("tenant_id") @db.Uuid
+  tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vehicleId        String             @map("vehicle_id") @db.Uuid
+  vehicle          Vehicle            @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driverId         String?            @map("driver_id") @db.Uuid
+  driver           Driver?            @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  planId           String?            @map("plan_id") @db.Uuid
+  plan             MaintenancePlan?   @relation(fields: [planId], references: [id], onDelete: SetNull)
+  type             MaintenanceType
+  status           ServiceOrderStatus @default(OPEN)
+  description      String
+  workshop         String?
+  startDate        DateTime?          @map("start_date")
+  endDate          DateTime?          @map("end_date")
+  totalCost        Float              @default(0) @map("total_cost")
+  laborCost        Float?             @map("labor_cost")
+  partsCost        Float?             @map("parts_cost")
+  notes            String?
+  photos           Json?
+  approvedByUserId String?            @map("approved_by_user_id") @db.Uuid
+  approvedByUser   User?              @relation("ApprovedByUserServiceOrders", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  createdByUserId  String?            @map("created_by_user_id") @db.Uuid
+  createdByUser    User?              @relation("CreatedByUserServiceOrders", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  items            ServiceOrderItem[]
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, vehicleId])
+  @@index([tenantId, driverId])
+  @@index([tenantId, planId])
+  @@index([tenantId, type])
+  @@index([tenantId, createdAt])
+  @@map("service_orders")
+  @@schema("public")
+}
+
+model ServiceOrderItem {
+  id             String       @id @default(uuid()) @db.Uuid
+  serviceOrderId String       @map("service_order_id") @db.Uuid
+  serviceOrder   ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  description    String
+  quantity       Float
+  unitCost       Float        @map("unit_cost")
+  totalCost      Float        @map("total_cost")
+  partNumber     String?      @map("part_number")
+
+  @@index([serviceOrderId])
+  @@map("service_order_items")
   @@schema("public")
 }

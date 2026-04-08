@@ -9,4 +9,5 @@ export * from './os-status.enum';
 export * from './fine-severity.enum';
 export * from './incident-type.enum';
 export * from './document-type.enum';
+export * from './document-status.enum';
 export * from './checklist-status.enum';

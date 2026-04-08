@@ -298,28 +298,25 @@ Uma task só está **pronta** quando:
   apps/web/src/app/
   ├── core/                    # Singletons, guards, interceptors
   │   ├── guards/
-  │   │   ├── auth.guard.ts
-  │   │   └── role.guard.ts
+  │   │   ├── auth-guard.ts        # CanActivateFn funcional
+  │   │   └── role-guard.ts        # CanActivateFn funcional
   │   ├── interceptors/
-  │   │   ├── auth.interceptor.ts
-  │   │   ├── error.interceptor.ts
-  │   │   └── tenant.interceptor.ts
-  │   ├── services/
-  │   │   ├── auth.service.ts
-  │   │   ├── api.service.ts       # HttpClient wrapper com base URL
-  │   │   ├── notification.service.ts
-  │   │   └── storage.service.ts
-  │   └── core.module.ts
+  │   │   ├── auth-interceptor.ts  # HttpInterceptorFn funcional
+  │   │   ├── error-interceptor.ts # HttpInterceptorFn funcional
+  │   │   └── tenant-interceptor.ts # HttpInterceptorFn funcional
+  │   └── services/
+  │       ├── auth.ts
+  │       ├── api.ts               # HttpClient wrapper com base URL
+  │       ├── notification.ts
+  │       └── storage.ts
   ├── shared/                   # Componentes e pipes reutilizáveis
   │   ├── components/
   │   ├── pipes/
-  │   ├── directives/
-  │   └── shared.module.ts
+  │   └── directives/
   ├── layout/                   # Shell da aplicação
-  │   ├── main-layout/          # Layout com menu lateral PO-UI
-  │   ├── auth-layout/          # Layout para login/registro (sem menu)
-  │   └── layout.module.ts
-  ├── features/                 # Feature modules (lazy loaded)
+  │   ├── main-layout/          # Layout com menu lateral PO-UI (standalone)
+  │   └── auth-layout/          # Layout para login/registro (standalone)
+  ├── features/                 # Features standalone (lazy loaded via routes)
   │   ├── auth/                 # Login, registro, forgot password
   │   ├── dashboard/            # Dashboard principal
   │   ├── vehicles/             # CRUD de veículos
@@ -334,17 +331,18 @@ Uma task só está **pronta** quando:
   │   ├── reports/              # Relatórios
   │   ├── ai-assistant/         # Chat IA
   │   └── settings/             # Configurações da conta
-  ├── app-routing.module.ts
-  └── app.component.ts
+  ├── app.routes.ts             # Array de rotas (provideRouter)
+  └── app.ts                    # Componente root (standalone)
   ```
 - [x] **0.4.6** — Implementar `main-layout`: usar `po-page-default` ou `po-page-detail` com `po-menu` lateral contendo itens de navegação (Dashboard, Veículos, Motoristas, Combustível, Manutenção, Pneus, Multas, Documentos, Sinistros, Financeiro, Relatórios, IA, Configurações)
 - [x] **0.4.7** — Implementar `auth-layout`: layout limpo com logo centralizado para telas de login/registro
 - [x] **0.4.8** — Configurar roteamento base com lazy loading:
   ```typescript
+  // app.routes.ts — standalone, sem NgModule
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: 'auth', loadChildren: () => import('./features/auth/auth.module') },
-  { path: 'dashboard', loadChildren: () => import('./features/dashboard/dashboard.module'), canActivate: [AuthGuard] },
-  // ... demais rotas com AuthGuard
+  { path: 'auth', loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES) },
+  { path: 'dashboard', loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES) },
+  // ... demais rotas com authGuard (CanActivateFn funcional)
   ```
 - [x] **0.4.9** — Implementar `api.service.ts`: wrapper do HttpClient com `baseUrl` configurável via environment, métodos `get<T>`, `post<T>`, `put<T>`, `patch<T>`, `delete<T>`
 - [x] **0.4.10** — Implementar `auth.interceptor.ts`: injeta Bearer token no header Authorization de cada request
@@ -563,6 +561,8 @@ Uma task só está **pronta** quando:
 
 > **Objetivo**: Autenticação funcional, multi-tenancy, CRUD de veículos e motoristas, dashboard básico. Ao final desta fase, um gestor pode se cadastrar, logar, cadastrar veículos e motoristas.
 
+> **Status atual**: concluída.
+
 ---
 
 ### TASK 1.1 — Autenticação (Backend)
@@ -643,7 +643,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [x] **1.2.1** — Criar `features/auth/auth.module.ts` e `auth-routing.module.ts`
+- [x] **1.2.1** — Criar `features/auth/auth.routes.ts` (standalone, sem NgModule)
 - [x] **1.2.2** — Implementar tela de **Login** (`auth/login`):
   - Formulário PO-UI: email (po-input), senha (po-password)
   - Botão "Entrar" com loading state
@@ -736,7 +736,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [x] **1.4.1** — Criar `features/vehicles/vehicles.module.ts` com roteamento
+- [x] **1.4.1** — Criar `features/vehicles/vehicles.routes.ts` (standalone, sem NgModule)
 - [x] **1.4.2** — Implementar **listagem** (`vehicles/list`):
   - `po-page-list` com `po-table` (colunas: placa, marca/modelo, ano, categoria, status, km, ações)
   - Filtros: `po-combo` para status, categoria, tipo combustível; `po-input` para busca textual
@@ -770,7 +770,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.5.1** — Criar migration Prisma para tabela `Driver`:
+- [x] **1.5.1** — Criar migration Prisma para tabela `Driver`:
 
   ```prisma
   model Driver {
@@ -803,14 +803,14 @@ Uma task só está **pronta** quando:
   }
   ```
 
-- [ ] **1.5.2** — Criar módulo `apps/api/src/modules/drivers/`
-- [ ] **1.5.3** — Implementar CRUD completo: `GET /drivers` (list + search + paginação), `GET /drivers/:id`, `POST /drivers`, `PUT /drivers/:id`, `DELETE /drivers/:id`
-- [ ] **1.5.4** — Implementar `GET /drivers/:id/history` — histórico de veículos que dirigiu, multas, sinistros, abastecimentos
-- [ ] **1.5.5** — Implementar `POST /drivers/import` — importação via CSV
-- [ ] **1.5.6** — Implementar validação de CPF (dígitos verificadores)
-- [ ] **1.5.7** — Implementar alerta de vencimento de CNH (retornar flag `cnhExpiring` quando faltam ≤30 dias)
-- [ ] **1.5.8** — Implementar `PATCH /drivers/:id/link-vehicle/:vehicleId` — vincular motorista a um veículo
-- [ ] **1.5.9** — Escrever testes
+- [x] **1.5.2** — Criar módulo `apps/api/src/modules/drivers/`
+- [x] **1.5.3** — Implementar CRUD completo: `GET /drivers` (list + search + paginação), `GET /drivers/:id`, `POST /drivers`, `PUT /drivers/:id`, `DELETE /drivers/:id`
+- [x] **1.5.4** — Implementar `GET /drivers/:id/history` — histórico de veículos que dirigiu, multas, sinistros, abastecimentos
+- [x] **1.5.5** — Implementar `POST /drivers/import` — importação via CSV
+- [x] **1.5.6** — Implementar validação de CPF (dígitos verificadores)
+- [x] **1.5.7** — Implementar alerta de vencimento de CNH (retornar flag `cnhExpiring` quando faltam ≤30 dias)
+- [x] **1.5.8** — Implementar `PATCH /drivers/:id/link-vehicle/:vehicleId` — vincular motorista a um veículo
+- [x] **1.5.9** — Escrever testes
 
 ---
 
@@ -818,12 +818,12 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.6.1** — Criar `features/drivers/drivers.module.ts` com roteamento
-- [ ] **1.6.2** — Implementar listagem com `po-table`: nome, CPF, CNH (categoria + validade), telefone, departamento, score, status
-- [ ] **1.6.3** — Implementar formulário de criação/edição com campos e máscaras (CPF, telefone)
-- [ ] **1.6.4** — Implementar tela de detalhes com tabs: Dados, Veículos Vinculados, Multas, Sinistros, Score
-- [ ] **1.6.5** — Highlight visual quando CNH está vencida ou próxima do vencimento (badge vermelho/amarelo)
-- [ ] **1.6.6** — Implementar vinculação motorista ↔ veículo com `po-combo` de seleção
+- [x] **1.6.1** — Criar `features/drivers/drivers.routes.ts` (standalone, sem NgModule)
+- [x] **1.6.2** — Implementar listagem com `po-table`: nome, CPF, CNH (categoria + validade), telefone, departamento, score, status
+- [x] **1.6.3** — Implementar formulário de criação/edição com campos e máscaras (CPF, telefone)
+- [x] **1.6.4** — Implementar tela de detalhes com tabs: Dados, Veículos Vinculados, Multas, Sinistros, Score
+- [x] **1.6.5** — Highlight visual quando CNH está vencida ou próxima do vencimento (badge vermelho/amarelo)
+- [x] **1.6.6** — Implementar vinculação motorista ↔ veículo com `po-combo` de seleção
 
 ---
 
@@ -833,7 +833,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **1.7.1** — Backend: implementar `GET /api/v1/dashboard/summary` retornando:
+- [x] **1.7.1** — Backend: implementar `GET /api/v1/dashboard/summary` retornando:
   ```json
   {
     "vehicles": { "total": 45, "active": 38, "maintenance": 5, "reserve": 2 },
@@ -845,13 +845,13 @@ Uma task só está **pronta** quando:
     ]
   }
   ```
-- [ ] **1.7.2** — Frontend: criar `features/dashboard/dashboard.component.ts`
-- [ ] **1.7.3** — Implementar cards de resumo no topo: Total de Veículos (com breakdown por status), Total de Motoristas, Alertas Pendentes, Custo do Mês
-- [ ] **1.7.4** — Implementar widget de "Alertas" (lista das próximas manutenções vencendo, documentos expirando, CNHs vencendo) com `po-list-view` ou cards
-- [ ] **1.7.5** — Implementar widget de "Atividade Recente" (timeline dos últimos eventos: cadastros, abastecimentos, OS criadas)
-- [ ] **1.7.6** — Implementar gráfico de "Custo Mensal" (barras empilhadas: combustível, manutenção, multas, outros) — usar Chart.js ou po-chart se disponível
-- [ ] **1.7.7** — Implementar gráfico de "Distribuição de Veículos por Status" (donut chart)
-- [ ] **1.7.8** — Responsividade: cards em grid que se adapta a telas menores
+- [x] **1.7.2** — Frontend: criar `features/dashboard/dashboard.component.ts`
+- [x] **1.7.3** — Implementar cards de resumo no topo: Total de Veículos (com breakdown por status), Total de Motoristas, Alertas Pendentes, Custo do Mês
+- [x] **1.7.4** — Implementar widget de "Alertas" (lista das próximas manutenções vencendo, documentos expirando, CNHs vencendo) com `po-list-view` ou cards
+- [x] **1.7.5** — Implementar widget de "Atividade Recente" (timeline dos últimos eventos: cadastros, abastecimentos, OS criadas)
+- [x] **1.7.6** — Implementar gráfico de "Custo Mensal" (barras empilhadas: combustível, manutenção, multas, outros) — usar Chart.js ou po-chart se disponível
+- [x] **1.7.7** — Implementar gráfico de "Distribuição de Veículos por Status" (donut chart)
+- [x] **1.7.8** — Responsividade: cards em grid que se adapta a telas menores
 
 ---
 
@@ -865,17 +865,17 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.1.1** — Migration: tabela `FuelRecord` (id, tenantId, vehicleId, driverId, date, mileage, liters, totalCost, pricePerLiter, fuelType, gasStation, fullTank, notes, receiptUrl, createdByUserId, createdAt)
-- [ ] **2.1.2** — Backend CRUD: `GET /vehicles/:vehicleId/fuel-records`, `POST /fuel-records`, `PUT /fuel-records/:id`, `DELETE /fuel-records/:id`
-- [ ] **2.1.3** — Backend: cálculo automático de km/l ao salvar (com base na diferença de km entre abastecimentos)
-- [ ] **2.1.4** — Backend: atualização automática de `vehicle.currentMileage` ao registrar abastecimento (se km informado > atual)
-- [ ] **2.1.5** — Backend: detecção de anomalia — se km/l < 60% da média do veículo, marcar flag `anomaly: true` e motivo
-- [ ] **2.1.6** — Backend: `GET /fuel-records/stats` — total gasto, litros consumidos, média km/l, custo/km por período
-- [ ] **2.1.7** — Backend: `GET /fuel-records/ranking` — ranking de veículos por eficiência (melhor e pior km/l)
-- [ ] **2.1.8** — Frontend: listagem de abastecimentos com filtros (veículo, motorista, período, posto)
-- [ ] **2.1.9** — Frontend: formulário de registro com seleção de veículo (po-combo com busca), motorista, campos numéricos
-- [ ] **2.1.10** — Frontend: dashboard de combustível com gráficos (evolução de consumo, custo mensal, ranking)
-- [ ] **2.1.11** — Frontend: highlight de registros com anomalia (linha vermelha na tabela)
+- [x] **2.1.1** — Migration: tabela `FuelRecord` (id, tenantId, vehicleId, driverId, date, mileage, liters, totalCost, pricePerLiter, fuelType, gasStation, fullTank, notes, receiptUrl, createdByUserId, createdAt)
+- [x] **2.1.2** — Backend CRUD: `GET /vehicles/:vehicleId/fuel-records`, `POST /fuel-records`, `PUT /fuel-records/:id`, `DELETE /fuel-records/:id`
+- [x] **2.1.3** — Backend: cálculo automático de km/l ao salvar (com base na diferença de km entre abastecimentos)
+- [x] **2.1.4** — Backend: atualização automática de `vehicle.currentMileage` ao registrar abastecimento (se km informado > atual)
+- [x] **2.1.5** — Backend: detecção de anomalia — se km/l < 60% da média do veículo, marcar flag `anomaly: true` e motivo
+- [x] **2.1.6** — Backend: `GET /fuel-records/stats` — total gasto, litros consumidos, média km/l, custo/km por período
+- [x] **2.1.7** — Backend: `GET /fuel-records/ranking` — ranking de veículos por eficiência (melhor e pior km/l)
+- [x] **2.1.8** — Frontend: listagem de abastecimentos com filtros (veículo, motorista, período, posto)
+- [x] **2.1.9** — Frontend: formulário de registro com seleção de veículo (po-combo com busca), motorista, campos numéricos
+- [x] **2.1.10** — Frontend: dashboard de combustível com gráficos (evolução de consumo, custo mensal, ranking)
+- [x] **2.1.11** — Frontend: highlight de registros com anomalia (linha vermelha na tabela)
 
 ---
 
@@ -883,7 +883,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.2.1** — Migration: tabelas `MaintenancePlan`, `ServiceOrder`, `ServiceOrderItem`
+- [x] **2.2.1** — Migration: tabelas `MaintenancePlan`, `ServiceOrder`, `ServiceOrderItem`
 
   ```
   MaintenancePlan: id, tenantId, vehicleId, name (ex: "Troca de óleo"), type (PREVENTIVE/CORRECTIVE),
@@ -895,13 +895,13 @@ Uma task só está **pronta** quando:
   ServiceOrderItem: id, serviceOrderId, description, quantity, unitCost, totalCost, partNumber?
   ```
 
-- [ ] **2.2.2** — Backend CRUD de planos de manutenção
-- [ ] **2.2.3** — Backend CRUD de ordens de serviço com workflow de status (validar transições: OPEN→APPROVED ou CANCELLED, APPROVED→IN_PROGRESS, IN_PROGRESS→COMPLETED)
-- [ ] **2.2.4** — Backend: job agendado (BullMQ/cron) que roda diariamente verificando planos de manutenção vencidos → gera alerta
-- [ ] **2.2.5** — Backend: `GET /maintenance/alerts` — lista de manutenções vencidas e próximas de vencer
-- [ ] **2.2.6** — Backend: cálculo de MTTR e MTBF por veículo
-- [ ] **2.2.7** — Backend: `GET /maintenance/stats` — custos de manutenção por período, por veículo, preventiva vs corretiva
-- [ ] **2.2.8** — Frontend: listagem de planos de manutenção com status visual (verde=em dia, amarelo=próximo, vermelho=vencido)
+- [x] **2.2.2** — Backend CRUD de planos de manutenção
+- [x] **2.2.3** — Backend CRUD de ordens de serviço com workflow de status (validar transições: OPEN→APPROVED ou CANCELLED, APPROVED→IN_PROGRESS, IN_PROGRESS→COMPLETED)
+- [x] **2.2.4** — Backend: job agendado (BullMQ/cron) que roda diariamente verificando planos de manutenção vencidos → gera alerta
+- [x] **2.2.5** — Backend: `GET /maintenance/alerts` — lista de manutenções vencidas e próximas de vencer
+- [x] **2.2.6** — Backend: cálculo de MTTR e MTBF por veículo
+- [x] **2.2.7** — Backend: `GET /maintenance/stats` — custos de manutenção por período, por veículo, preventiva vs corretiva
+- [x] **2.2.8** — Frontend: listagem de planos de manutenção com status visual (verde=em dia, amarelo=próximo, vermelho=vencido)
 - [ ] **2.2.9** — Frontend: listagem de ordens de serviço com filtros (status, veículo, período)
 - [ ] **2.2.10** — Frontend: formulário de OS com adição dinâmica de itens/peças, upload de fotos e NF
 - [ ] **2.2.11** — Frontend: workflow visual de aprovação (botões de ação conforme status atual e role do usuário)

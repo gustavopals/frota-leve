@@ -1,39 +1,471 @@
-.dashboard-page__grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+:host {
+  display: block;
 }
 
-.dashboard-page__card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 247, 248, 0.9));
-  border: 1px solid rgba(23, 49, 59, 0.08);
+// ─── Hero: banda de comando compacta ─────────────────────────────────────────
+
+.dashboard-page__hero {
+  align-items: center;
+  background:
+    radial-gradient(ellipse at 75% 50%, rgba(199, 80, 0, 0.3) 0%, transparent 52%),
+    radial-gradient(ellipse at 10% 80%, rgba(0, 120, 140, 0.2) 0%, transparent 45%),
+    linear-gradient(135deg, #0c2730 0%, #16303a 55%, #1c3840 100%);
   border-radius: 18px;
+  color: #fff;
   display: grid;
-  gap: 0.65rem;
-  min-height: 180px;
-  padding: 1.1rem;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  margin-bottom: 0.85rem;
+  padding: 0.9rem 1.2rem;
 }
 
-.dashboard-page__card strong {
-  color: #17313b;
-  font-size: 1rem;
+.dashboard-page__eyebrow {
+  color: rgba(255, 255, 255, 0.5);
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
 }
 
-.dashboard-page__card p,
-.dashboard-page__card li {
-  color: #50616d;
-  line-height: 1.55;
+.dashboard-page__hero-identity {
+  h2 {
+    font-size: 1.2rem;
+    line-height: 1.2;
+    margin: 0;
+  }
 }
 
-.dashboard-page__card ul {
-  margin: 0;
-  padding-left: 1rem;
+.dashboard-page__hero-kpis {
+  align-items: center;
+  display: flex;
 }
 
-.dashboard-page__label {
-  color: #c75000;
-  font-size: 0.72rem;
+.dashboard-page__hero-kpi {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0 1.1rem;
+  text-align: center;
+
+  &:first-child {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  strong {
+    display: block;
+    font-size: 1.55rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.18rem;
+  }
+
+  span {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.65rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  &[data-tone='success'] strong { color: #4ade80; }
+  &[data-tone='warning'] strong { color: #fbbf24; }
+  &[data-tone='danger'] strong { color: #f87171; }
+}
+
+.dashboard-page__hero-end {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dashboard-page__hero-ctas {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.dashboard-page__sync {
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+}
+
+// ─── Estados de carregamento / erro ──────────────────────────────────────────
+
+.dashboard-page__state {
+  align-items: center;
+  background: rgba(23, 49, 59, 0.04);
+  border: 1px solid rgba(23, 49, 59, 0.1);
+  border-radius: 14px;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  padding: 0.9rem 1.1rem;
+
+  h3 {
+    font-size: 0.9rem;
+    margin: 0.15rem 0 0;
+  }
+}
+
+.dashboard-page__state-label {
+  color: var(--fl-muted);
+  display: block;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.dashboard-page__state--error {
+  border-color: rgba(177, 60, 48, 0.2);
+}
+
+// ─── Faixa de KPIs ───────────────────────────────────────────────────────────
+
+.dashboard-page__metrics {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 0.65rem;
+}
+
+.dashboard-page__metric,
+.dashboard-page__panel {
+  border: 1px solid rgba(23, 49, 59, 0.09);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.dashboard-page__metric {
+  strong {
+    color: var(--fl-ink);
+    display: block;
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  span {
+    color: var(--fl-muted);
+    display: block;
+    font-size: 0.75rem;
+    margin-top: 0.12rem;
+    margin-bottom: 0.6rem;
+  }
+}
+
+.dashboard-page__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.dashboard-page__pill {
+  border-radius: 5px;
+  font-size: 0.69rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.28rem 0.5rem;
+}
+
+.dashboard-page__pill--success {
+  background: rgba(16, 124, 65, 0.1);
+  color: #146537;
+}
+
+.dashboard-page__pill--warning {
+  background: rgba(199, 143, 0, 0.12);
+  color: #7a5a00;
+}
+
+.dashboard-page__pill--danger {
+  background: rgba(177, 60, 48, 0.1);
+  color: #8d2f27;
+}
+
+.dashboard-page__pill--neutral {
+  background: rgba(80, 97, 109, 0.09);
+  color: #3b4d58;
+}
+
+// ─── Grade principal ──────────────────────────────────────────────────────────
+
+.dashboard-page__content {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.9fr);
+}
+
+.dashboard-page__column {
+  align-content: start;
+  display: grid;
+  gap: 0.65rem;
+}
+
+// ─── Cabeçalho de painel ─────────────────────────────────────────────────────
+
+.dashboard-page__panel-header {
+  align-items: center;
+  border-bottom: 1px solid rgba(23, 49, 59, 0.07);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.55rem;
+
+  strong {
+    color: var(--fl-ink);
+    font-size: 0.9rem;
+  }
+}
+
+.dashboard-page__panel-meta {
+  background: rgba(23, 49, 59, 0.06);
+  border-radius: 5px;
+  color: var(--fl-muted);
+  flex-shrink: 0;
+  font-size: 0.69rem;
+  font-weight: 600;
+  padding: 0.28rem 0.55rem;
+  white-space: nowrap;
+}
+
+// ─── Linhas de alerta ────────────────────────────────────────────────────────
+
+.dashboard-page__card-kicker {
+  color: var(--fl-accent, #c75000);
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dashboard-page__alert-list {
+  display: grid;
+  gap: 0;
+}
+
+.dashboard-page__alert-row {
+  align-items: center;
+  border-bottom: 1px solid rgba(23, 49, 59, 0.06);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0.55rem 0;
+
+  &:last-child { border-bottom: none; }
+
+  h4 {
+    color: var(--fl-ink);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0.12rem 0 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.dashboard-page__alert-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-page__alert-row-meta {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.45rem;
+
+  small {
+    color: var(--fl-muted);
+    font-size: 0.69rem;
+    white-space: nowrap;
+  }
+}
+
+// ─── Feed de atividade ───────────────────────────────────────────────────────
+
+.dashboard-page__feed {
+  display: grid;
+  gap: 0;
+}
+
+.dashboard-page__feed-row {
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(23, 49, 59, 0.06);
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.55rem 0;
+
+  &:last-child { border-bottom: none; }
+}
+
+.dashboard-page__feed-dot {
+  background: rgba(199, 80, 0, 0.45);
+  border-radius: 50%;
+  flex-shrink: 0;
+  height: 7px;
+  margin-top: 0.42rem;
+  width: 7px;
+}
+
+.dashboard-page__feed-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-page__feed-main {
+  margin-bottom: 0.18rem;
+}
+
+.dashboard-page__feed-desc {
+  color: var(--fl-ink);
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 500;
+  margin-top: 0.08rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-page__feed-meta {
+  align-items: center;
+  color: var(--fl-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.69rem;
+  gap: 0.45rem;
+}
+
+// ─── Legenda de status (linha compacta) ──────────────────────────────────────
+
+.dashboard-page__status-legend {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+
+.dashboard-page__status-row {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dashboard-page__status-dot {
+  border-radius: 50%;
+  flex-shrink: 0;
+  height: 9px;
+  width: 9px;
+}
+
+.dashboard-page__status-label {
+  color: var(--fl-ink);
+  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.dashboard-page__status-count {
+  color: var(--fl-ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-width: 2ch;
+  text-align: right;
+}
+
+.dashboard-page__status-share {
+  color: var(--fl-muted);
+  font-size: 0.69rem;
+  min-width: 3.5ch;
+  text-align: right;
+}
+
+// ─── Utilitários ─────────────────────────────────────────────────────────────
+
+.dashboard-page__empty {
+  color: var(--fl-muted);
+  font-size: 0.82rem;
+  margin: 0;
+  padding: 0.4rem 0;
+}
+
+.dashboard-page__chart-note {
+  background: rgba(23, 49, 59, 0.04);
+  border-left: 3px solid rgba(199, 80, 0, 0.28);
+  border-radius: 0 6px 6px 0;
+  color: var(--fl-muted);
+  font-size: 0.75rem;
+  margin-bottom: 0.6rem;
+  padding: 0.4rem 0.65rem;
+}
+
+// ─── Responsivo ──────────────────────────────────────────────────────────────
+
+@media (max-width: 1220px) {
+  .dashboard-page__hero {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    row-gap: 0.75rem;
+  }
+
+  .dashboard-page__hero-kpis {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .dashboard-page__hero-end {
+    align-items: flex-end;
+    grid-column: 2;
+    grid-row: 1 / 3;
+    justify-content: center;
+  }
+
+  .dashboard-page__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-page__content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-page__hero {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+
+  .dashboard-page__hero-kpis,
+  .dashboard-page__hero-end {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .dashboard-page__hero-end {
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-page__hero-kpi:first-child {
+    padding-left: 0;
+  }
+
+  .dashboard-page__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-page__alert-row,
+  .dashboard-page__panel-header {
+    flex-wrap: wrap;
+  }
+
+  .dashboard-page__alert-row-meta {
+    flex-wrap: wrap;
+  }
 }

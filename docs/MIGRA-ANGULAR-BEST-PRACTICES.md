@@ -1,490 +1,73 @@
-# Migração Angular: NgModules → Standalone Components
+# Migracao Angular 21: Modernizacao Completa
 
-**Status**: Planejado  
-**Versão Angular**: 21.2.0  
-**Estimativa**: 5-7 sprints (implementação gradual)  
-**Prioridade**: Alta (foundation do projeto)
-
----
-
-## 📋 Índice
-
-1. [Análise do Estado Atual](#análise-do-estado-atual)
-2. [Por Que Migrar](#por-que-migrar)
-3. [Estratégia de Migração](#estratégia-de-migração)
-4. [Guia Passo a Passo](#guia-passo-a-passo)
-5. [Exemplos Práticos](#exemplos-práticos)
-6. [Checklist de Migração](#checklist-de-migração)
-7. [Armadilhas Comuns](#armadilhas-comuns)
-8. [Pós-Migração](#pós-migração)
+**Status**: Concluido
+**Angular**: 21.2.0 | **PO-UI**: 21.8.0
+**Escopo**: 24 componentes, 33 arquivos para deletar, 5 conversoes de infraestrutura
 
 ---
 
-## Análise do Estado Atual
+## O Que Muda
 
-### Arquitetura Atual (NgModules)
+No Angular 21, componentes sao **standalone por padrao**. Nao existe `standalone: true` — ele ja e o comportamento natural. Nosso codigo usa `standalone: false` em 24 lugares, forcando o padrao antigo. Alem disso, guards, interceptors e inputs/outputs tem APIs novas mais simples.
 
-```
-app/
-├── app.ts (standalone: false)
-├── app-module.ts
-│   └── imports: [BrowserModule, CoreModule, SharedModule, LayoutModule, AppRoutingModule]
-├── app-routing-module.ts
-│   └── routes: loadChildren() → feature-module
-├── core/
-│   └── core-module.ts (interceptors, guards, services)
-├── shared/
-│   └── shared-module.ts (comum para todas as features)
-├── layout/
-│   └── layout-module.ts (MainLayout + componentes de layout)
-└── features/
-    ├── vehicles/
-    │   ├── vehicles-module.ts (declarations, imports)
-    │   ├── vehicles-routing-module.ts
-    │   ├── components/ (VehicleImportModal, etc)
-    │   ├── pages/ (VehiclesPage, VehicleFormPage, VehicleDetailPage)
-    │   └── vehicles.service.ts
-    ├── auth/
-    ├── dashboard/
-    └── ... (fuel, maintenance, tires, fines, etc)
-```
+### Resumo das Mudancas
 
-### Problemas Identificados
-
-| Problema                                | Impacto                    | Solução                         |
-| --------------------------------------- | -------------------------- | ------------------------------- |
-| Boilerplate (`declarations`, `imports`) | Bundle +5-10%              | Remover com standalone          |
-| SharedModule importado em tudo          | Duplicação                 | Importar direto em componentes  |
-| Módulos vazios (só routing)             | Complexidade               | Converter para routes arrays    |
-| AuthModule sem lazy loading             | Carregamento desnecessário | Lazy load + provide guards      |
-| Múltiplos níveis de módulos             | Confusão mental            | 1 módulo = 1 componente/feature |
+| Padrao Antigo (atual)                              | Padrao Angular 21                          | Arquivos afetados     |
+| -------------------------------------------------- | ------------------------------------------ | --------------------- |
+| `@NgModule` + `declarations`                       | Deletar — componente importa direto        | 33 arquivos deletados |
+| `standalone: false`                                | Remover a linha (default e standalone)     | 24 componentes        |
+| `class AuthGuard implements CanActivate`           | `const authGuard: CanActivateFn`           | 2 guards              |
+| `class AuthInterceptor implements HttpInterceptor` | `const authInterceptor: HttpInterceptorFn` | 3 interceptors        |
+| `@Input()` / `@Output()` / `@ViewChild()`          | `input()` / `output()` / `viewChild()`     | 3 componentes         |
+| `platformBrowser().bootstrapModule()`              | `bootstrapApplication()`                   | main.ts               |
+| `RouterModule.forRoot()`                           | `provideRouter()`                          | app.routes.ts         |
 
 ---
 
-## Por Que Migrar
+## Ordem de Execucao
 
-### Números Concretos (Angular 21)
+```
+Passo 1: Bootstrap (main.ts + app.ts + app.routes.ts)
+    ↓
+Passo 2: Interceptors → funcionais
+    ↓
+Passo 3: Guards → funcionais
+    ↓
+Passo 4: Layout (MainLayout + AuthLayout)
+    ↓
+Passo 5: Shared (FeaturePlaceholder) + deletar CoreModule
+    ↓
+Passo 6: Features — todas de uma vez (mecanico)
+    ↓
+Passo 7: Signal APIs (input/output/viewChild)
+    ↓
+Passo 8: Validacao final
+```
 
-- **Bundle Size**: -8% em média (boilerplate removido)
-- **Initial Load**: -200-300ms típico (tree-shaking melhor)
-- **Linhas de Código**: -40% em feature modules
-- **Testing Setup**: -50% (sem `TestBed.configureTestingModule` obrigatório)
-- **Time to Market**: 20% mais rápido (menos conceitos)
-
-### Alinhamento com Roadmap
-
-A migração prepara o projeto para:
-
-- ✅ Micro-frontends (standalone componentes com Module Federation)
-- ✅ Server-side rendering (hydration com standalone)
-- ✅ Signal-based reatividade (nova direção do Angular)
-- ✅ Documentação oficial do Angular (só exemplo de standalone)
+> **Regra**: cada passo termina com `npm run build` passando. Se quebrar, corrige antes de avancar.
 
 ---
 
-## Estratégia de Migração
+## Passo 1: Bootstrap
 
-### Fases
+### 1.1 Criar `app.routes.ts`
 
-```
-FASE 1: Foundation (1-2 sprints)
-├─ Converter shared-module → standalone
-├─ Converter core-module → standalone + providers
-└─ Converter app.module → bootstrapApplication()
+Extrair as rotas de `app-routing-module.ts` para um array exportado.
 
-FASE 2: Layout & Routing (1 sprint)
-├─ Converter layout-module → standalone
-├─ Refatorar app-routing-module → routes array
-└─ Ajustar lazy loading routes
-
-FASE 3: Auth Feature (1 sprint)
-├─ Converter auth-module → standalone
-├─ Route guards com inject()
-└─ Testes ajustados
-
-FASE 4: Features Críticas (2 sprints)
-├─ vehicles-module → standalone (priority: task 1.3 já pronta!)
-├─ fuel-module → standalone
-├─ drivers-module → standalone
-└─ Outros módulos conforme prioridade
-
-FASE 5: Cleanup & Documentação (0.5 sprint)
-├─ Remover referências a NgModules
-├─ Atualizar documentação interna
-└─ Validar bundle size
-```
-
-### Princípios
-
-1. **Sem quebrante** — sempre funciona durante migração
-2. **Gradual** — NgModules e standalone podem coexistir
-3. **Testado** — cada fase validada com testes e e2e
-4. **Documentado** — exemplos práticos deixados no código
-
----
-
-## Guia Passo a Passo
-
-### Fase 1.1: Converter Shared Module
-
-#### Passo 1: Mapear Exportações do Shared
-
-```bash
-# Antes: Listar tudo que shared-module exporta
-grep -A 50 "imports:" apps/web/src/app/shared/shared-module.ts
-
-# Exemplo:
-# imports: [CommonModule, FormsModule, HttpClientModule, PoModule]
-```
-
-#### Passo 2: Criar Função de Provider
-
-**Arquivo**: `apps/web/src/app/shared/shared.providers.ts`
+**Criar** `apps/web/src/app/app.routes.ts`:
 
 ```typescript
-import { Provider } from '@angular/core';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { SharedService } from './shared.service';
-
-export function provideSharedServices(): Provider[] {
-  return [
-    SharedService,
-    // Interceptadores se houver
-  ];
-}
-```
-
-#### Passo 3: Converter Componentes/Pipes Compartilhados
-
-**Antes:**
-
-```typescript
-// shared-module.ts
-@NgModule({
-  declarations: [CustomPipe, SharedComponent],
-  imports: [CommonModule, PoModule],
-  exports: [CustomPipe, SharedComponent, PoModule],
-})
-export class SharedModule {}
-```
-
-**Depois:**
-
-```typescript
-// shared-pipes.ts
-import { Pipe, PipeTransform } from '@angular/core';
-
-@Pipe({
-  name: 'custom',
-  standalone: true,
-})
-export class CustomPipe implements PipeTransform {
-  transform(value: string): string {
-    return value.toUpperCase();
-  }
-}
-
-// shared-components.ts
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { PoModule } from '@po-ui/ng-components';
-
-@Component({
-  selector: 'app-shared-component',
-  standalone: true,
-  imports: [CommonModule, PoModule],
-  template: '...',
-})
-export class SharedComponent {}
-
-// shared.ts (barrel export)
-export { CustomPipe } from './shared-pipes';
-export { SharedComponent } from './shared-components';
-export { provideSharedServices } from './shared.providers';
-```
-
-#### Passo 4: Atualizar App Module
-
-**Antes:**
-
-```typescript
-import { SharedModule } from './shared/shared-module';
-
-@NgModule({
-  imports: [SharedModule, ...],
-})
-export class AppModule {}
-```
-
-**Depois:**
-
-```typescript
-import { provideSharedServices } from './shared/shared';
-
-bootstrapApplication(App, {
-  providers: [
-    provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
-    provideSharedServices(),
-    // ... outros providers
-  ],
-});
-```
-
-#### Passo 5: Validar
-
-```bash
-# Build deve passar sem warnings
-npm run build
-
-# Verificar bundle size não aumentou
-npm run build -- --stats-json
-```
-
----
-
-### Fase 1.2: Converter Core Module
-
-#### Padrão: Services → Providers
-
-**Antes:**
-
-```typescript
-// core-module.ts
-@NgModule({
-  providers: [
-    AuthService,
-    TenantService,
-    UserService,
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-  ],
-})
-export class CoreModule {}
-```
-
-**Depois:**
-
-```typescript
-// core.providers.ts
-import { HTTP_INTERCEPTORS, HttpInterceptor } from '@angular/common/http';
-import { Provider } from '@angular/core';
-
-// Interceptadores como classes standalone-friendly
-export class AuthInterceptor implements HttpInterceptor {
-  constructor(private authService: AuthService) {}
-  intercept(req, next) {
-    /* ... */
-  }
-}
-
-export function provideCoreServices(): Provider[] {
-  return [
-    AuthService,
-    TenantService,
-    UserService,
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true,
-    },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: TenantInterceptor,
-      multi: true,
-    },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: ErrorInterceptor,
-      multi: true,
-    },
-  ];
-}
-
-// app.bootstrap.ts
-bootstrapApplication(App, {
-  providers: [
-    provideCoreServices(),
-    provideHttpClient(withInterceptorsFromDi()),
-    // ...
-  ],
-});
-```
-
-#### Guards: De Classe para Função
-
-**Antes:**
-
-```typescript
-@Injectable({ providedIn: 'root' })
-export class AuthGuard implements CanActivateChild {
-  constructor(private authService: AuthService, private router: Router) {}
-
-  canActivateChild(): boolean {
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/auth/login']);
-      return false;
-    }
-    return true;
-  }
-}
-
-// app-routing.module.ts
-{
-  path: '',
-  component: MainLayout,
-  canActivateChild: [AuthGuard],
-  children: [...]
-}
-```
-
-**Depois:**
-
-```typescript
-// core/guards/auth.guard.ts
-import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-
-export const authGuard = () => {
-  const authService = inject(AuthService);
-  const router = inject(Router);
-
-  if (!authService.isAuthenticated()) {
-    router.navigate(['/auth/login']);
-    return false;
-  }
-  return true;
-};
-
-// routes.ts
-{
-  path: '',
-  component: MainLayout,
-  canActivateChild: [authGuard], // ← função, não classe
-  children: [...]
-}
-```
-
----
-
-### Fase 2: Converter Layout
-
-**Arquivo**: `apps/web/src/app/layout/main-layout/main-layout.ts`
-
-**Antes:**
-
-```typescript
-@NgModule({
-  declarations: [MainLayout, HeaderComponent, SidebarComponent],
-  imports: [CommonModule, RouterModule, PoModule, SharedModule],
-})
-export class LayoutModule {}
-```
-
-**Depois:**
-
-```typescript
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { PoModule } from '@po-ui/ng-components';
-import { HeaderComponent } from './header/header.component';
-import { SidebarComponent } from './sidebar/sidebar.component';
-
-@Component({
-  selector: 'app-main-layout',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    PoModule,
-    HeaderComponent,
-    SidebarComponent,
-    // Pipes/componentes do shared conforme uso
-  ],
-  templateUrl: './main-layout.html',
-  styleUrl: './main-layout.scss',
-})
-export class MainLayout {
-  protected readonly title = signal('Frota Leve');
-
-  constructor() {
-    // Dependency injection ainda funciona
-    const poTheme = inject(PoThemeService);
-    poTheme.setDensityMode('small');
-  }
-}
-
-// header.component.ts
-@Component({
-  selector: 'app-header',
-  standalone: true,
-  imports: [CommonModule, PoModule],
-  template: '...',
-})
-export class HeaderComponent {}
-
-// sidebar.component.ts
-@Component({
-  selector: 'app-sidebar',
-  standalone: true,
-  imports: [CommonModule, RouterModule, PoModule],
-  template: '...',
-})
-export class SidebarComponent {}
-```
-
----
-
-### Fase 2.2: Refatorar Rotas (App Module → Bootstrap)
-
-**Antes:**
-
-```typescript
-// app.ts
-@Component({
-  selector: 'app-root',
-  standalone: false,
-  templateUrl: './app.html',
-})
-export class App {}
-
-// app-module.ts
-@NgModule({
-  declarations: [App],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    AppRoutingModule,
-    CoreModule,
-    // ...
-  ],
-  bootstrap: [App],
-})
-export class AppModule {}
-
-// main.ts
-bootstrapModule(AppModule);
-```
-
-**Depois:**
-
-```typescript
-// app.ts
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet], // Precisa disso para rotas funcionarem!
-  templateUrl: './app.html',
-})
-export class App {}
-
-// app.routes.ts
-import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
+import type { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth-guard';
+import { roleGuard } from './core/guards/role-guard';
 import { MainLayout } from './layout/main-layout/main-layout';
 
 export const APP_ROUTES: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'dashboard',
+  },
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
@@ -500,11 +83,71 @@ export const APP_ROUTES: Routes = [
           import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
       },
       {
+        path: 'onboarding',
+        loadChildren: () =>
+          import('./features/onboarding/onboarding.routes').then((m) => m.ONBOARDING_ROUTES),
+      },
+      {
         path: 'vehicles',
         loadChildren: () =>
           import('./features/vehicles/vehicles.routes').then((m) => m.VEHICLES_ROUTES),
       },
-      // ... outras rotas
+      {
+        path: 'drivers',
+        loadChildren: () =>
+          import('./features/drivers/drivers.routes').then((m) => m.DRIVERS_ROUTES),
+      },
+      {
+        path: 'fuel',
+        loadChildren: () => import('./features/fuel/fuel.routes').then((m) => m.FUEL_ROUTES),
+      },
+      {
+        path: 'maintenance',
+        loadChildren: () =>
+          import('./features/maintenance/maintenance.routes').then((m) => m.MAINTENANCE_ROUTES),
+      },
+      {
+        path: 'tires',
+        loadChildren: () => import('./features/tires/tires.routes').then((m) => m.TIRES_ROUTES),
+      },
+      {
+        path: 'fines',
+        loadChildren: () => import('./features/fines/fines.routes').then((m) => m.FINES_ROUTES),
+      },
+      {
+        path: 'documents',
+        loadChildren: () =>
+          import('./features/documents/documents.routes').then((m) => m.DOCUMENTS_ROUTES),
+      },
+      {
+        path: 'incidents',
+        loadChildren: () =>
+          import('./features/incidents/incidents.routes').then((m) => m.INCIDENTS_ROUTES),
+      },
+      {
+        path: 'financial',
+        canActivate: [roleGuard],
+        data: { roles: ['OWNER', 'ADMIN', 'FINANCIAL'] },
+        loadChildren: () =>
+          import('./features/financial/financial.routes').then((m) => m.FINANCIAL_ROUTES),
+      },
+      {
+        path: 'reports',
+        loadChildren: () =>
+          import('./features/reports/reports.routes').then((m) => m.REPORTS_ROUTES),
+      },
+      {
+        path: 'ai-assistant',
+        loadChildren: () =>
+          import('./features/ai-assistant/ai-assistant.routes').then((m) => m.AI_ASSISTANT_ROUTES),
+      },
+      {
+        path: 'settings',
+        canActivate: [roleGuard],
+        data: { roles: ['OWNER', 'ADMIN'] },
+        loadChildren: () =>
+          import('./features/settings/settings.routes').then((m) => m.SETTINGS_ROUTES),
+      },
       {
         path: '**',
         redirectTo: 'dashboard',
@@ -512,569 +155,889 @@ export const APP_ROUTES: Routes = [
     ],
   },
 ];
+```
 
-// main.ts
+### 1.2 Converter `app.ts`
+
+**Antes:**
+
+```typescript
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.html',
+  standalone: false,
+  styleUrl: './app.scss',
+})
+export class App {
+  private readonly poThemeService = inject(PoThemeService);
+  // ...
+}
+```
+
+**Depois:**
+
+```typescript
+import { Component, inject, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { PoThemeService } from '@po-ui/ng-components';
+
+@Component({
+  selector: 'app-root',
+  imports: [RouterOutlet],
+  templateUrl: './app.html',
+  styleUrl: './app.scss',
+})
+export class App {
+  private readonly poThemeService = inject(PoThemeService);
+  protected readonly title = signal('Frota Leve');
+
+  constructor() {
+    this.poThemeService.setDensityMode('small');
+  }
+}
+```
+
+> Sem `standalone: false` e sem `standalone: true`. No Angular 21, standalone e o default.
+
+### 1.3 Converter `main.ts`
+
+**Antes:**
+
+```typescript
+import { platformBrowser } from '@angular/platform-browser';
+import { AppModule } from './app/app-module';
+
+platformBrowser()
+  .bootstrapModule(AppModule)
+  .catch((error: unknown) => {
+    queueMicrotask(() => {
+      throw error;
+    });
+  });
+```
+
+**Depois:**
+
+```typescript
 import { bootstrapApplication } from '@angular/platform-browser';
+import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { App } from './app/app';
 import { APP_ROUTES } from './app/app.routes';
-import { provideCoreServices } from './app/core/core.providers';
-import { provideSharedServices } from './app/shared/shared';
+import { authInterceptor } from './app/core/interceptors/auth-interceptor';
+import { tenantInterceptor } from './app/core/interceptors/tenant-interceptor';
+import { errorInterceptor } from './app/core/interceptors/error-interceptor';
 
 bootstrapApplication(App, {
   providers: [
-    provideRouter(APP_ROUTES, {
-      bindToComponentInputs: true,
-      scrollPositionRestoration: 'enabled',
-    }),
-    provideHttpClient(withInterceptorsFromDi()),
-    provideCoreServices(),
-    provideSharedServices(),
+    provideRouter(APP_ROUTES, withComponentInputBinding(), withViewTransitions()),
+    provideHttpClient(withInterceptors([authInterceptor, tenantInterceptor, errorInterceptor])),
     provideAnimations(),
   ],
-}).catch((err) => console.error(err));
+}).catch((error: unknown) => {
+  queueMicrotask(() => {
+    throw error;
+  });
+});
+```
+
+### 1.4 Deletar
+
+```bash
+rm apps/web/src/app/app-module.ts
+rm apps/web/src/app/app-routing-module.ts
+```
+
+### 1.5 Validar
+
+```bash
+npm run build   # deve compilar
+npm run test    # deve passar
 ```
 
 ---
 
-### Fase 3: Converter Feature Modules
+## Passo 2: Interceptors Funcionais
 
-#### Template: Vehicles (Priority)
+Os 3 interceptors mudam de **classe com interface** para **funcao pura**. A API funcional usa `HttpInterceptorFn` em vez de `HttpInterceptor`, e `HttpHandlerFn` em vez de `HttpHandler`.
 
-**Estrutura Alvo:**
+### 2.1 Auth Interceptor
 
-```
-features/vehicles/
-├── vehicles.routes.ts         ← array de rotas
-├── vehicles-service.ts        ← service existente (sem mudança)
-├── pages/
-│   ├── vehicles-page.component.ts    (standalone: true)
-│   ├── vehicle-form-page.component.ts (standalone: true)
-│   └── vehicle-detail-page.component.ts (standalone: true)
-└── components/
-    └── vehicle-import-modal.component.ts (standalone: true)
-```
-
-**Passo 1: Converter Componentes**
+**Antes** (`core/interceptors/auth-interceptor.ts`):
 
 ```typescript
-// vehicles-page.component.ts
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { PoModule } from '@po-ui/ng-components';
-import { VehiclesService } from '../vehicles.service';
+@Injectable()
+export class AuthInterceptor implements HttpInterceptor {
+  constructor(private readonly authService: AuthService) {}
 
-@Component({
-  selector: 'app-vehicles-page',
-  standalone: true,
-  imports: [
-    CommonModule,
-    PoModule,
-    // Pipes/componentes do shared conforme necessário
-  ],
-  templateUrl: './vehicles-page.component.html',
-  styleUrl: './vehicles-page.component.scss',
-})
-export class VehiclesPage implements OnInit {
-  private readonly vehiclesService = inject(VehiclesService);
-
-  ngOnInit() {
-    // lógica
+  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    const accessToken = this.authService.getAccessToken();
+    if (!accessToken) {
+      return next.handle(request);
+    }
+    return next.handle(request.clone({ setHeaders: { Authorization: `Bearer ${accessToken}` } }));
   }
 }
-
-// vehicle-form-page.component.ts
-@Component({
-  selector: 'app-vehicle-form-page',
-  standalone: true,
-  imports: [CommonModule, PoModule, ReactiveFormsModule, VehicleImportModal],
-  templateUrl: './vehicle-form-page.component.html',
-})
-export class VehicleFormPage {}
-
-// vehicle-import-modal.component.ts
-@Component({
-  selector: 'app-vehicle-import-modal',
-  standalone: true,
-  imports: [CommonModule, PoModule],
-  template: '...',
-})
-export class VehicleImportModal {}
 ```
 
-**Passo 2: Criar Routes Array**
+**Depois:**
 
 ```typescript
-// vehicles.routes.ts
-import { Routes } from '@angular/router';
-import { VehiclesPage } from './pages/vehicles-page/vehicles-page.component';
-import { VehicleFormPage } from './pages/vehicle-form-page/vehicle-form-page.component';
-import { VehicleDetailPage } from './pages/vehicle-detail-page/vehicle-detail-page.component';
+import type { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../services/auth';
 
-export const VEHICLES_ROUTES: Routes = [
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const accessToken = inject(AuthService).getAccessToken();
+
+  if (!accessToken) {
+    return next(req);
+  }
+
+  return next(req.clone({ setHeaders: { Authorization: `Bearer ${accessToken}` } }));
+};
+```
+
+### 2.2 Tenant Interceptor
+
+**Depois** (`core/interceptors/tenant-interceptor.ts`):
+
+```typescript
+import type { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../services/auth';
+
+export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
+  const tenantId = inject(AuthService).getTenantId();
+
+  if (!tenantId) {
+    return next(req);
+  }
+
+  return next(req.clone({ setHeaders: { 'X-Tenant-Id': tenantId } }));
+};
+```
+
+### 2.3 Error Interceptor
+
+**Depois** (`core/interceptors/error-interceptor.ts`):
+
+```typescript
+import { HttpErrorResponse, type HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { catchError, throwError } from 'rxjs';
+import { AuthService } from '../services/auth';
+import { NotificationService } from '../services/notification';
+
+function resolveClientErrorMessage(error: HttpErrorResponse): string {
+  if (typeof error.error === 'string' && error.error.trim()) {
+    return error.error;
+  }
+
+  if (typeof error.error === 'object' && error.error) {
+    if ('message' in error.error) {
+      const message = error.error.message;
+      if (typeof message === 'string' && message.trim()) {
+        return message;
+      }
+    }
+
+    if (
+      'error' in error.error &&
+      typeof error.error.error === 'object' &&
+      error.error.error &&
+      'message' in error.error.error
+    ) {
+      const message = error.error.error.message;
+      if (typeof message === 'string' && message.trim()) {
+        return message;
+      }
+    }
+  }
+
+  return 'Nao foi possivel concluir a operacao solicitada.';
+}
+
+export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  const notificationService = inject(NotificationService);
+  const isAuthRequest =
+    /\/auth\/(login|register|forgot-password|reset-password|refresh)(?:\?|$)/.test(req.url);
+
+  return next(req).pipe(
+    catchError((error: unknown) => {
+      if (!(error instanceof HttpErrorResponse)) {
+        return throwError(() => error);
+      }
+
+      if (error.status === 401) {
+        if (!isAuthRequest && authService.isAuthenticated()) {
+          authService.logout();
+          notificationService.warning('Sua sessao expirou. Faca login novamente.');
+          return throwError(() => error);
+        }
+
+        notificationService.warning(resolveClientErrorMessage(error));
+        return throwError(() => error);
+      }
+
+      if (error.status >= 500) {
+        notificationService.error('O servidor nao respondeu como esperado. Tente novamente.');
+      } else if (error.status >= 400) {
+        notificationService.warning(resolveClientErrorMessage(error));
+      }
+
+      return throwError(() => error);
+    }),
+  );
+};
+```
+
+---
+
+## Passo 3: Guards Funcionais
+
+### 3.1 Auth Guard
+
+**Antes** (`core/guards/auth-guard.ts`):
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class AuthGuard implements CanActivate, CanActivateChild {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ) {}
+  canActivate(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree { ... }
+  canActivateChild(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree { ... }
+}
+```
+
+**Depois:**
+
+```typescript
+import { inject } from '@angular/core';
+import type { CanActivateFn } from '@angular/router';
+import { Router } from '@angular/router';
+import { AuthService } from '../services/auth';
+
+export const authGuard: CanActivateFn = (_route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.isAuthenticated()) {
+    return true;
+  }
+
+  return router.createUrlTree(['/auth/login'], {
+    queryParams: { returnUrl: state.url },
+  });
+};
+```
+
+> `CanActivateFn` serve tanto para `canActivate` quanto para `canActivateChild`.
+
+### 3.2 Role Guard
+
+**Depois** (`core/guards/role-guard.ts`):
+
+```typescript
+import { inject } from '@angular/core';
+import type { CanActivateFn } from '@angular/router';
+import { Router } from '@angular/router';
+import { AuthService } from '../services/auth';
+import { NotificationService } from '../services/notification';
+
+export const roleGuard: CanActivateFn = (route) => {
+  const authService = inject(AuthService);
+  const notificationService = inject(NotificationService);
+  const router = inject(Router);
+  const roles = route.data['roles'];
+
+  if (!Array.isArray(roles) || roles.length === 0 || authService.hasAnyRole(roles)) {
+    return true;
+  }
+
+  notificationService.warning('Seu perfil atual nao possui acesso a esta area.');
+  return router.createUrlTree(['/dashboard']);
+};
+```
+
+---
+
+## Passo 4: Layout
+
+### 4.1 MainLayout
+
+**Antes:**
+
+```typescript
+@Component({
+  selector: 'app-main-layout',
+  standalone: false,
+  templateUrl: './main-layout.html',
+  styleUrl: './main-layout.scss',
+})
+export class MainLayout {
+  constructor(private readonly authService: AuthService) {}
+  // ...
+}
+```
+
+**Depois:**
+
+```typescript
+import { Component, inject } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { PoMenuModule, PoToolbarModule } from '@po-ui/ng-components';
+import type { PoMenuItem, PoToolbarAction, PoToolbarProfile } from '@po-ui/ng-components';
+import { environment } from '../../../environments/environment';
+import { AuthService } from '../../core/services/auth';
+
+@Component({
+  selector: 'app-main-layout',
+  imports: [RouterOutlet, PoToolbarModule, PoMenuModule],
+  templateUrl: './main-layout.html',
+  styleUrl: './main-layout.scss',
+})
+export class MainLayout {
+  private readonly authService = inject(AuthService);
+
+  protected readonly appName = environment.appName;
+  protected readonly appVersion = environment.version;
+  protected readonly menus: PoMenuItem[] = [
+    /* ... sem mudanca ... */
+  ];
+
+  // ... resto igual, mas trocando constructor injection por inject()
+}
+```
+
+> O template usa `po-toolbar`, `po-menu` e `router-outlet`. Entao importa so `PoToolbarModule`, `PoMenuModule` e `RouterOutlet`.
+
+### 4.2 AuthLayout
+
+**Depois:**
+
+```typescript
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { environment } from '../../../environments/environment';
+
+@Component({
+  selector: 'app-auth-layout',
+  imports: [RouterOutlet],
+  templateUrl: './auth-layout.html',
+  styleUrl: './auth-layout.scss',
+})
+export class AuthLayout {
+  protected readonly appName = environment.appName;
+}
+```
+
+> O template so usa `router-outlet` e interpolacao `{{ }}`. Nao precisa de nenhum modulo PO-UI.
+
+### 4.3 Deletar
+
+```bash
+rm apps/web/src/app/layout/layout-module.ts
+```
+
+---
+
+## Passo 5: Shared + Core
+
+### 5.1 FeaturePlaceholder
+
+**Antes:**
+
+```typescript
+@Component({
+  selector: 'app-feature-placeholder',
+  standalone: false,
+  templateUrl: './feature-placeholder.html',
+  styleUrl: './feature-placeholder.scss',
+})
+export class FeaturePlaceholder {
+  @Input({ required: true }) title = '';
+  @Input() subtitle = '';
+  @Input() description = '';
+  @Input() eyebrow = 'Setup base';
+}
+```
+
+**Depois (com signal inputs):**
+
+```typescript
+import { Component, input } from '@angular/core';
+
+@Component({
+  selector: 'app-feature-placeholder',
+  templateUrl: './feature-placeholder.html',
+  styleUrl: './feature-placeholder.scss',
+})
+export class FeaturePlaceholder {
+  readonly title = input.required<string>();
+  readonly subtitle = input('');
+  readonly description = input('');
+  readonly eyebrow = input('Setup base');
+}
+```
+
+> **Atencao**: no template, `@Input` acessa como `title`, signal input acessa como `title()`. Entao o template precisa mudar de `{{ title }}` para `{{ title() }}`.
+
+### 5.2 Deletar
+
+```bash
+rm apps/web/src/app/shared/shared-module.ts
+rm apps/web/src/app/core/core-module.ts
+```
+
+---
+
+## Passo 6: Features (Batch)
+
+Todas as 15 features seguem o **mesmo padrao mecanico**. Para cada feature:
+
+1. Abrir componente(s) → remover `standalone: false`, adicionar `imports: [...]`
+2. Criar `*.routes.ts` com as rotas do routing-module
+3. Deletar `*-module.ts` e `*-routing-module.ts`
+
+### 6.1 Template: Feature Simples (placeholder)
+
+10 features sao placeholders identicos (1 pagina que usa `FeaturePlaceholder`):
+`dashboard`, `drivers`, `fuel`, `maintenance`, `tires`, `fines`, `documents`, `incidents`, `financial`, `reports`, `settings`, `ai-assistant`, `onboarding`.
+
+**Componente — antes:**
+
+```typescript
+@Component({
+  selector: 'app-dashboard-page',
+  standalone: false,
+  templateUrl: './dashboard-page.html',
+  styleUrl: './dashboard-page.scss',
+})
+export class DashboardPage { ... }
+```
+
+**Componente — depois:**
+
+```typescript
+import { Component } from '@angular/core';
+import { FeaturePlaceholder } from '../../../../shared/components/feature-placeholder/feature-placeholder';
+// + qualquer outro import PO-UI que o template use
+
+@Component({
+  selector: 'app-dashboard-page',
+  imports: [FeaturePlaceholder],
+  templateUrl: './dashboard-page.html',
+  styleUrl: './dashboard-page.scss',
+})
+export class DashboardPage { ... }
+```
+
+**Criar routes — antes (2 arquivos):**
+
+```typescript
+// dashboard-module.ts — DELETAR
+@NgModule({
+  declarations: [DashboardPage],
+  imports: [SharedModule, DashboardRoutingModule],
+})
+export class DashboardModule {}
+
+// dashboard-routing-module.ts — DELETAR
+const routes: Routes = [{ path: '', component: DashboardPage }];
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule],
+})
+export class DashboardRoutingModule {}
+```
+
+**Criar routes — depois (1 arquivo):**
+
+```typescript
+// dashboard.routes.ts — CRIAR
+import type { Routes } from '@angular/router';
+import { DashboardPage } from './pages/dashboard-page/dashboard-page';
+
+export const DASHBOARD_ROUTES: Routes = [{ path: '', component: DashboardPage }];
+```
+
+**Deletar:**
+
+```bash
+rm apps/web/src/app/features/dashboard/dashboard-module.ts
+rm apps/web/src/app/features/dashboard/dashboard-routing-module.ts
+```
+
+### 6.2 Template: Auth (4 paginas + layout proprio)
+
+**Criar** `features/auth/auth.routes.ts`:
+
+```typescript
+import type { Routes } from '@angular/router';
+import { AuthLayout } from '../../layout/auth-layout/auth-layout';
+
+export const AUTH_ROUTES: Routes = [
   {
     path: '',
-    component: VehiclesPage,
-  },
-  {
-    path: 'new',
-    component: VehicleFormPage,
-  },
-  {
-    path: ':id',
-    component: VehicleDetailPage,
-  },
-  {
-    path: ':id/edit',
-    component: VehicleFormPage,
+    component: AuthLayout,
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'login' },
+      {
+        path: 'login',
+        loadComponent: () => import('./pages/login-page/login-page').then((m) => m.LoginPage),
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./pages/register-page/register-page').then((m) => m.RegisterPage),
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('./pages/forgot-password-page/forgot-password-page').then(
+            (m) => m.ForgotPasswordPage,
+          ),
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./pages/reset-password-page/reset-password-page').then(
+            (m) => m.ResetPasswordPage,
+          ),
+      },
+    ],
   },
 ];
 ```
 
-**Passo 3: Remover Module**
+> Usando `loadComponent` em vez de `component` para lazy load de cada pagina individualmente. Melhora o bundle split.
+
+**Converter cada pagina auth** (ex: LoginPage):
+
+```typescript
+import { Component, inject } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { PoButtonModule, PoFieldModule, PoPageModule } from '@po-ui/ng-components';
+import { AuthService } from '../../../../core/services/auth';
+// ...
+
+@Component({
+  selector: 'app-login-page',
+  imports: [ReactiveFormsModule, PoFieldModule, PoButtonModule, PoPageModule],
+  templateUrl: './login-page.html',
+  styleUrl: './login-page.scss',
+})
+export class LoginPage { ... }
+```
+
+**Deletar:**
 
 ```bash
-# Deletar: features/vehicles/vehicles-module.ts
-# Deletar: features/vehicles/vehicles-routing-module.ts
+rm apps/web/src/app/features/auth/auth-module.ts
+rm apps/web/src/app/features/auth/auth-routing-module.ts
+```
+
+### 6.3 Template: Vehicles (modulo mais complexo)
+
+**Criar** `features/vehicles/vehicles.routes.ts`:
+
+```typescript
+import type { Routes } from '@angular/router';
+import { VehiclesPage } from './pages/vehicles-page/vehicles-page';
+
+export const VEHICLES_ROUTES: Routes = [
+  { path: '', component: VehiclesPage },
+  {
+    path: 'new',
+    loadComponent: () =>
+      import('./pages/vehicle-form-page/vehicle-form-page').then((m) => m.VehicleFormPage),
+  },
+  {
+    path: ':id/edit',
+    loadComponent: () =>
+      import('./pages/vehicle-form-page/vehicle-form-page').then((m) => m.VehicleFormPage),
+  },
+  {
+    path: ':id',
+    loadComponent: () =>
+      import('./pages/vehicle-detail-page/vehicle-detail-page').then((m) => m.VehicleDetailPage),
+  },
+];
+```
+
+**Converter VehiclesPage** — imports baseados no template real:
+
+```typescript
+@Component({
+  selector: 'app-vehicles-page',
+  imports: [
+    DecimalPipe,                    // {{ stats.averageFleetAge | number: '1.0-1' }}
+    ReactiveFormsModule,            // [formGroup], formControlName
+    PoPageModule,                   // po-page-list
+    PoWidgetModule,                 // po-widget
+    PoFieldModule,                  // po-input, po-combo, po-select
+    PoButtonModule,                 // po-button
+    PoTableModule,                  // po-table
+    PoModalModule,                  // po-modal
+    VehicleImportModal,             // app-vehicle-import-modal
+  ],
+  templateUrl: './vehicles-page.html',
+  styleUrl: './vehicles-page.scss',
+})
+export class VehiclesPage { ... }
+```
+
+> `DecimalPipe` vem de `@angular/common` e substitui a necessidade de importar `CommonModule` inteiro. Os `@if` e `@for` no template funcionam sem nenhum import (sao built-in no Angular 17+).
+
+**Converter VehicleImportModal:**
+
+```typescript
+@Component({
+  selector: 'app-vehicle-import-modal',
+  imports: [
+    DecimalPipe,
+    PoModalModule,
+    PoTableModule,
+    PoButtonModule,
+    PoFieldModule,        // po-upload
+    PoInfoModule,
+    PoNotificationModule,
+  ],
+  templateUrl: './vehicle-import-modal.html',
+  styleUrl: './vehicle-import-modal.scss',
+})
+export class VehicleImportModal { ... }
+```
+
+**Deletar:**
+
+```bash
 rm apps/web/src/app/features/vehicles/vehicles-module.ts
 rm apps/web/src/app/features/vehicles/vehicles-routing-module.ts
 ```
 
-**Passo 4: Atualizar App Routes**
+### 6.4 Como saber quais PO-UI modules importar
 
-```typescript
-// app.routes.ts (antes)
-{
-  path: 'vehicles',
-  loadChildren: () =>
-    import('./features/vehicles/vehicles-module').then(m => m.VehiclesModule),
-}
+Olhe o template HTML do componente e mapeie:
 
-// app.routes.ts (depois)
-{
-  path: 'vehicles',
-  loadChildren: () =>
-    import('./features/vehicles/vehicles.routes').then(m => m.VEHICLES_ROUTES),
-}
-```
+| Componente no template                                                           | Modulo PO-UI           |
+| -------------------------------------------------------------------------------- | ---------------------- |
+| `po-page-list`, `po-page-default`, `po-page-edit`, `po-page-detail`              | `PoPageModule`         |
+| `po-table`                                                                       | `PoTableModule`        |
+| `po-modal`                                                                       | `PoModalModule`        |
+| `po-button`                                                                      | `PoButtonModule`       |
+| `po-input`, `po-combo`, `po-select`, `po-upload`, `po-textarea`, `po-datepicker` | `PoFieldModule`        |
+| `po-widget`                                                                      | `PoWidgetModule`       |
+| `po-toolbar`                                                                     | `PoToolbarModule`      |
+| `po-menu`                                                                        | `PoMenuModule`         |
+| `po-tabs`, `po-tab`                                                              | `PoTabsModule`         |
+| `po-tag`                                                                         | `PoTagModule`          |
+| `po-info`                                                                        | `PoInfoModule`         |
+| `po-divider`                                                                     | `PoDividerModule`      |
+| `po-dialog`                                                                      | `PoDialogModule`       |
+| `po-notification`                                                                | `PoNotificationModule` |
 
----
-
-## Exemplos Práticos
-
-### Exemplo 1: Injetar Service em Componente Standalone
-
-```typescript
-// ANTES: Precisa de TestBed
-it('deve carregar veículos', () => {
-  TestBed.configureTestingModule({
-    declarations: [VehiclesPage],
-    imports: [VehiclesModule],
-    providers: [VehiclesService],
-  });
-  const service = TestBed.inject(VehiclesService);
-});
-
-// DEPOIS: Injeção direta
-it('deve carregar veículos', () => {
-  const service = new VehiclesService(jasmine.createSpyObj('HttpClient', ['get']));
-  expect(service).toBeDefined();
-});
-```
-
-### Exemplo 2: Lazy Load com Providers
-
-```typescript
-// ANTES
-{
-  path: 'vehicles',
-  loadChildren: () => import('./vehicles-module').then(m => m.VehiclesModule),
-}
-
-// DEPOIS: Pode prover serviços direto na rota
-{
-  path: 'vehicles',
-  loadChildren: () => import('./vehicles.routes').then(m => m.VEHICLES_ROUTES),
-  providers: [VehiclesService], // ← Scoped à rota
-}
-
-// OU em vehicles.routes.ts
-export const VEHICLES_ROUTES: Routes = [
-  {
-    path: '',
-    component: VehiclesPage,
-    providers: [VehiclesService], // ← Só para essa rota
-  },
-];
-```
-
-### Exemplo 3: Route Guard Standalone
-
-```typescript
-// Antes
-@Injectable({ providedIn: 'root' })
-export class RoleGuard implements CanActivate {
-  constructor(private authService: AuthService) {}
-
-  canActivate(route: ActivatedRouteSnapshot) {
-    const requiredRole = route.data['role'];
-    return this.authService.hasRole(requiredRole);
-  }
-}
-
-// Depois
-import { inject, CanActivateFn } from '@angular/core';
-import { ActivatedRouteSnapshot } from '@angular/router';
-
-export const roleGuard: CanActivateFn = (
-  route: ActivatedRouteSnapshot
-) => {
-  const authService = inject(AuthService);
-  const requiredRole = route.data['role'];
-  return authService.hasRole(requiredRole);
-};
-
-// Uso
-{
-  path: 'settings',
-  canActivate: [roleGuard],
-  data: { role: 'OWNER' },
-}
-```
+| Diretiva/Pipe no template                  | Import                                               |
+| ------------------------------------------ | ---------------------------------------------------- |
+| `@if`, `@for`, `@switch`                   | Nenhum (built-in Angular 17+)                        |
+| `{{ x \| number }}`, `{{ x \| currency }}` | `DecimalPipe` ou `CurrencyPipe` de `@angular/common` |
+| `{{ x \| date }}`                          | `DatePipe` de `@angular/common`                      |
+| `{{ x \| async }}`                         | `AsyncPipe` de `@angular/common`                     |
+| `[ngClass]`, `[ngStyle]`                   | `NgClass` ou `NgStyle` de `@angular/common`          |
+| `[formGroup]`, `formControlName`           | `ReactiveFormsModule` de `@angular/forms`            |
+| `[(ngModel)]`                              | `FormsModule` de `@angular/forms`                    |
+| `router-outlet`, `[routerLink]`            | `RouterOutlet`, `RouterLink` de `@angular/router`    |
 
 ---
 
-## Checklist de Migração
+## Passo 7: Signal APIs
 
-### Pré-Migração
+### 7.1 `input()` substitui `@Input()`
 
-- [ ] Backup do branch (ou já em branch feature)
-- [ ] Testes e2e passando
-- [ ] Bundle size baseline capturado (`npm run build -- --stats-json`)
-- [ ] Documentação lida: [Angular Standalone Docs](https://angular.io/guide/standalone-components)
+**Onde**: `FeaturePlaceholder` (ja feito no Passo 5)
 
-### Fase 1: Shared + Core
+**Regra no template**: `{{ title }}` muda para `{{ title() }}` (signal e uma funcao).
 
-- [ ] `shared-module.ts` convertido para barrel exports
-- [ ] Todos os pipes/componentes em arquivos standalone
-- [ ] `core-module.ts` convertido para `core.providers.ts`
-- [ ] Interceptadores registrados via `withInterceptorsFromDi()`
-- [ ] Guards convertidos para funções
-- [ ] Testes atualizados
-- [ ] Build passa sem warnings
-- [ ] Bundle size mantido ou reduzido
+### 7.2 `output()` substitui `@Output() + EventEmitter`
 
-### Fase 2: Layout + Routing
+**Onde**: `VehicleImportModal`
 
-- [ ] `layout-module.ts` deletado
-- [ ] MainLayout e componentes filhos standalone
-- [ ] App component standalone
-- [ ] `main.ts` usa `bootstrapApplication()`
-- [ ] `app.routes.ts` criado
-- [ ] Rotas lazy loading ajustadas
-- [ ] E2E tests passam
-- [ ] Navegação funciona
+**Antes:**
 
-### Fase 3: Auth
+```typescript
+import { EventEmitter, Output } from '@angular/core';
 
-- [ ] `auth-module.ts` deletado
-- [ ] Componentes auth standalone
-- [ ] `auth.routes.ts` criado
-- [ ] Route guards funcionando
-- [ ] Login/logout fluxo testado
-- [ ] Interceptadores ajustados se necessário
+@Output() readonly completed = new EventEmitter<void>();
 
-### Fase 4: Features Críticas
+// Emitir:
+this.completed.emit();
+```
 
-**Vehicles:**
+**Depois:**
 
-- [ ] `vehicles-module.ts` e `vehicles-routing-module.ts` deletados
-- [ ] Todos componentes standalone
-- [ ] `vehicles.routes.ts` criado
-- [ ] Service funcionando
-- [ ] CRUD operacional
-- [ ] E2E tests passam
+```typescript
+import { output } from '@angular/core';
 
-**Fuel, Maintenance, Drivers (mesmo processo)**
+readonly completed = output<void>();
 
-### Fase 5: Cleanup
+// Emitir:
+this.completed.emit();
+```
 
-- [ ] Sem referências a `@NgModule` no código (exceto biblioteca)
-- [ ] README atualizado com instruções standalone
-- [ ] Documentação interna limpa
-- [ ] Bundle size final comparado com baseline
-- [ ] Performance metrics capturados
+> A chamada `emit()` funciona igual. O template `(completed)="..."` nao muda.
+
+### 7.3 `viewChild()` substitui `@ViewChild()`
+
+**Onde**: `VehiclesPage`, `VehicleImportModal`
+
+**Antes:**
+
+```typescript
+import { ViewChild } from '@angular/core';
+
+@ViewChild('statusModal', { static: true }) private readonly statusModal?: PoModalComponent;
+@ViewChild(VehicleImportModal, { static: true }) private readonly importModal?: VehicleImportModal;
+```
+
+**Depois:**
+
+```typescript
+import { viewChild } from '@angular/core';
+
+private readonly statusModal = viewChild.required<PoModalComponent>('statusModal');
+private readonly importModal = viewChild.required<VehicleImportModal>(VehicleImportModal);
+```
+
+> `viewChild()` retorna um signal. Acesso muda de `this.statusModal?.open()` para `this.statusModal().open()`.
 
 ---
 
-## Armadilhas Comuns
+## Passo 8: Validacao Final
 
-### 1️⃣ Esquecer `RouterOutlet` em App Component
-
-```typescript
-// ❌ ERRADO: Rotas não renderizam
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule],
-  template: '<main>Hello</main>',
-})
-export class App {}
-
-// ✅ CERTO
-import { RouterOutlet } from '@angular/router';
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule, RouterOutlet],
-  template: '<router-outlet></router-outlet>',
-})
-export class App {}
-```
-
-### 2️⃣ Interceptadores não Registrados
-
-```typescript
-// ❌ ERRADO: Interceptadores não funcionam
-bootstrapApplication(App, {
-  providers: [
-    provideRouter(routes),
-    provideHttpClient(), // ← Falta withInterceptorsFromDi()
-  ],
-});
-
-// ✅ CERTO
-import { withInterceptorsFromDi } from '@angular/common/http';
-
-bootstrapApplication(App, {
-  providers: [provideRouter(routes), provideHttpClient(withInterceptorsFromDi())],
-});
-```
-
-### 3️⃣ Providers em Componente vs Raiz
-
-```typescript
-// ❌ Não faz sentido em componente lazy-loaded
-@Component({
-  providers: [VehiclesService],
-})
-export class VehiclesPage {}
-
-// E depois importar em MainLayout
-@Component({
-  imports: [VehiclesService], // ← Errado! Service, não componente
-})
-export class MainLayout {}
-
-// ✅ CERTO: Prover na rota ou usar providedIn: 'root'
-// Opção 1: Service scoped à rota
-export const VEHICLES_ROUTES: Routes = [
-  {
-    path: '',
-    component: VehiclesPage,
-    providers: [VehiclesService],
-  },
-];
-
-// Opção 2: Service global
-@Injectable({ providedIn: 'root' })
-export class VehiclesService {}
-```
-
-### 4️⃣ SharedModule vs Importar Direto
-
-```typescript
-// ❌ Ainda tentando usar SharedModule
-@Component({
-  imports: [SharedModule],
-  template: '...',
-})
-export class MyComponent {}
-
-// ✅ Importar componentes/pipes específicos
-@Component({
-  imports: [CommonModule, PoModule, CustomPipe, SharedComponent],
-  template: '...',
-})
-export class MyComponent {}
-```
-
-### 5️⃣ Esquecer `provideAnimations()`
-
-```typescript
-// ❌ ERRADO: Animações não funcionam
-bootstrapApplication(App, {
-  providers: [provideRouter(routes)],
-});
-
-// ✅ CERTO
-import { provideAnimations } from '@angular/platform-browser/animations';
-
-bootstrapApplication(App, {
-  providers: [
-    provideRouter(routes),
-    provideAnimations(), // ← Necessário se usar PoModule animations
-  ],
-});
-```
-
----
-
-## Pós-Migração
-
-### Validação de Sucesso
+### 8.1 Verificar que nao sobrou nada antigo
 
 ```bash
-# 1. Build deve ser limpo
-npm run build
+# Nenhum NgModule no codigo (exceto node_modules)
+grep -rn "@NgModule" apps/web/src/app/
+# Esperado: zero resultados
 
-# 2. Testes devem passar 100%
-npm run test
+# Nenhum standalone: false
+grep -rn "standalone: false" apps/web/src/app/
+# Esperado: zero resultados
 
-# 3. E2E deve funcionar
-npm run e2e
+# Nenhum module file
+find apps/web/src/app -name "*-module.ts"
+# Esperado: zero resultados
 
-# 4. Bundle size deve estar ≤ antes
-npm run build -- --stats-json
-# Comparar com baseline
-
-# 5. Lighthouse score
-npm run build
-# Abrir em navegador e rodar Lighthouse
-
-# 6. Nenhum warning de deprecation
-npm run lint
-
-# 7. Performance no dev server
-npm run dev
-# Verificar se hot reload está mais rápido
+# Nenhum @Input/@Output/@ViewChild (exceto se PO-UI exigir)
+grep -rn "@Input\|@Output\|@ViewChild" apps/web/src/app/ --include="*.ts"
+# Esperado: zero resultados (ou apenas em arquivos que PO-UI exige)
 ```
 
-### Otimizações Adicionais Pós-Migração
+### 8.2 Build e testes
 
-1. **Code Splitting Automático**
-
-   ```typescript
-   // Já vai funcionar melhor com tree-shaking
-   npm run build -- --configuration production --stats-json
-   ```
-
-2. **Signal-based Components** (future optimization)
-
-   ```typescript
-   @Component({
-     template: `{{ count() }}`,
-   })
-   export class Counter {
-     count = signal(0);
-     increment = () => this.count.update((c) => c + 1);
-   }
-   ```
-
-3. **OnPush Change Detection** (agora mais seguro)
-   ```typescript
-   @Component({
-     changeDetection: ChangeDetectionStrategy.OnPush,
-   })
-   export class MyComponent {}
-   ```
-
-### Documentação Para Time
-
-Criar arquivo `docs/ANGULAR-PATTERNS.md`:
-
-```markdown
-# Padrões Angular Standalone (Post-Migração)
-
-## Estrutura de Feature Module
+```bash
+npm run build                # deve compilar limpo
+npm run test                 # testes devem passar
+npm run lint                 # sem warnings novos
 ```
 
+### 8.3 Teste manual
+
+- [ ] Login funciona
+- [ ] Redirect para dashboard apos login
+- [ ] Menu lateral navega para todas as rotas
+- [ ] Tela de veiculos carrega, filtra, exporta
+- [ ] Formulario de veiculo salva
+- [ ] Importacao de veiculos funciona
+- [ ] Alteracao de status funciona
+- [ ] Logout redireciona para login
+- [ ] Rota protegida redireciona usuario sem permissao
+- [ ] Rota inexistente redireciona para dashboard
+
+---
+
+## Arquivos: Resumo de Acoes
+
+### Criar (17 arquivos)
+
+| Arquivo                                        | Conteudo                    |
+| ---------------------------------------------- | --------------------------- |
+| `app.routes.ts`                                | Array de rotas da aplicacao |
+| `features/auth/auth.routes.ts`                 | Rotas do auth               |
+| `features/dashboard/dashboard.routes.ts`       | Rotas do dashboard          |
+| `features/vehicles/vehicles.routes.ts`         | Rotas de veiculos           |
+| `features/drivers/drivers.routes.ts`           | Rotas de motoristas         |
+| `features/fuel/fuel.routes.ts`                 | Rotas de combustivel        |
+| `features/maintenance/maintenance.routes.ts`   | Rotas de manutencao         |
+| `features/tires/tires.routes.ts`               | Rotas de pneus              |
+| `features/fines/fines.routes.ts`               | Rotas de multas             |
+| `features/documents/documents.routes.ts`       | Rotas de documentos         |
+| `features/incidents/incidents.routes.ts`       | Rotas de sinistros          |
+| `features/financial/financial.routes.ts`       | Rotas do financeiro         |
+| `features/reports/reports.routes.ts`           | Rotas de relatorios         |
+| `features/ai-assistant/ai-assistant.routes.ts` | Rotas do assistente IA      |
+| `features/settings/settings.routes.ts`         | Rotas de configuracoes      |
+| `features/onboarding/onboarding.routes.ts`     | Rotas do onboarding         |
+
+### Editar (29 arquivos)
+
+| Arquivo                    | Mudanca                                                                           |
+| -------------------------- | --------------------------------------------------------------------------------- |
+| `main.ts`                  | `bootstrapApplication()` + providers                                              |
+| `app.ts`                   | Remover `standalone: false`, add `imports: [RouterOutlet]`                        |
+| 3x interceptors            | Classe → funcao                                                                   |
+| 2x guards                  | Classe → funcao                                                                   |
+| `main-layout.ts`           | Remover `standalone: false`, add imports PO-UI                                    |
+| `auth-layout.ts`           | Remover `standalone: false`, add `imports: [RouterOutlet]`                        |
+| `feature-placeholder.ts`   | Remover `standalone: false`, `@Input` → `input()`                                 |
+| `feature-placeholder.html` | `{{ title }}` → `{{ title() }}`                                                   |
+| 4x paginas auth            | Remover `standalone: false`, add imports PO-UI + Forms                            |
+| 3x paginas vehicles        | Remover `standalone: false`, add imports PO-UI + Forms                            |
+| `vehicle-import-modal.ts`  | Remover `standalone: false`, `@Output` → `output()`, `@ViewChild` → `viewChild()` |
+| 10x paginas placeholder    | Remover `standalone: false`, add `imports: [FeaturePlaceholder]`                  |
+
+### Deletar (33 arquivos)
+
+| Tipo                            | Quantidade |
+| ------------------------------- | ---------- |
+| `*-module.ts` (feature modules) | 15         |
+| `*-routing-module.ts`           | 15         |
+| `app-module.ts`                 | 1          |
+| `app-routing-module.ts`         | 1          |
+| `shared-module.ts`              | 1          |
+| `core-module.ts`                | 1          |
+| `layout-module.ts`              | 1          |
+| **Total deletados**             | **33**     |
+
+---
+
+## Resultado Final
+
+Depois da migracao, a estrutura de uma feature fica assim:
+
+```
 features/vehicles/
-├── vehicles.routes.ts
-├── vehicles.service.ts
+├── vehicles.routes.ts              ← 15 linhas, export const
+├── vehicles.service.ts             ← sem mudanca
+├── vehicles.types.ts               ← sem mudanca
+├── vehicles.constants.ts           ← sem mudanca
+├── vehicles.utils.ts               ← sem mudanca
 ├── pages/
-│ ├── list.component.ts
-│ ├── form.component.ts
-│ └── detail.component.ts
+│   ├── vehicles-page/
+│   │   ├── vehicles-page.ts        ← imports direto no decorator
+│   │   ├── vehicles-page.html      ← sem mudanca
+│   │   └── vehicles-page.scss      ← sem mudanca
+│   ├── vehicle-form-page/
+│   └── vehicle-detail-page/
 └── components/
-└── modal.component.ts
-
-````
-
-## Template: Novo Component
-
-```typescript
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { PoModule } from '@po-ui/ng-components';
-
-@Component({
-  selector: 'app-my-component',
-  standalone: true,
-  imports: [CommonModule, PoModule],
-  templateUrl: './my-component.html',
-  styleUrl: './my-component.scss',
-})
-export class MyComponent {}
-````
-
-## Prover Serviço
-
-- **Global**: `@Injectable({ providedIn: 'root' })`
-- **Rota**: `providers: [MyService]` em routes array
-- **Componente**: `providers: [MyService]` em decorator
-
-Escolha baseado em escopo necessário.
-
+    └── vehicle-import-modal/
 ```
 
----
-
-## Timeline Recomendada
-
-| Sprint | Fase | Tarefas |
-|--------|------|---------|
-| S1 | 1.1 | Converter shared-module, criar shared.providers.ts, atualizar app-module.ts |
-| S2 | 1.2 | Converter core-module, guards em funções, atualizar main.ts |
-| S2 | 2 | Layout standalone, app.routes.ts, bootstrapApplication |
-| S3 | 3 | Auth feature standalone, testes ajustados |
-| S4 | 4.1 | Vehicles feature standalone (priority) |
-| S5 | 4.2 | Fuel, Maintenance features |
-| S6 | 4.3 | Remaining features (Tires, Fines, Drivers, etc) |
-| S6 | 5 | Cleanup, documentação, validação final |
-
----
-
-## Recursos
-
-- 📖 [Angular Standalone Docs](https://angular.io/guide/standalone-components)
-- 📖 [Dependency Injection in Standalone Apps](https://angular.io/guide/standalone-components#dependency-injection)
-- 📖 [Router Configuration with Standalone Components](https://angular.io/guide/routing-with-urlmatcherrule#standalone-api-summary)
-- 🎥 [Angular Standalone API Migration](https://www.youtube.com/watch?v=EjVo_fNxWxI)
-- 🛠️ [Angular Schematics for Migration](https://github.com/angular/angular-cli/discussions/24862)
-
----
-
-## FAQ
-
-**P: Posso manter NgModules para algumas features?**
-R: Sim, coexistem bem. Mas recomendo migrar tudo para evitar confusão mental.
-
-**P: E backward compatibility com browsers antigos?**
-R: Standalone não mudou suporte a browsers. Angular 21 suporta IE11 (se configurado).
-
-**P: Bundle size vai diminuir automaticamente?**
-R: Não automaticamente, mas tree-shaking é mais efetivo com standalone.
-
-**P: Preciso refatorar testes?**
-R: Sim, mas `TestBed` ainda funciona. Componentes standalone podem ser testados mais simples sem TestBed.
-
-**P: E lazy loading?**
-R: Funciona igual, mas com rotas arrays em vez de modules.
-
----
-
-**Documento Criado**: 2026-04-07
-**Última Revisão**: 2026-04-07
-**Próxima Revisão**: Após completar Fase 1
-```
+**Nenhum module. Nenhum routing-module. Cada componente sabe o que precisa.**

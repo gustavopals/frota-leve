@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { PoButtonModule, PoFieldModule } from '@po-ui/ng-components';
 import { finalize } from 'rxjs';
 import {
   cnpjValidator,
@@ -12,7 +13,7 @@ import { NotificationService } from '../../../../core/services/notification';
 
 @Component({
   selector: 'app-register-page',
-  standalone: false,
+  imports: [ReactiveFormsModule, RouterLink, PoFieldModule, PoButtonModule],
   templateUrl: './register-page.html',
   styleUrl: './register-page.scss',
 })
