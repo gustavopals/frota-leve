@@ -6,28 +6,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Frota Leve** (future brand: Frotafy) is a multi-tenant SaaS platform for fleet management, targeting Brazilian companies. See `IDEIA.MD` for full product vision and `ROADMAP.MD` for the detailed development plan (~295 subtasks across 6 phases).
 
-## Current State
+## Architecture
 
-The project is being **restructured**. The `main` branch contains an initial implementation with NestJS + Angular + Tailwind CSS. The `ROADMAP.MD` defines a new architecture using Express + Angular + PO-UI + Turborepo monorepo. When implementing, follow the ROADMAP unless explicitly told otherwise.
+TypeScript monorepo using **npm workspaces** + **Turborepo**. Node.js >= 20, npm >= 10.
 
-### Existing code (main branch)
+```
+apps/api         Express 4 + Prisma backend
+apps/web         Angular 21 + PO-UI 21 frontend
+apps/mobile      PWA placeholder (TASK 4.1)
+packages/database  Prisma schema, migrations, seeds, Docker services
+packages/shared    Enums, Zod DTOs, types, utils, constants — used by both api and web
+packages/ai        AI integration placeholder (TASK 3.1)
+```
 
-- **Backend**: NestJS + Prisma + PostgreSQL (`backend/`)
-- **Frontend**: Angular 18 + Tailwind CSS + Capacitor (`frontend/`)
-- Modules already scaffolded: auth, vehicles, fuel, maintenance, checklist, tenants, users
+**Path aliases** (defined in `tsconfig.base.json`):
 
-### Target architecture (per ROADMAP)
+- `@frota-leve/shared` → `packages/shared`
+- `@frota-leve/database` → `packages/database`
+- `@frota-leve/ai` → `packages/ai`
 
-- **Monorepo**: Turborepo with `apps/web`, `apps/api`, `apps/mobile`, `packages/shared`, `packages/database`, `packages/ai`
-- **Backend**: Node.js + Express + Prisma + PostgreSQL + Redis
-- **Frontend**: Angular 21 with PO-UI (TOTVS design system) — **Standalone Components** (see below)
-- **Mobile**: Angular PWA (offline-first)
-- **AI**: Claude API integration (`packages/ai`)
-- **Payments**: Stripe Billing
+### API Module Pattern (`apps/api/src/modules/<feature>/`)
+
+Each feature module follows this structure:
+
+- `<feature>.routes.ts` — Express router with middleware chain
+- `<feature>.controller.ts` — request handlers, extracts tenant/user context
+- `<feature>.service.ts` — business logic, always scoped by `tenantId`
+- `<feature>.validators.ts` — Zod schemas (imports shared DTOs from `@frota-leve/shared`)
+- `<feature>.types.ts` — TypeScript types specific to the module
+
+Middleware stack order in `apps/api/src/app.ts`: requestId → rateLimiter → morgan → body parsing → routes → errorHandler.
+
+Auth flow: `authenticate` (JWT) → `tenantMiddleware` (loads tenant, checks status) → `authorize(...roles)` (RBAC).
 
 ### Angular Architecture (Standalone — Angular 21)
 
-The frontend uses **standalone components** exclusively (Angular 21 default). There are **zero NgModules** in the codebase.
+The frontend uses **standalone components** exclusively (Angular 21 default). There are **zero NgModules**.
 
 **Rules:**
 
@@ -40,39 +54,70 @@ The frontend uses **standalone components** exclusively (Angular 21 default). Th
 7. **Bootstrap**: `bootstrapApplication()` with `provideRouter()` and `provideHttpClient(withInterceptors(...))`
 8. **Lazy loading**: `loadChildren: () => import('./feature.routes').then(m => m.FEATURE_ROUTES)`
 
+Frontend structure: `app/core/` (guards, interceptors, services), `app/features/` (lazy-loaded feature routes).
+
 **Reference**: `docs/MIGRA-ANGULAR-BEST-PRACTICES.md`
 
 ## Build & Run Commands
 
-### Backend (current - NestJS)
+All commands run from the **monorepo root**.
+
+### Development
 
 ```bash
-cd backend
-npm run start:dev          # Dev server with watch
-npm run build              # Production build
-npm run test               # Unit tests (Jest)
-npm run test:e2e           # E2E tests
-npm run lint               # ESLint
-npx prisma migrate dev     # Run migrations
-npx prisma migrate dev --name <name>  # Create migration
-npx prisma generate        # Generate Prisma client
-npx prisma studio          # DB GUI
-npm run seed               # Seed database (ts-node prisma/seed.ts)
+npm run dev                # All workspaces (api + web + services)
+npm run dev:backend        # API + database services only
+npm run services:up        # Start PostgreSQL + Redis containers
+npm run services:down      # Stop containers
+npm run services:logs      # Container logs
 ```
 
-### Frontend (current - Angular)
+### Workspace-Specific
 
 ```bash
-cd frontend
-npm start                  # Dev server (ng serve)
-npm run build              # Production build
-npm test                   # Unit tests
+npm run dev --workspace=apps/api       # API only
+npm run dev --workspace=apps/web       # Frontend only
+npm test --workspace=packages/shared   # Test one package
+npm run lint --workspace=apps/api      # Lint one workspace
 ```
 
-### Docker (PostgreSQL + pgAdmin)
+### Database (Prisma)
 
 ```bash
-npm run docker:up          # Start containers (from root)
+npm run db:migrate -- --name <name>   # Create & run migration
+npm run db:seed                        # Seed dev data
+npm run db:reset                       # Reset DB + re-seed (destructive!)
+npm run db:studio                      # Prisma Studio GUI
+```
+
+### Build, Test, Lint
+
+```bash
+npm run build              # Build all (turbo)
+npm run test               # Test all (turbo)
+npm run lint               # Lint all (turbo)
+npm run type-check         # Type-check all (turbo)
+npm run format             # Prettier format all
+npm run format:check       # Prettier check (CI)
+```
+
+### Running a Single Test
+
+```bash
+# API unit test
+cd apps/api && npx jest path/to/file.spec.ts
+
+# API e2e test
+cd apps/api && npx jest --config jest.e2e.config.cjs path/to/file.e2e-spec.ts
+
+# Shared package test
+cd packages/shared && npx jest path/to/file.spec.ts
+```
+
+### Docker (Production)
+
+```bash
+docker compose -f docker-compose.prod.yml up -d   # Full prod stack
 ```
 
 ## Conventions
@@ -87,9 +132,14 @@ npm run docker:up          # Start containers (from root)
 - Comments in **Portuguese** for business logic, **English** for infrastructure code
 - Error messages in **Portuguese** (user-facing)
 
-### Commits
+### Commits & Hooks
 
 Conventional commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`
+
+Pre-commit hook (`.husky/pre-commit`) runs:
+
+1. **lint-staged** — ESLint fix + Prettier on staged `.ts/.tsx` files
+2. **type-check on changed workspaces** — `tools/run-type-check-on-staged.mjs` intelligently checks only affected packages
 
 ### Branches
 
@@ -97,35 +147,42 @@ Conventional commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`
 
 ### Tests
 
-Place `.spec.ts` files next to the file being tested.
+Place `.spec.ts` files next to the file being tested. E2E tests use `.e2e-spec.ts`.
 
 ### Angular Conventions
 
 - **Standalone by default**: Never use `standalone: false` or `@NgModule`
-- **Imports in Decorator**: Explicitly list all dependencies in `imports: [...]`
-- **Routes as Arrays**: Export `Routes` arrays (e.g., `export const MY_ROUTES: Routes = [...]`)
-- **Lazy Loading**: Use `loadChildren: () => import(...).then(m => m.MY_ROUTES)`
 - **Signal APIs**: Use `input()`, `output()`, `viewChild()` — not `@Input`, `@Output`, `@ViewChild`
 - **Functional Guards/Interceptors**: `CanActivateFn`, `HttpInterceptorFn`
 - **File Naming**: `component.ts` (not `component.component.ts`)
+- **Change Detection**: Prefer `ChangeDetectionStrategy.OnPush`
+
+### ESLint Rules
+
+- `@typescript-eslint/no-explicit-any`: **error** — no `any` allowed
+- `@typescript-eslint/consistent-type-imports`: **warn** — use `import type` for type-only imports
+- `no-console`: **warn** — use Winston logger instead
+- Unused vars prefixed with `_` are allowed
 
 ## Multi-Tenancy (Critical)
 
 Every database query and API endpoint MUST be scoped by `tenantId`. This is the most important architectural constraint:
 
-- **Backend controllers**: Always extract `tenantId` from the authenticated user context
-- **Backend services**: Always include `where: { tenantId }` in Prisma queries
+- **API controllers**: Extract tenant context via `getActorContext(req)` which provides `tenantId`, plan, userId, IP, user-agent
+- **API services**: Always include `where: { tenantId }` in Prisma queries
+- **Middleware**: `tenantMiddleware` blocks requests for SUSPENDED/CANCELLED tenants
+- **Plan enforcement**: Middleware checks tenant plan limits (max vehicles, max users, feature gates)
 - **Never** allow cross-tenant data access
 - Database uses `@@index([tenantId])` on all tenant-scoped tables
 
 ## Key Architectural Decisions
 
-1. **Validation**: zod on backend for DTO validation; shared schemas in `packages/shared` (target). Current code uses `class-validator` (NestJS).
-2. **Error handling**: Custom `AppError` with code, message, and HTTP status. Standardized response: `{ success: boolean, data?, error?: { code, message, details } }`
-3. **Auth**: JWT + Refresh Token with rotation. Refresh tokens blacklisted in Redis.
-4. **Logging**: Winston with levels (error, warn, info, debug) and correlation ID per request.
+1. **Validation**: Zod schemas in `packages/shared/src/dtos/`, shared by frontend and backend. Backend validates via `validate(schema, target)` middleware.
+2. **Error handling**: Custom error classes in `apps/api/src/shared/errors/` (`NotFoundError`, `ValidationError`, `ForbiddenError`, `PlanLimitError`, etc.). Standardized response: `{ success: boolean, data?, error?: { code, message, details } }`
+3. **Auth**: JWT access token (15m) + refresh token (7d) with rotation. Refresh tokens blacklisted in Redis. Password hashing: bcryptjs with 12 salt rounds.
+4. **Logging**: Winston with correlation ID per request. Human-readable in dev, JSON in prod. Silent in test.
 5. **API responses**: Paginated lists return `{ data, meta: { page, limit, total, totalPages } }`.
-6. **Plan enforcement**: Middleware checks tenant plan limits (max vehicles, max users, feature gates) before allowing operations.
+6. **Environment config**: `apps/api/src/config/env.ts` validates all env vars with Zod at boot — process exits on missing required vars.
 
 ## ROADMAP Task Reference
 
