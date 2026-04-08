@@ -1,5 +1,6 @@
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { formatCurrency } from '@frota-leve/shared/src/utils/format.utils';
 import type { PoPageAction } from '@po-ui/ng-components';
 import {
@@ -14,6 +15,9 @@ import { finalize } from 'rxjs';
 import { NotificationService } from '../../../../core/services/notification';
 import { DocumentsService } from '../../documents.service';
 import type {
+  DocumentCalendarDay,
+  DocumentCalendarItem,
+  DocumentCalendarMonth,
   DocumentPriorityItem,
   DocumentRecord,
   DocumentTone,
@@ -21,11 +25,17 @@ import type {
   PendingDocumentsResponse,
 } from '../../documents.types';
 import {
+  DOCUMENT_CALENDAR_WEEKDAY_LABELS,
+  buildDocumentCalendarMonth,
   buildDocumentTypeCards,
   buildPriorityItems,
   createEmptyPendingDocumentsResponse,
   formatDocumentDate,
   formatDocumentDateTime,
+  formatDocumentLongDate,
+  getDocumentDateKey,
+  shiftDocumentMonth,
+  startOfDocumentMonth,
 } from '../../documents.utils';
 
 type DocumentsHeroMetric = {
@@ -50,15 +60,21 @@ type DocumentsMetricCard = {
 })
 export class DocumentsPage {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
   private readonly documentsService = inject(DocumentsService);
   private readonly notificationService = inject(NotificationService);
 
+  readonly calendarWeekdayLabels = DOCUMENT_CALENDAR_WEEKDAY_LABELS;
   documents: DocumentRecord[] = [];
   pending: PendingDocumentsResponse = createEmptyPendingDocumentsResponse();
   heroMetrics: DocumentsHeroMetric[] = [];
   metricCards: DocumentsMetricCard[] = [];
   typeCards: DocumentTypeCardSummary[] = [];
   priorityItems: DocumentPriorityItem[] = [];
+  calendarReferenceDate = startOfDocumentMonth(new Date());
+  calendarMonth: DocumentCalendarMonth = buildDocumentCalendarMonth([], this.calendarReferenceDate);
+  selectedCalendarDateKey: string | null = null;
+  selectedCalendarDay: DocumentCalendarDay | null = null;
   isLoading = false;
   hasLoadError = false;
   hasLoadedOnce = false;
@@ -69,11 +85,18 @@ export class DocumentsPage {
   }
 
   protected get pageSubtitle(): string {
-    return 'Cards por tipo com semaforo de risco e leitura rapida da fila de renovacoes.';
+    return 'Cards por tipo, fila prioritaria e calendario mensal para organizar renovacoes da operacao.';
   }
 
   protected get pageActions(): PoPageAction[] {
     return [
+      {
+        label: 'Novo documento',
+        icon: 'an an-plus',
+        action: () => {
+          void this.router.navigate(['/documents/new']);
+        },
+      },
       {
         label: this.isLoading ? 'Atualizando...' : 'Atualizar painel',
         disabled: this.isLoading,
@@ -140,6 +163,59 @@ export class DocumentsPage {
     return this.documents.reduce((total, document) => total + (document.cost ?? 0), 0);
   }
 
+  protected get calendarRangeLabel(): string {
+    if (this.calendarMonth.totalItems === 0) {
+      return 'Sem vencimentos no mes visivel.';
+    }
+
+    if (
+      this.calendarMonth.firstDueDate &&
+      this.calendarMonth.lastDueDate &&
+      this.calendarMonth.firstDueDate === this.calendarMonth.lastDueDate
+    ) {
+      return `Tudo concentrado em ${formatDocumentDate(this.calendarMonth.firstDueDate)}.`;
+    }
+
+    return `Janela do mes entre ${formatDocumentDate(this.calendarMonth.firstDueDate)} e ${formatDocumentDate(this.calendarMonth.lastDueDate)}.`;
+  }
+
+  protected get selectedCalendarDayLabel(): string {
+    if (!this.selectedCalendarDay) {
+      return 'Selecione um dia';
+    }
+
+    return formatDocumentLongDate(this.selectedCalendarDay.isoDate);
+  }
+
+  protected get selectedCalendarDayDescription(): string {
+    if (!this.selectedCalendarDay) {
+      return 'Clique em um dia do calendario para ver os documentos agendados.';
+    }
+
+    if (this.selectedCalendarDay.total === 0) {
+      return 'Nenhum vencimento cai nesta data dentro do mes visivel.';
+    }
+
+    if (this.selectedCalendarDay.total === 1) {
+      return '1 documento vence nesta data.';
+    }
+
+    return `${this.selectedCalendarDay.total} documentos vencem nesta data.`;
+  }
+
+  protected get selectedCalendarItems(): DocumentCalendarItem[] {
+    return this.selectedCalendarDay?.items ?? [];
+  }
+
+  protected get isCurrentCalendarMonth(): boolean {
+    const today = new Date();
+
+    return (
+      today.getFullYear() === this.calendarReferenceDate.getFullYear() &&
+      today.getMonth() === this.calendarReferenceDate.getMonth()
+    );
+  }
+
   protected reload(): void {
     this.loadPanel();
   }
@@ -163,6 +239,50 @@ export class DocumentsPage {
       default:
         return PoTagType.Neutral;
     }
+  }
+
+  protected previousCalendarMonth(): void {
+    this.calendarReferenceDate = shiftDocumentMonth(this.calendarReferenceDate, -1);
+    this.rebuildCalendarView();
+  }
+
+  protected nextCalendarMonth(): void {
+    this.calendarReferenceDate = shiftDocumentMonth(this.calendarReferenceDate, 1);
+    this.rebuildCalendarView();
+  }
+
+  protected goToCurrentCalendarMonth(): void {
+    this.calendarReferenceDate = startOfDocumentMonth(new Date());
+    this.rebuildCalendarView();
+  }
+
+  protected selectCalendarDay(day: DocumentCalendarDay): void {
+    this.selectedCalendarDateKey = day.dateKey;
+    this.selectedCalendarDay = day;
+  }
+
+  protected previewCalendarItems(day: DocumentCalendarDay): DocumentCalendarItem[] {
+    return day.items.slice(0, 2);
+  }
+
+  protected getCalendarOverflowCount(day: DocumentCalendarDay): number {
+    return Math.max(day.total - 2, 0);
+  }
+
+  protected openDocumentEditor(documentId: string): void {
+    void this.router.navigate(['/documents', documentId, 'edit']);
+  }
+
+  protected getCalendarDayAriaLabel(day: DocumentCalendarDay): string {
+    if (day.total === 0) {
+      return `${formatDocumentLongDate(day.isoDate)} sem vencimentos`;
+    }
+
+    if (day.total === 1) {
+      return `${formatDocumentLongDate(day.isoDate)} com 1 vencimento`;
+    }
+
+    return `${formatDocumentLongDate(day.isoDate)} com ${day.total} vencimentos`;
   }
 
   private loadPanel(): void {
@@ -203,6 +323,7 @@ export class DocumentsPage {
     this.priorityItems = buildPriorityItems(this.documents, this.pending).slice(0, 8);
     this.heroMetrics = this.buildHeroMetrics();
     this.metricCards = this.buildMetricCards();
+    this.rebuildCalendarView();
   }
 
   private buildHeroMetrics(): DocumentsHeroMetric[] {
@@ -259,5 +380,24 @@ export class DocumentsPage {
         tone: this.expiredDocumentsCount > 0 ? 'danger' : 'success',
       },
     ];
+  }
+
+  private rebuildCalendarView(): void {
+    this.calendarMonth = buildDocumentCalendarMonth(this.documents, this.calendarReferenceDate);
+
+    const days = this.calendarMonth.weeks.flatMap((week) => week.days);
+    const previousSelection = this.selectedCalendarDateKey
+      ? days.find((day) => day.dateKey === this.selectedCalendarDateKey)
+      : null;
+    const todayKey = getDocumentDateKey(new Date());
+    const todayDay = days.find((day) => day.dateKey === todayKey && day.isCurrentMonth) ?? null;
+    const todayWithItems = todayDay?.total ? todayDay : null;
+    const firstDayWithItems = days.find((day) => day.isCurrentMonth && day.total > 0) ?? null;
+    const firstCurrentMonthDay = days.find((day) => day.isCurrentMonth) ?? null;
+    const resolvedDay =
+      previousSelection ?? todayWithItems ?? firstDayWithItems ?? todayDay ?? firstCurrentMonthDay;
+
+    this.selectedCalendarDateKey = resolvedDay?.dateKey ?? null;
+    this.selectedCalendarDay = resolvedDay;
   }
 }

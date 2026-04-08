@@ -5,3 +5,7 @@ export * from './fuel-record.dto';
 export * from './maintenance-plan.dto';
 export * from './service-order.dto';
 export * from './document.dto';
+export * from './fine.dto';
+export * from './tire.dto';
+export * from './tire-inspection.dto';
+export * from './tire-move.dto';

@@ -17,6 +17,8 @@ import {
 } from './modules/fuel-records/fuel-records.routes';
 import { maintenanceRouter } from './modules/maintenance/maintenance.routes';
 import { documentsRouter } from './modules/documents/documents.routes';
+import { finesRouter } from './modules/fines/fines.routes';
+import { tiresRouter } from './modules/tires/tires.routes';
 import { logger } from './config/logger';
 import { env } from './config/env';
 import { NotFoundError } from './shared/errors';
@@ -68,6 +70,8 @@ export function createApp() {
   app.use('/api/v1/vehicles/:vehicleId/fuel-records', vehicleFuelRecordsRouter);
   app.use('/api/v1/maintenance', maintenanceRouter);
   app.use('/api/v1/documents', documentsRouter);
+  app.use('/api/v1/fines', finesRouter);
+  app.use('/api/v1/tires', tiresRouter);
 
   // TODO: demais rotas serão registradas aqui conforme as tasks avançam
 

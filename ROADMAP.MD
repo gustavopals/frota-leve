@@ -902,10 +902,10 @@ Uma task só está **pronta** quando:
 - [x] **2.2.6** — Backend: cálculo de MTTR e MTBF por veículo
 - [x] **2.2.7** — Backend: `GET /maintenance/stats` — custos de manutenção por período, por veículo, preventiva vs corretiva
 - [x] **2.2.8** — Frontend: listagem de planos de manutenção com status visual (verde=em dia, amarelo=próximo, vermelho=vencido)
-- [ ] **2.2.9** — Frontend: listagem de ordens de serviço com filtros (status, veículo, período)
-- [ ] **2.2.10** — Frontend: formulário de OS com adição dinâmica de itens/peças, upload de fotos e NF
-- [ ] **2.2.11** — Frontend: workflow visual de aprovação (botões de ação conforme status atual e role do usuário)
-- [ ] **2.2.12** — Frontend: dashboard de manutenção (custos, OS abertas vs fechadas, veículos parados)
+- [x] **2.2.9** — Frontend: listagem de ordens de serviço com filtros (status, veículo, período)
+- [x] **2.2.10** — Frontend: formulário de OS com adição dinâmica de itens/peças, upload de fotos e NF
+- [x] **2.2.11** — Frontend: workflow visual de aprovação (botões de ação conforme status atual e role do usuário)
+- [x] **2.2.12** — Frontend: dashboard de manutenção (custos, OS abertas vs fechadas, veículos parados)
 
 ---
 
@@ -913,13 +913,13 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.3.1** — Migration: tabela `Document` (id, tenantId, vehicleId?, driverId?, type, description, expirationDate, alertDaysBefore, cost?, fileUrl, status, notes, createdAt)
-- [ ] **2.3.2** — Backend CRUD com filtros por tipo, veículo, motorista, status (vigente, vencido, próximo)
-- [ ] **2.3.3** — Backend: job diário para verificar vencimentos e gerar alertas (notificação + painel)
-- [ ] **2.3.4** — Backend: `GET /documents/pending` — documentos que vencem nos próximos 30/60/90 dias
-- [ ] **2.3.5** — Frontend: painel de documentos com cards por tipo e visual de semáforo (verde/amarelo/vermelho)
-- [ ] **2.3.6** — Frontend: formulário com upload de arquivo e configuração de alerta
-- [ ] **2.3.7** — Frontend: calendário de vencimentos (view mensal)
+- [x] **2.3.1** — Migration: tabela `Document` (id, tenantId, vehicleId?, driverId?, type, description, expirationDate, alertDaysBefore, cost?, fileUrl, status, notes, createdAt)
+- [x] **2.3.2** — Backend CRUD com filtros por tipo, veículo, motorista, status (vigente, vencido, próximo)
+- [x] **2.3.3** — Backend: job diário para verificar vencimentos e gerar alertas (notificação + painel)
+- [x] **2.3.4** — Backend: `GET /documents/pending` — documentos que vencem nos próximos 30/60/90 dias
+- [x] **2.3.5** — Frontend: painel de documentos com cards por tipo e visual de semáforo (verde/amarelo/vermelho)
+- [x] **2.3.6** — Frontend: formulário com upload de arquivo e configuração de alerta
+- [x] **2.3.7** — Frontend: calendário de vencimentos (view mensal)
 
 ---
 
@@ -927,11 +927,11 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.4.1** — Migration: tabela `Fine` (id, tenantId, vehicleId, driverId?, date, autoNumber, location, description, severity, points, amount, discountAmount?, dueDate, status [PENDING, DRIVER_IDENTIFIED, APPEALED, PAID, PAYROLL_DEDUCTED], payrollDeduction, notes, fileUrl, createdAt)
-- [ ] **2.4.2** — Backend CRUD com fluxo de status
-- [ ] **2.4.3** — Backend: `POST /fines/import` — importação de planilha de multas
-- [ ] **2.4.4** — Backend: `GET /fines/stats` — total de multas por período, por motorista, por tipo, valor total
-- [ ] **2.4.5** — Frontend: listagem com filtros e ações de workflow (identificar condutor, registrar recurso, registrar pagamento)
+- [x] **2.4.1** — Migration: tabela `Fine` (id, tenantId, vehicleId, driverId?, date, autoNumber, location, description, severity, points, amount, discountAmount?, dueDate, status [PENDING, DRIVER_IDENTIFIED, APPEALED, PAID, PAYROLL_DEDUCTED], payrollDeduction, notes, fileUrl, createdAt)
+- [x] **2.4.2** — Backend CRUD com fluxo de status
+- [x] **2.4.3** — Backend: `POST /fines/import` — importação de planilha de multas
+- [x] **2.4.4** — Backend: `GET /fines/stats` — total de multas por período, por motorista, por tipo, valor total
+- [x] **2.4.5** — Frontend: listagem com filtros e ações de workflow (identificar condutor, registrar recurso, registrar pagamento)
 - [ ] **2.4.6** — Frontend: modal de identificação do condutor (selecionar motorista + data de entrega ao DETRAN)
 - [ ] **2.4.7** — Frontend: dashboard de multas (ranking de motoristas, tipos mais frequentes, custo acumulado)
 
@@ -941,7 +941,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.5.1** — Migration: tabelas `Tire` e `TireInspection`
+- [x] **2.5.1** — Migration: tabelas `Tire` e `TireInspection`
 
   ```
   Tire: id, tenantId, brand, model, size, serialNumber, dot, status (NEW, IN_USE, RETREADED, DISCARDED),
@@ -950,11 +950,11 @@ Uma task só está **pronta** quando:
   TireInspection: id, tireId, vehicleId, inspectedByUserId, date, grooveDepth, position, photos, notes, createdAt
   ```
 
-- [ ] **2.5.2** — Backend CRUD de pneus com ciclo de vida
-- [ ] **2.5.3** — Backend: registro de inspeção (sulcagem) com cálculo de desgaste
-- [ ] **2.5.4** — Backend: `PATCH /tires/:id/move` — movimentar pneu entre veículos/posições
-- [ ] **2.5.5** — Backend: alerta de troca quando sulco < limite configurável (ex: 3mm)
-- [ ] **2.5.6** — Backend: cálculo de custo por km rodado por pneu e comparativo entre marcas
+- [x] **2.5.2** — Backend CRUD de pneus com ciclo de vida
+- [x] **2.5.3** — Backend: registro de inspeção (sulcagem) com cálculo de desgaste
+- [x] **2.5.4** — Backend: `PATCH /tires/:id/move` — movimentar pneu entre veículos/posições
+- [x] **2.5.5** — Backend: alerta de troca quando sulco < limite configurável (ex: 3mm)
+- [x] **2.5.6** — Backend: cálculo de custo por km rodado por pneu e comparativo entre marcas
 - [ ] **2.5.7** — Frontend: mapa visual do veículo mostrando posição dos pneus (SVG interativo com eixos)
 - [ ] **2.5.8** — Frontend: histórico de inspeções com gráfico de desgaste ao longo do tempo
 - [ ] **2.5.9** — Gate de plano: middleware que bloqueia acesso ao módulo de pneus para plano ESSENTIAL

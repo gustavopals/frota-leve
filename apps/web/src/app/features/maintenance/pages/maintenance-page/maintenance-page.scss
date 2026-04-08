@@ -2,6 +2,42 @@
   display: block;
 }
 
+.maintenance-page__module {
+  margin-bottom: 2rem;
+}
+
+.maintenance-page__module--dashboard {
+  margin-bottom: 2rem;
+}
+
+.maintenance-page__module--service-orders {
+  margin-bottom: 0;
+}
+
+.maintenance-page__section-header {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.maintenance-page__section-copy {
+  max-width: 780px;
+
+  h2 {
+    color: var(--fl-ink);
+    font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+    font-size: 1.45rem;
+    margin: 0.25rem 0 0.35rem;
+  }
+
+  p {
+    color: var(--fl-muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
 .maintenance-page__metrics,
 .maintenance-page__legend {
   display: grid;
@@ -11,6 +47,10 @@
 
 .maintenance-page__metrics {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.maintenance-page__metrics--dashboard {
+  margin-bottom: 1.15rem;
 }
 
 .maintenance-page__metric,
@@ -51,6 +91,107 @@
 
 .maintenance-page__metric--overdue {
   border-color: rgba(180, 35, 24, 0.22);
+}
+
+.maintenance-page__metric--neutral {
+  border-color: rgba(102, 112, 133, 0.22);
+}
+
+.maintenance-page__dashboard-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.9fr);
+}
+
+.maintenance-page__dashboard-panel {
+  border: 1px solid rgba(23, 49, 59, 0.08);
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.maintenance-page__panel-header {
+  border-bottom: 1px solid rgba(23, 49, 59, 0.08);
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.75rem;
+
+  strong {
+    color: var(--fl-ink);
+    display: block;
+    font-size: 1rem;
+    margin-bottom: 0.18rem;
+  }
+
+  small {
+    color: var(--fl-muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+}
+
+.maintenance-page__status-breakdown {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 0.85rem;
+}
+
+.maintenance-page__status-breakdown-item {
+  background: rgba(23, 49, 59, 0.04);
+  border: 1px solid rgba(23, 49, 59, 0.08);
+  border-radius: 16px;
+  padding: 0.8rem 0.85rem;
+
+  strong {
+    color: var(--fl-ink);
+    display: block;
+    font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+    font-size: 1.2rem;
+    margin-bottom: 0.18rem;
+  }
+
+  span {
+    color: var(--fl-muted);
+    display: block;
+    font-size: 0.76rem;
+    line-height: 1.4;
+  }
+}
+
+.maintenance-page__vehicle-row {
+  align-items: center;
+  border-bottom: 1px solid rgba(23, 49, 59, 0.08);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  strong {
+    color: var(--fl-ink);
+    display: block;
+  }
+
+  small {
+    color: var(--fl-muted);
+    display: block;
+    font-size: 0.76rem;
+    line-height: 1.45;
+  }
+
+  span {
+    color: var(--fl-ink);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-align: right;
+  }
+}
+
+.maintenance-page__vehicle-row--cost span {
+  color: #155eef;
 }
 
 .maintenance-page__filters {
@@ -106,6 +247,10 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.maintenance-page__filters-grid--service-orders {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .maintenance-page__filter-actions {
   display: flex;
   gap: 0.55rem;
@@ -153,14 +298,17 @@
 }
 
 .maintenance-page__plan-cell,
+.maintenance-page__order-cell,
 .maintenance-page__stack-cell,
-.maintenance-page__status-cell {
+.maintenance-page__status-cell,
+.maintenance-page__workflow-cell {
   display: flex;
   flex-direction: column;
   gap: 0.18rem;
 }
 
-.maintenance-page__plan-cell {
+.maintenance-page__plan-cell,
+.maintenance-page__order-cell {
   border-left: 4px solid transparent;
   padding-left: 0.7rem;
 
@@ -173,6 +321,7 @@
     color: var(--fl-muted);
     display: block;
     font-size: 0.75rem;
+    line-height: 1.45;
   }
 }
 
@@ -198,20 +347,56 @@
   }
 }
 
-.maintenance-page__status-accent--healthy {
+.maintenance-page__workflow-cell {
+  gap: 0.45rem;
+
+  small {
+    color: var(--fl-muted);
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+}
+
+.maintenance-page__workflow-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.maintenance-page__workflow-chip {
+  align-self: flex-start;
+  background: rgba(21, 112, 239, 0.08);
+  border: 1px solid rgba(21, 112, 239, 0.16);
+  border-radius: 999px;
+  color: #155eef;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.28rem 0.6rem;
+}
+
+.maintenance-page__status-accent--healthy,
+.maintenance-page__order-accent--completed {
   border-left-color: #027a48;
 }
 
-.maintenance-page__status-accent--upcoming {
+.maintenance-page__status-accent--upcoming,
+.maintenance-page__order-accent--in-progress {
   border-left-color: #b54708;
 }
 
-.maintenance-page__status-accent--overdue {
+.maintenance-page__status-accent--overdue,
+.maintenance-page__order-accent--cancelled {
   border-left-color: #b42318;
 }
 
-.maintenance-page__status-accent--inactive {
+.maintenance-page__status-accent--inactive,
+.maintenance-page__order-accent--open {
   border-left-color: #667085;
+}
+
+.maintenance-page__order-accent--approved {
+  border-left-color: #1570ef;
 }
 
 .maintenance-page__empty-panel {
@@ -227,6 +412,10 @@
     line-height: 1.55;
     margin: 0;
   }
+}
+
+.maintenance-page__empty-panel--inline {
+  margin-bottom: 0;
 }
 
 .maintenance-page__pagination {
@@ -248,9 +437,15 @@
 }
 
 @media (max-width: 1180px) {
+  .maintenance-page__dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
   .maintenance-page__metrics,
   .maintenance-page__legend,
-  .maintenance-page__filters-grid {
+  .maintenance-page__filters-grid,
+  .maintenance-page__filters-grid--service-orders,
+  .maintenance-page__status-breakdown {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -258,10 +453,13 @@
 @media (max-width: 720px) {
   .maintenance-page__metrics,
   .maintenance-page__legend,
-  .maintenance-page__filters-grid {
+  .maintenance-page__filters-grid,
+  .maintenance-page__filters-grid--service-orders,
+  .maintenance-page__status-breakdown {
     grid-template-columns: 1fr;
   }
 
+  .maintenance-page__section-header,
   .maintenance-page__filters-header,
   .maintenance-page__pagination {
     flex-direction: column;

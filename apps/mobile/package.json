@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "echo 'Mobile — setup na TASK 4.1'",
+    "build": "node -e \"const fs=require('node:fs'); fs.mkdirSync('dist',{recursive:true}); fs.writeFileSync('dist/build-output.txt','Mobile placeholder build\\n'); console.log('Mobile - setup na TASK 4.1');\"",
     "dev": "echo 'Mobile — setup na TASK 4.1'",
     "lint": "echo 'OK'",
     "type-check": "echo 'OK'",

@@ -1,233 +1,627 @@
 <po-page-list
-  p-title="Planos de manutenção"
-  p-subtitle="Cadência preventiva, corretiva e preditiva com leitura visual imediata de vencimento."
+  p-title="Manutenção da frota"
+  p-subtitle="Planos preventivos e ordens de serviço com leitura operacional de vencimento, execução e custo."
   [p-breadcrumb]="breadcrumb"
   [p-actions]="pageActions"
   p-components-size="medium"
 >
-  <section class="maintenance-page__metrics">
-    <po-widget
-      p-title="Planos na página"
-      class="maintenance-page__metric"
-    >
-      <strong>{{ totalPlansOnPage }}</strong>
-      <span>recorte atual carregado</span>
-    </po-widget>
+  <section class="maintenance-page__module maintenance-page__module--dashboard">
+    <header class="maintenance-page__section-header">
+      <div class="maintenance-page__section-copy">
+        <span class="maintenance-page__eyebrow">Dashboard de manutenção</span>
+        <h2>Custos, workflow e indisponibilidade</h2>
+        <p>
+          Leitura consolidada de custo, ordens de serviço abertas versus fechadas e veículos
+          atualmente parados em manutenção.
+        </p>
+      </div>
+    </header>
 
-    <po-widget
-      p-title="Em dia"
-      class="maintenance-page__metric maintenance-page__metric--healthy"
-    >
-      <strong>{{ healthyPlansCount }}</strong>
-      <span>zona verde na página</span>
-    </po-widget>
+    <section class="maintenance-page__metrics maintenance-page__metrics--dashboard">
+      <po-widget
+        p-title="Custo acumulado"
+        class="maintenance-page__metric maintenance-page__metric--healthy"
+      >
+        <strong>{{ maintenanceCostLabel }}</strong>
+        <span>{{ averageOrderCostLabel }} de custo médio por OS</span>
+      </po-widget>
 
-    <po-widget
-      p-title="Próximos"
-      class="maintenance-page__metric maintenance-page__metric--upcoming"
-    >
-      <strong>{{ upcomingPlansCount }}</strong>
-      <span>janela de até 30 dias ou 1.000 km</span>
-    </po-widget>
+      <po-widget
+        p-title="OS abertas"
+        class="maintenance-page__metric maintenance-page__metric--upcoming"
+      >
+        <strong>{{ openServiceOrdersCount }}</strong>
+        <span>abertas + aprovadas + em execução</span>
+      </po-widget>
 
-    <po-widget
-      p-title="Vencidos"
-      class="maintenance-page__metric maintenance-page__metric--overdue"
-    >
-      <strong>{{ overduePlansCount }}</strong>
-      <span>{{ coverageRateLabel }}</span>
-    </po-widget>
+      <po-widget
+        p-title="OS fechadas"
+        class="maintenance-page__metric maintenance-page__metric--healthy"
+      >
+        <strong>{{ closedServiceOrdersCount }}</strong>
+        <span>concluídas ou canceladas</span>
+      </po-widget>
+
+      <po-widget
+        p-title="Veículos parados"
+        class="maintenance-page__metric maintenance-page__metric--neutral"
+      >
+        <strong>{{ parkedVehiclesCount }}</strong>
+        <span>{{ maintenanceDowntimeLabel }}</span>
+      </po-widget>
+    </section>
+
+    <section class="maintenance-page__dashboard-grid">
+      <po-widget p-title="Custo por período" class="maintenance-page__dashboard-panel">
+        <header class="maintenance-page__panel-header">
+          <div>
+            <strong>{{ maintenanceCostLabel }}</strong>
+            <small>Preventiva, corretiva e preditiva empilhadas na mesma série.</small>
+          </div>
+        </header>
+
+        @if (hasDashboardCostData) {
+          <po-chart
+            [p-type]="dashboardCostChartType"
+            [p-categories]="dashboardCostCategories"
+            [p-series]="dashboardCostSeries"
+            [p-options]="dashboardCostChartOptions"
+            [p-height]="260"
+          ></po-chart>
+        } @else {
+          <section class="maintenance-page__empty-panel maintenance-page__empty-panel--inline">
+            <h3>
+              {{ isLoadingDashboard ? 'Carregando custos...' : 'Sem custo consolidado ainda' }}
+            </h3>
+            <p>
+              {{
+                isLoadingDashboard
+                  ? 'O dashboard está processando as ordens de serviço para montar a série histórica.'
+                  : 'Os gráficos aparecem quando o módulo acumula ordens com custo lançado.'
+              }}
+            </p>
+          </section>
+        }
+      </po-widget>
+
+      <po-widget p-title="OS abertas vs fechadas" class="maintenance-page__dashboard-panel">
+        <header class="maintenance-page__panel-header">
+          <div>
+            <strong
+              >{{ openServiceOrdersCount + closedServiceOrdersCount }} ordens monitoradas</strong
+            >
+            <small>Abertas = OPEN, APPROVED, IN_PROGRESS.</small>
+          </div>
+        </header>
+
+        @if (dashboardWorkflowSeries.length > 0) {
+          <po-chart
+            [p-type]="dashboardWorkflowChartType"
+            [p-series]="dashboardWorkflowSeries"
+            [p-options]="dashboardWorkflowChartOptions"
+            [p-height]="240"
+          ></po-chart>
+        }
+
+        <div class="maintenance-page__status-breakdown">
+          @for (item of workflowStatusBreakdown; track item.label) {
+            <article class="maintenance-page__status-breakdown-item">
+              <strong>{{ item.value }}</strong>
+              <span>{{ item.label }}</span>
+            </article>
+          }
+        </div>
+      </po-widget>
+
+      <po-widget p-title="Veículos parados" class="maintenance-page__dashboard-panel">
+        <header class="maintenance-page__panel-header">
+          <div>
+            <strong>{{ parkedVehiclesCount }} com OS em execução</strong>
+            <small>Leitura baseada nas ordens atualmente em execução.</small>
+          </div>
+        </header>
+
+        @for (vehicle of parkedVehicles; track vehicle.id) {
+          <article class="maintenance-page__vehicle-row">
+            <div>
+              <strong>{{ vehicle.plate }}</strong>
+              <small>{{ vehicle.brand }} {{ vehicle.model }} • {{ vehicle.year }}</small>
+            </div>
+            <span>{{ vehicle.currentMileage | number: '1.0-0' }} km</span>
+          </article>
+        } @empty {
+          <section class="maintenance-page__empty-panel maintenance-page__empty-panel--inline">
+            <h3>{{ isLoadingDashboard ? 'Carregando veículos...' : 'Nenhum veículo parado' }}</h3>
+            <p>
+              {{
+                isLoadingDashboard
+                  ? 'A lista está sincronizando o status operacional da frota.'
+                  : 'Quando um veículo estiver com status de manutenção, ele aparecerá aqui.'
+              }}
+            </p>
+          </section>
+        }
+      </po-widget>
+
+      <po-widget p-title="Maior custo por veículo" class="maintenance-page__dashboard-panel">
+        <header class="maintenance-page__panel-header">
+          <div>
+            <strong>Top custo acumulado</strong>
+            <small>Recorte ordenado do maior para o menor custo lançado.</small>
+          </div>
+        </header>
+
+        @for (item of topMaintenanceVehicles; track item.id) {
+          <article class="maintenance-page__vehicle-row maintenance-page__vehicle-row--cost">
+            <div>
+              <strong>{{ item.title }}</strong>
+              <small>{{ item.subtitle }}</small>
+            </div>
+            <span>{{ item.totalCost }}</span>
+          </article>
+        } @empty {
+          <section class="maintenance-page__empty-panel maintenance-page__empty-panel--inline">
+            <h3>{{ isLoadingDashboard ? 'Carregando ranking...' : 'Sem ranking disponível' }}</h3>
+            <p>
+              {{
+                isLoadingDashboard
+                  ? 'O módulo está consolidando o custo por veículo.'
+                  : 'O ranking aparece conforme os custos de manutenção são lançados.'
+              }}
+            </p>
+          </section>
+        }
+      </po-widget>
+    </section>
   </section>
 
-  <section class="maintenance-page__filters">
-    <div class="maintenance-page__filters-header">
-      <div>
-        <span class="maintenance-page__eyebrow">Leitura operacional</span>
-        <h2>Filtre por plano, veículo e atividade</h2>
+  <section class="maintenance-page__module">
+    <header class="maintenance-page__section-header">
+      <div class="maintenance-page__section-copy">
+        <span class="maintenance-page__eyebrow">Semáforo preventivo</span>
+        <h2>Planos de manutenção</h2>
+        <p>Cadência preventiva, corretiva e preditiva com leitura visual imediata de vencimento.</p>
+      </div>
+    </header>
+
+    <section class="maintenance-page__metrics">
+      <po-widget p-title="Planos na página" class="maintenance-page__metric">
+        <strong>{{ totalPlansOnPage }}</strong>
+        <span>recorte atual carregado</span>
+      </po-widget>
+
+      <po-widget
+        p-title="Em dia"
+        class="maintenance-page__metric maintenance-page__metric--healthy"
+      >
+        <strong>{{ healthyPlansCount }}</strong>
+        <span>zona verde na página</span>
+      </po-widget>
+
+      <po-widget
+        p-title="Próximos"
+        class="maintenance-page__metric maintenance-page__metric--upcoming"
+      >
+        <strong>{{ upcomingPlansCount }}</strong>
+        <span>janela de até 30 dias ou 1.000 km</span>
+      </po-widget>
+
+      <po-widget
+        p-title="Vencidos"
+        class="maintenance-page__metric maintenance-page__metric--overdue"
+      >
+        <strong>{{ overduePlansCount }}</strong>
+        <span>{{ coverageRateLabel }}</span>
+      </po-widget>
+    </section>
+
+    <section class="maintenance-page__filters">
+      <div class="maintenance-page__filters-header">
+        <div>
+          <span class="maintenance-page__eyebrow">Leitura operacional</span>
+          <h2>Filtre por plano, veículo e atividade</h2>
+        </div>
+
+        <div class="maintenance-page__filters-meta">
+          <span>{{ activePlanFiltersCount }} filtros ativos</span>
+          <small>verde = em dia • amarelo = próximo • vermelho = vencido</small>
+        </div>
       </div>
 
-      <div class="maintenance-page__filters-meta">
-        <span>{{ activeFiltersCount }} filtros ativos</span>
-        <small>verde = em dia • amarelo = próximo • vermelho = vencido</small>
-      </div>
-    </div>
+      <form class="maintenance-page__filters-grid" [formGroup]="planFiltersForm" novalidate>
+        <po-input
+          formControlName="search"
+          name="search"
+          p-label="Buscar plano"
+          p-placeholder="Troca de óleo, freio, revisão..."
+          (p-enter)="applyPlanFilters()"
+        ></po-input>
 
-    <form
-      class="maintenance-page__filters-grid"
-      [formGroup]="filtersForm"
-      novalidate
-    >
-      <po-input
-        formControlName="search"
-        name="search"
-        p-label="Buscar plano"
-        p-placeholder="Troca de óleo, freio, revisão..."
-        (p-enter)="applyFilters()"
-      ></po-input>
+        <po-combo
+          formControlName="vehicleId"
+          name="vehicleId"
+          p-label="Veículo"
+          [p-options]="vehicleOptions"
+          [p-disabled]="isLoadingOptions"
+        ></po-combo>
 
-      <po-combo
-        formControlName="vehicleId"
-        name="vehicleId"
-        p-label="Veículo"
-        [p-options]="vehicleOptions"
-        [p-disabled]="isLoadingOptions"
-      ></po-combo>
+        <po-combo
+          formControlName="type"
+          name="type"
+          p-label="Tipo"
+          [p-options]="typeOptions"
+        ></po-combo>
 
-      <po-combo
-        formControlName="type"
-        name="type"
-        p-label="Tipo"
-        [p-options]="typeOptions"
-      ></po-combo>
+        <po-combo
+          formControlName="activity"
+          name="activity"
+          p-label="Atividade"
+          [p-options]="activityOptions"
+        ></po-combo>
 
-      <po-combo
-        formControlName="activity"
-        name="activity"
-        p-label="Atividade"
-        [p-options]="activityOptions"
-      ></po-combo>
+        <div class="maintenance-page__filter-actions">
+          <po-button
+            p-kind="primary"
+            p-label="Aplicar"
+            [p-disabled]="isLoadingPlans"
+            (p-click)="applyPlanFilters()"
+          ></po-button>
 
-      <div class="maintenance-page__filter-actions">
+          <po-button
+            p-label="Limpar"
+            [p-disabled]="isLoadingPlans"
+            (p-click)="clearPlanFilters()"
+          ></po-button>
+        </div>
+      </form>
+    </section>
+
+    <section class="maintenance-page__legend">
+      <article class="maintenance-page__legend-item maintenance-page__legend-item--healthy">
+        <strong>Em dia</strong>
+        <span>sem gatilho crítico próximo</span>
+      </article>
+
+      <article class="maintenance-page__legend-item maintenance-page__legend-item--upcoming">
+        <strong>Próximo</strong>
+        <span>exige atenção preventiva</span>
+      </article>
+
+      <article class="maintenance-page__legend-item maintenance-page__legend-item--overdue">
+        <strong>Vencido</strong>
+        <span>fora da janela planejada</span>
+      </article>
+    </section>
+
+    @if (hasPlans) {
+      <section class="maintenance-page__table-shell">
+        <po-table
+          [p-columns]="planColumns"
+          [p-items]="planTableItems"
+          p-container="shadow"
+          p-spacing="extraSmall"
+          [p-hide-columns-manager]="true"
+          [p-hide-batch-actions]="true"
+          [p-hide-table-search]="true"
+          [p-text-wrap]="true"
+        >
+          <ng-template p-table-column-template [p-property]="planColumnProperty" let-value>
+            <div
+              class="maintenance-page__plan-cell"
+              [class.maintenance-page__status-accent--healthy]="value.status === 'healthy'"
+              [class.maintenance-page__status-accent--upcoming]="value.status === 'upcoming'"
+              [class.maintenance-page__status-accent--overdue]="value.status === 'overdue'"
+              [class.maintenance-page__status-accent--inactive]="value.status === 'inactive'"
+            >
+              <strong>{{ value.title }}</strong>
+              <small>{{ value.subtitle }}</small>
+              <span>{{ value.activityLabel }}</span>
+            </div>
+          </ng-template>
+
+          <ng-template p-table-column-template [p-property]="planVehicleColumnProperty" let-value>
+            <div class="maintenance-page__stack-cell">
+              <strong>{{ value.title }}</strong>
+              <small>{{ value.subtitle }}</small>
+            </div>
+          </ng-template>
+
+          <ng-template p-table-column-template [p-property]="planScheduleColumnProperty" let-value>
+            <div class="maintenance-page__stack-cell">
+              <strong>{{ value.primary }}</strong>
+              <small>{{ value.secondary }}</small>
+            </div>
+          </ng-template>
+
+          <ng-template p-table-column-template [p-property]="planNextDueColumnProperty" let-value>
+            <div class="maintenance-page__stack-cell">
+              <strong>{{ value.primary }}</strong>
+              <small>{{ value.secondary }}</small>
+            </div>
+          </ng-template>
+
+          <ng-template p-table-column-template [p-property]="planStatusColumnProperty" let-value>
+            <div class="maintenance-page__status-cell">
+              <po-tag [p-value]="value.label" [p-type]="value.type"></po-tag>
+              <small>{{ value.helper }}</small>
+            </div>
+          </ng-template>
+        </po-table>
+      </section>
+    } @else {
+      <section class="maintenance-page__empty-panel">
+        <h3>{{ isLoadingPlans ? 'Carregando planos...' : 'Nenhum plano encontrado' }}</h3>
+        <p>
+          {{
+            isLoadingPlans
+              ? 'A lista está sendo atualizada com base no filtro atual.'
+              : 'Ajuste os filtros ou cadastre planos de manutenção para visualizar o semáforo operacional.'
+          }}
+        </p>
+      </section>
+    }
+
+    <section class="maintenance-page__pagination">
+      <small>{{ plansPaginationSummary }}</small>
+
+      <div class="maintenance-page__pagination-actions">
+        <po-button
+          p-label="Anterior"
+          [p-disabled]="!canGoBackPlans"
+          (p-click)="previousPlansPage()"
+        ></po-button>
+
         <po-button
           p-kind="primary"
-          p-label="Aplicar"
-          [p-disabled]="isLoading"
-          (p-click)="applyFilters()"
+          p-label="Próxima"
+          [p-disabled]="!canGoForwardPlans"
+          (p-click)="nextPlansPage()"
+        ></po-button>
+      </div>
+    </section>
+  </section>
+
+  <section class="maintenance-page__module maintenance-page__module--service-orders">
+    <header
+      class="maintenance-page__section-header maintenance-page__section-header--service-orders"
+    >
+      <div class="maintenance-page__section-copy">
+        <span class="maintenance-page__eyebrow">Execução da oficina</span>
+        <h2>Ordens de serviço</h2>
+        <p>Status, veículo e período de criação para acompanhar a execução e o custo do fluxo.</p>
+      </div>
+    </header>
+
+    <section class="maintenance-page__metrics">
+      <po-widget p-title="OS na página" class="maintenance-page__metric">
+        <strong>{{ totalServiceOrdersOnPage }}</strong>
+        <span>recorte operacional atual</span>
+      </po-widget>
+
+      <po-widget
+        p-title="Pendentes"
+        class="maintenance-page__metric maintenance-page__metric--neutral"
+      >
+        <strong>{{ pendingServiceOrdersCount }}</strong>
+        <span>abertas ou aprovadas</span>
+      </po-widget>
+
+      <po-widget
+        p-title="Em execução"
+        class="maintenance-page__metric maintenance-page__metric--upcoming"
+      >
+        <strong>{{ inProgressServiceOrdersCount }}</strong>
+        <span>já iniciadas pela oficina</span>
+      </po-widget>
+
+      <po-widget
+        p-title="Custo no recorte"
+        class="maintenance-page__metric maintenance-page__metric--healthy"
+      >
+        <strong>{{ serviceOrderCostSummary }}</strong>
+        <span>{{ serviceOrderCostHelper }}</span>
+      </po-widget>
+    </section>
+
+    <section class="maintenance-page__filters">
+      <div class="maintenance-page__filters-header">
+        <div>
+          <span class="maintenance-page__eyebrow">Fila de execução</span>
+          <h2>Filtre por status, veículo e período</h2>
+        </div>
+
+        <div class="maintenance-page__filters-meta">
+          <span>{{ activeServiceOrderFiltersCount }} filtros ativos</span>
+          <small
+            >o período considera a data de criação da OS •
+            {{ serviceOrderWorkflowRoleLabel }}</small
+          >
+        </div>
+      </div>
+
+      <form
+        class="maintenance-page__filters-grid maintenance-page__filters-grid--service-orders"
+        [formGroup]="serviceOrderFiltersForm"
+        novalidate
+      >
+        <po-combo
+          formControlName="vehicleId"
+          name="serviceOrderVehicleId"
+          p-label="Veículo"
+          [p-options]="vehicleOptions"
+          [p-disabled]="isLoadingOptions"
+        ></po-combo>
+
+        <po-combo
+          formControlName="status"
+          name="status"
+          p-label="Status"
+          [p-options]="serviceOrderStatusOptions"
+        ></po-combo>
+
+        <po-datepicker
+          formControlName="dateFrom"
+          name="dateFrom"
+          p-label="Criada de"
+          p-format="dd/mm/yyyy"
+        ></po-datepicker>
+
+        <po-datepicker
+          formControlName="dateTo"
+          name="dateTo"
+          p-label="Criada até"
+          p-format="dd/mm/yyyy"
+        ></po-datepicker>
+
+        <div class="maintenance-page__filter-actions">
+          <po-button
+            p-kind="primary"
+            p-label="Aplicar"
+            [p-disabled]="isLoadingServiceOrders"
+            (p-click)="applyServiceOrderFilters()"
+          ></po-button>
+
+          <po-button
+            p-label="Limpar"
+            [p-disabled]="isLoadingServiceOrders"
+            (p-click)="clearServiceOrderFilters()"
+          ></po-button>
+        </div>
+      </form>
+    </section>
+
+    @if (hasServiceOrders) {
+      <section class="maintenance-page__table-shell">
+        <po-table
+          [p-columns]="serviceOrderColumns"
+          [p-items]="serviceOrderTableItems"
+          [p-actions]="serviceOrderRowActions"
+          p-container="shadow"
+          p-spacing="extraSmall"
+          [p-hide-columns-manager]="true"
+          [p-hide-batch-actions]="true"
+          [p-hide-table-search]="true"
+          [p-text-wrap]="true"
+        >
+          <ng-template p-table-column-template [p-property]="serviceOrderColumnProperty" let-value>
+            <div
+              class="maintenance-page__order-cell"
+              [class.maintenance-page__order-accent--open]="value.status === 'OPEN'"
+              [class.maintenance-page__order-accent--approved]="value.status === 'APPROVED'"
+              [class.maintenance-page__order-accent--in-progress]="value.status === 'IN_PROGRESS'"
+              [class.maintenance-page__order-accent--completed]="value.status === 'COMPLETED'"
+              [class.maintenance-page__order-accent--cancelled]="value.status === 'CANCELLED'"
+            >
+              <strong>{{ value.title }}</strong>
+              <small>{{ value.subtitle }}</small>
+              <span>{{ value.helper }}</span>
+            </div>
+          </ng-template>
+
+          <ng-template
+            p-table-column-template
+            [p-property]="serviceOrderVehicleColumnProperty"
+            let-value
+          >
+            <div class="maintenance-page__stack-cell">
+              <strong>{{ value.title }}</strong>
+              <small>{{ value.subtitle }}</small>
+            </div>
+          </ng-template>
+
+          <ng-template
+            p-table-column-template
+            [p-property]="serviceOrderTimelineColumnProperty"
+            let-value
+          >
+            <div class="maintenance-page__stack-cell">
+              <strong>{{ value.primary }}</strong>
+              <small>{{ value.secondary }}</small>
+            </div>
+          </ng-template>
+
+          <ng-template
+            p-table-column-template
+            [p-property]="serviceOrderCostColumnProperty"
+            let-value
+          >
+            <div class="maintenance-page__stack-cell">
+              <strong>{{ value.primary }}</strong>
+              <small>{{ value.secondary }}</small>
+            </div>
+          </ng-template>
+
+          <ng-template
+            p-table-column-template
+            [p-property]="serviceOrderStatusColumnProperty"
+            let-value
+          >
+            <div class="maintenance-page__status-cell">
+              <po-tag [p-value]="value.label" [p-type]="value.type"></po-tag>
+              <small>{{ value.helper }}</small>
+            </div>
+          </ng-template>
+
+          <ng-template
+            p-table-column-template
+            [p-property]="serviceOrderWorkflowColumnProperty"
+            let-value
+          >
+            <div class="maintenance-page__workflow-cell">
+              @if (value.actions.length > 0 && value.canManage) {
+                <div class="maintenance-page__workflow-actions">
+                  @for (action of value.actions; track action.nextStatus) {
+                    <po-button
+                      [p-kind]="action.kind"
+                      [p-label]="action.label"
+                      [p-disabled]="isUpdatingServiceOrder(value.order.id)"
+                      (p-click)="executeServiceOrderWorkflowAction(value.order, action.nextStatus)"
+                    ></po-button>
+                  }
+                </div>
+              } @else {
+                <span class="maintenance-page__workflow-chip">
+                  {{ value.canManage ? 'Fluxo encerrado' : 'Sem permissão' }}
+                </span>
+              }
+
+              <small>{{ value.helper }}</small>
+            </div>
+          </ng-template>
+        </po-table>
+      </section>
+    } @else {
+      <section class="maintenance-page__empty-panel">
+        <h3>
+          {{ isLoadingServiceOrders ? 'Carregando ordens de serviço...' : 'Nenhuma OS encontrada' }}
+        </h3>
+        <p>
+          {{
+            isLoadingServiceOrders
+              ? 'A listagem está sendo atualizada com base no filtro informado.'
+              : 'Ajuste status, veículo ou período para refinar a fila de ordens de serviço.'
+          }}
+        </p>
+      </section>
+    }
+
+    <section class="maintenance-page__pagination">
+      <small>{{ serviceOrdersPaginationSummary }}</small>
+
+      <div class="maintenance-page__pagination-actions">
+        <po-button
+          p-label="Anterior"
+          [p-disabled]="!canGoBackServiceOrders"
+          (p-click)="previousServiceOrdersPage()"
         ></po-button>
 
         <po-button
-          p-label="Limpar"
-          [p-disabled]="isLoading"
-          (p-click)="clearFilters()"
+          p-kind="primary"
+          p-label="Próxima"
+          [p-disabled]="!canGoForwardServiceOrders"
+          (p-click)="nextServiceOrdersPage()"
         ></po-button>
       </div>
-    </form>
-  </section>
-
-  <section class="maintenance-page__legend">
-    <article class="maintenance-page__legend-item maintenance-page__legend-item--healthy">
-      <strong>Em dia</strong>
-      <span>sem gatilho crítico próximo</span>
-    </article>
-
-    <article class="maintenance-page__legend-item maintenance-page__legend-item--upcoming">
-      <strong>Próximo</strong>
-      <span>exige atenção preventiva</span>
-    </article>
-
-    <article class="maintenance-page__legend-item maintenance-page__legend-item--overdue">
-      <strong>Vencido</strong>
-      <span>fora da janela planejada</span>
-    </article>
-  </section>
-
-  @if (hasItems) {
-    <section class="maintenance-page__table-shell">
-      <po-table
-        [p-columns]="columns"
-        [p-items]="tableItems"
-        p-container="shadow"
-        p-spacing="extraSmall"
-        [p-hide-columns-manager]="true"
-        [p-hide-batch-actions]="true"
-        [p-hide-table-search]="true"
-        [p-text-wrap]="true"
-      >
-        <ng-template
-          p-table-column-template
-          [p-property]="planColumnProperty"
-          let-value
-        >
-          <div
-            class="maintenance-page__plan-cell"
-            [class.maintenance-page__status-accent--healthy]="value.status === 'healthy'"
-            [class.maintenance-page__status-accent--upcoming]="value.status === 'upcoming'"
-            [class.maintenance-page__status-accent--overdue]="value.status === 'overdue'"
-            [class.maintenance-page__status-accent--inactive]="value.status === 'inactive'"
-          >
-            <strong>{{ value.title }}</strong>
-            <small>{{ value.subtitle }}</small>
-            <span>{{ value.activityLabel }}</span>
-          </div>
-        </ng-template>
-
-        <ng-template
-          p-table-column-template
-          [p-property]="vehicleColumnProperty"
-          let-value
-        >
-          <div class="maintenance-page__stack-cell">
-            <strong>{{ value.title }}</strong>
-            <small>{{ value.subtitle }}</small>
-          </div>
-        </ng-template>
-
-        <ng-template
-          p-table-column-template
-          [p-property]="scheduleColumnProperty"
-          let-value
-        >
-          <div class="maintenance-page__stack-cell">
-            <strong>{{ value.primary }}</strong>
-            <small>{{ value.secondary }}</small>
-          </div>
-        </ng-template>
-
-        <ng-template
-          p-table-column-template
-          [p-property]="nextDueColumnProperty"
-          let-value
-        >
-          <div class="maintenance-page__stack-cell">
-            <strong>{{ value.primary }}</strong>
-            <small>{{ value.secondary }}</small>
-          </div>
-        </ng-template>
-
-        <ng-template
-          p-table-column-template
-          [p-property]="statusColumnProperty"
-          let-value
-        >
-          <div class="maintenance-page__status-cell">
-            <po-tag
-              [p-value]="value.label"
-              [p-type]="value.type"
-            ></po-tag>
-            <small>{{ value.helper }}</small>
-          </div>
-        </ng-template>
-      </po-table>
     </section>
-  } @else {
-    <section class="maintenance-page__empty-panel">
-      <h3>{{ isLoading ? 'Carregando planos...' : 'Nenhum plano encontrado' }}</h3>
-      <p>
-        {{
-          isLoading
-            ? 'A lista está sendo atualizada com base no filtro atual.'
-            : 'Ajuste os filtros ou cadastre planos de manutenção para visualizar o semáforo operacional.'
-        }}
-      </p>
-    </section>
-  }
-
-  <section class="maintenance-page__pagination">
-    <small>{{ paginationSummary }}</small>
-
-    <div class="maintenance-page__pagination-actions">
-      <po-button
-        p-label="Anterior"
-        [p-disabled]="!canGoBack"
-        (p-click)="previousPage()"
-      ></po-button>
-
-      <po-button
-        p-kind="primary"
-        p-label="Próxima"
-        [p-disabled]="!canGoForward"
-        (p-click)="nextPage()"
-      ></po-button>
-    </div>
   </section>
 </po-page-list>

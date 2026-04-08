@@ -114,6 +114,10 @@ function normalizePhotos(photos?: string[]): Prisma.InputJsonValue | typeof Pris
   return photos as Prisma.InputJsonValue;
 }
 
+function normalizeFileUrl(value?: string | null): string | null {
+  return normalizeOptionalString(value);
+}
+
 function toDatabaseMaintenanceType(value: MaintenanceType): DatabaseMaintenanceType {
   return value as unknown as DatabaseMaintenanceType;
 }
@@ -464,6 +468,7 @@ export class ServiceOrdersService {
           partsCost,
           notes: normalizeOptionalString(input.notes),
           photos: normalizePhotos(input.photos),
+          invoiceUrl: normalizeFileUrl(input.invoiceUrl),
           approvedByUserId: null,
           createdByUserId: userId,
           ...(normalizedItems.length > 0
@@ -577,6 +582,7 @@ export class ServiceOrdersService {
           partsCost,
           notes: normalizeOptionalString(input.notes),
           photos: normalizePhotos(input.photos),
+          invoiceUrl: normalizeFileUrl(input.invoiceUrl),
           approvedByUserId,
           items: {
             deleteMany: {},
@@ -757,6 +763,7 @@ export class ServiceOrdersService {
       partsCost: record.partsCost,
       notes: record.notes,
       photos: Array.isArray(record.photos) ? (record.photos as string[]) : [],
+      invoiceUrl: record.invoiceUrl,
       approvedByUserId: record.approvedByUserId,
       createdByUserId: record.createdByUserId,
       createdAt: record.createdAt,

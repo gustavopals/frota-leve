@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { DocumentType } from '../enums/document-type.enum';
 
+const MAX_DOCUMENT_FILE_URL_LENGTH = 6_000_000;
+
 function optionalNullableUuid(message: string) {
   return z.preprocess((value) => {
     if (value === '' || value === undefined) {
@@ -46,7 +48,11 @@ const documentBaseSchema = z
       .max(365, 'Antecedência do alerta deve ser de no máximo 365 dias')
       .default(30),
     cost: optionalCoercedNonNegativeNumber(),
-    fileUrl: z.string().trim().url('URL do arquivo inválida').max(2000),
+    fileUrl: z
+      .string()
+      .trim()
+      .url('URL do arquivo inválida')
+      .max(MAX_DOCUMENT_FILE_URL_LENGTH, 'Arquivo excede o tamanho máximo permitido'),
     notes: optionalTrimmedString(4000),
   })
   .superRefine((value, ctx) => {

@@ -149,5 +149,154 @@
         }
       </po-widget>
     </section>
+
+    <section class="documents-page__calendar-layout">
+      <po-widget p-title="Calendario mensal" class="documents-page__panel documents-page__panel--calendar">
+        <div class="documents-page__panel-header documents-page__panel-header--calendar">
+          <div>
+            <strong>{{ calendarMonth.monthLabel }}</strong>
+            <p>{{ calendarRangeLabel }}</p>
+          </div>
+
+          <div class="documents-page__calendar-toolbar">
+            <po-button
+              p-kind="tertiary"
+              p-label="Anterior"
+              (p-click)="previousCalendarMonth()"
+            ></po-button>
+            <po-button
+              p-kind="tertiary"
+              p-label="Mes atual"
+              [p-disabled]="isCurrentCalendarMonth"
+              (p-click)="goToCurrentCalendarMonth()"
+            ></po-button>
+            <po-button
+              p-kind="tertiary"
+              p-label="Proximo"
+              (p-click)="nextCalendarMonth()"
+            ></po-button>
+          </div>
+        </div>
+
+        <div class="documents-page__calendar-summary">
+          <article class="documents-page__calendar-stat">
+            <strong>{{ calendarMonth.totalItems }}</strong>
+            <span>vencimentos no mes</span>
+          </article>
+
+          <article class="documents-page__calendar-stat">
+            <strong>{{ calendarMonth.daysWithItems }}</strong>
+            <span>dias com agenda</span>
+          </article>
+
+          <article class="documents-page__calendar-stat" data-tone="warning">
+            <strong>{{ calendarMonth.expiringItems }}</strong>
+            <span>proximos do prazo</span>
+          </article>
+
+          <article class="documents-page__calendar-stat" data-tone="danger">
+            <strong>{{ calendarMonth.expiredItems }}</strong>
+            <span>ja vencidos</span>
+          </article>
+        </div>
+
+        <div class="documents-page__calendar-legend">
+          <span class="documents-page__calendar-legend-item documents-page__calendar-legend-item--success">Em dia</span>
+          <span class="documents-page__calendar-legend-item documents-page__calendar-legend-item--warning">Proximo</span>
+          <span class="documents-page__calendar-legend-item documents-page__calendar-legend-item--danger">Vencido</span>
+        </div>
+
+        <div class="documents-page__calendar-grid">
+          @for (label of calendarWeekdayLabels; track label) {
+            <span class="documents-page__calendar-weekday">{{ label }}</span>
+          }
+
+          @for (week of calendarMonth.weeks; track week.id) {
+            @for (day of week.days; track day.dateKey) {
+              <button
+                type="button"
+                class="documents-page__calendar-day"
+                [class.documents-page__calendar-day--muted]="!day.isCurrentMonth"
+                [class.documents-page__calendar-day--selected]="selectedCalendarDateKey === day.dateKey"
+                [class.documents-page__calendar-day--today]="day.isToday"
+                [attr.data-tone]="day.tone"
+                [attr.aria-label]="getCalendarDayAriaLabel(day)"
+                (click)="selectCalendarDay(day)"
+              >
+                <div class="documents-page__calendar-day-top">
+                  <strong>{{ day.dayOfMonth }}</strong>
+                  @if (day.total > 0) {
+                    <span>{{ day.total }}</span>
+                  }
+                </div>
+
+                @if (day.total > 0) {
+                  <div class="documents-page__calendar-items">
+                    @for (item of previewCalendarItems(day); track item.id) {
+                      <span class="documents-page__calendar-chip" [attr.data-tone]="item.tone">
+                        <strong>{{ item.typeLabel }}</strong>
+                        <small>{{ item.description }}</small>
+                      </span>
+                    }
+
+                    @if (getCalendarOverflowCount(day) > 0) {
+                      <span class="documents-page__calendar-more">
+                        +{{ getCalendarOverflowCount(day) }} mais
+                      </span>
+                    }
+                  </div>
+                } @else {
+                  <span class="documents-page__calendar-empty">Livre</span>
+                }
+              </button>
+            }
+          }
+        </div>
+      </po-widget>
+
+      <po-widget p-title="Agenda do dia" class="documents-page__panel documents-page__panel--agenda">
+        <div class="documents-page__panel-header">
+          <div>
+            <strong>{{ selectedCalendarDayLabel }}</strong>
+            <p>{{ selectedCalendarDayDescription }}</p>
+          </div>
+          <span class="documents-page__panel-meta">{{ selectedCalendarItems.length }} itens</span>
+        </div>
+
+        @if (selectedCalendarItems.length > 0) {
+          <div class="documents-page__agenda-list">
+            @for (item of selectedCalendarItems; track item.id) {
+              <article class="documents-page__agenda-item" [attr.data-tone]="item.tone">
+                <div class="documents-page__agenda-main">
+                  <span class="documents-page__card-kicker">{{ item.typeLabel }}</span>
+                  <h4>{{ item.description }}</h4>
+                  <small>{{ item.targetLabel }}</small>
+                </div>
+
+                <div class="documents-page__agenda-meta">
+                  <po-tag
+                    [p-value]="item.statusLabel"
+                    [p-type]="getTagType(item.tone)"
+                  ></po-tag>
+                  <strong>{{ formatDate(item.expirationDate) }}</strong>
+                  <button
+                    type="button"
+                    class="documents-page__inline-link"
+                    (click)="openDocumentEditor(item.id)"
+                  >
+                    Editar documento
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <section class="documents-page__empty-panel">
+            <h3>Dia sem vencimentos</h3>
+            <p>Selecione outro dia do calendario para revisar a agenda ou avance para o proximo mes.</p>
+          </section>
+        }
+      </po-widget>
+    </section>
   }
 </po-page-default>

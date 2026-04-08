@@ -1,0 +1,83 @@
+<po-modal
+  #identifyModal
+  p-title="Identificar condutor da multa"
+  p-size="lg"
+  [p-primary-action]="primaryAction"
+  [p-secondary-action]="secondaryAction"
+>
+  <section class="identify-driver-modal">
+    <!-- Resumo da multa -->
+    <header class="identify-driver-modal__fine-summary">
+      <span class="identify-driver-modal__eyebrow">Autuação selecionada</span>
+      <h3>Auto nº {{ fineAutoNumber }}</h3>
+      <p>{{ fine?.description }}</p>
+
+      <div class="identify-driver-modal__fine-meta">
+        <article class="identify-driver-modal__meta-card">
+          <span>Veículo</span>
+          <strong>{{ fineVehicleLabel }}</strong>
+        </article>
+        <article class="identify-driver-modal__meta-card">
+          <span>Data da infração</span>
+          <strong>{{ fineDateLabel }}</strong>
+        </article>
+        <article class="identify-driver-modal__meta-card">
+          <span>Valor</span>
+          <strong>{{ fineAmountLabel }}</strong>
+        </article>
+        <article class="identify-driver-modal__meta-card">
+          <span>Vencimento</span>
+          <strong>{{ fineDueDateLabel }}</strong>
+        </article>
+      </div>
+    </header>
+
+    <hr class="identify-driver-modal__divider" />
+
+    <!-- Formulário -->
+    <form [formGroup]="form" class="identify-driver-modal__form">
+      <div class="identify-driver-modal__form-header">
+        <span class="identify-driver-modal__eyebrow">Identificação</span>
+        <h4>Selecione o condutor responsável</h4>
+        <p>
+          O motorista identificado ficará vinculado à multa e o status passará para
+          <strong>Condutor identificado</strong>. A data de entrega ao DETRAN é opcional e serve
+          como registro do prazo de notificação.
+        </p>
+      </div>
+
+      <div class="identify-driver-modal__fields">
+        <po-combo
+          class="identify-driver-modal__field identify-driver-modal__field--full"
+          p-label="Motorista responsável"
+          p-placeholder="Buscar por nome ou CPF..."
+          p-help="Obrigatório — selecione o motorista que conduzia o veículo na data da infração."
+          formControlName="driverId"
+          [p-options]="driverOptions"
+          [p-loading]="isLoadingDrivers"
+          [p-filter-mode]="comboFilterMode.contains"
+          (p-change)="onDriverSearch($event)"
+          [p-required]="true"
+        ></po-combo>
+
+        <po-datepicker
+          class="identify-driver-modal__field"
+          p-label="Data de entrega ao DETRAN"
+          p-placeholder="DD/MM/AAAA"
+          p-help="Opcional — data em que a notificação foi protocolada no DETRAN."
+          formControlName="detranDeliveryDate"
+          p-format="dd/mm/yyyy"
+        ></po-datepicker>
+      </div>
+
+      @if (selectedDriverName) {
+        <div class="identify-driver-modal__confirmation">
+          <span class="identify-driver-modal__confirmation-icon">✓</span>
+          <span>
+            Condutor selecionado: <strong>{{ selectedDriverName }}</strong>
+          </span>
+        </div>
+      }
+    </form>
+  </section>
+</po-modal>

@@ -11,22 +11,22 @@ datasource db {
 }
 
 model Tenant {
-  id                   String       @id @default(uuid()) @db.Uuid
+  id                   String            @id @default(uuid()) @db.Uuid
   name                 String
-  tradeName            String?      @map("trade_name")
-  cnpj                 String       @unique
+  tradeName            String?           @map("trade_name")
+  cnpj                 String            @unique
   email                String
   phone                String?
   address              Json?
-  logoUrl              String?      @map("logo_url")
-  plan                 PlanType     @default(ESSENTIAL)
-  status               TenantStatus @default(TRIAL)
-  trialEndsAt          DateTime?    @map("trial_ends_at")
-  stripeCustomerId     String?      @map("stripe_customer_id")
-  stripeSubscriptionId String?      @map("stripe_subscription_id")
+  logoUrl              String?           @map("logo_url")
+  plan                 PlanType          @default(ESSENTIAL)
+  status               TenantStatus      @default(TRIAL)
+  trialEndsAt          DateTime?         @map("trial_ends_at")
+  stripeCustomerId     String?           @map("stripe_customer_id")
+  stripeSubscriptionId String?           @map("stripe_subscription_id")
   settings             Json?
-  createdAt            DateTime     @default(now()) @map("created_at")
-  updatedAt            DateTime     @updatedAt @map("updated_at")
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
   users                User[]
   vehicles             Vehicle[]
   drivers              Driver[]
@@ -34,6 +34,9 @@ model Tenant {
   maintenancePlans     MaintenancePlan[]
   serviceOrders        ServiceOrder[]
   documents            Document[]
+  fines                Fine[]
+  tires                Tire[]
+  tireInspections      TireInspection[]
 
   @@map("tenants")
   @@schema("public")
@@ -59,23 +62,24 @@ enum TenantStatus {
 }
 
 model User {
-  id                  String               @id @default(uuid()) @db.Uuid
-  tenantId            String               @map("tenant_id") @db.Uuid
-  tenant              Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  name                String
-  email               String               @unique
-  passwordHash        String               @map("password_hash")
-  role                UserRole             @default(VIEWER)
-  isActive            Boolean              @default(true) @map("is_active")
-  lastLoginAt         DateTime?            @map("last_login_at")
-  avatarUrl           String?              @map("avatar_url")
-  createdAt           DateTime             @default(now()) @map("created_at")
-  updatedAt           DateTime             @updatedAt @map("updated_at")
-  passwordResetTokens PasswordResetToken[]
-  assignedVehicles    Vehicle[]            @relation("CurrentDriverVehicles")
-  driverProfile       Driver?
-  approvedServiceOrders ServiceOrder[]     @relation("ApprovedByUserServiceOrders")
-  createdServiceOrders  ServiceOrder[]     @relation("CreatedByUserServiceOrders")
+  id                       String               @id @default(uuid()) @db.Uuid
+  tenantId                 String               @map("tenant_id") @db.Uuid
+  tenant                   Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name                     String
+  email                    String               @unique
+  passwordHash             String               @map("password_hash")
+  role                     UserRole             @default(VIEWER)
+  isActive                 Boolean              @default(true) @map("is_active")
+  lastLoginAt              DateTime?            @map("last_login_at")
+  avatarUrl                String?              @map("avatar_url")
+  createdAt                DateTime             @default(now()) @map("created_at")
+  updatedAt                DateTime             @updatedAt @map("updated_at")
+  passwordResetTokens      PasswordResetToken[]
+  assignedVehicles         Vehicle[]            @relation("CurrentDriverVehicles")
+  driverProfile            Driver?
+  approvedServiceOrders    ServiceOrder[]       @relation("ApprovedByUserServiceOrders")
+  createdServiceOrders     ServiceOrder[]       @relation("CreatedByUserServiceOrders")
+  performedTireInspections TireInspection[]     @relation("InspectedByUserTireInspections")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -167,6 +171,37 @@ enum ServiceOrderStatus {
   @@schema("public")
 }
 
+enum FineStatus {
+  PENDING
+  DRIVER_IDENTIFIED
+  APPEALED
+  PAID
+  PAYROLL_DEDUCTED
+
+  @@map("fine_status")
+  @@schema("public")
+}
+
+enum FineSeverity {
+  LIGHT
+  MEDIUM
+  SERIOUS
+  VERY_SERIOUS
+
+  @@map("fine_severity")
+  @@schema("public")
+}
+
+enum TireStatus {
+  NEW
+  IN_USE
+  RETREADED
+  DISCARDED
+
+  @@map("tire_status")
+  @@schema("public")
+}
+
 enum VehicleCategory {
   LIGHT
   HEAVY
@@ -190,35 +225,38 @@ enum VehicleStatus {
 }
 
 model Vehicle {
-  id                  String          @id @default(uuid()) @db.Uuid
-  tenantId            String          @map("tenant_id") @db.Uuid
-  tenant              Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                  String            @id @default(uuid()) @db.Uuid
+  tenantId            String            @map("tenant_id") @db.Uuid
+  tenant              Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   plate               String
   renavam             String?
   chassis             String?
   brand               String
   model               String
   year                Int
-  yearModel           Int             @map("year_model")
+  yearModel           Int               @map("year_model")
   color               String?
-  fuelType            FuelType        @map("fuel_type")
+  fuelType            FuelType          @map("fuel_type")
   category            VehicleCategory
-  status              VehicleStatus   @default(ACTIVE)
-  currentMileage      Int             @default(0) @map("current_mileage")
-  averageConsumption  Float?          @map("average_consumption")
-  expectedConsumption Float?          @map("expected_consumption")
-  acquisitionDate     DateTime?       @map("acquisition_date")
-  acquisitionValue    Float?          @map("acquisition_value")
+  status              VehicleStatus     @default(ACTIVE)
+  currentMileage      Int               @default(0) @map("current_mileage")
+  averageConsumption  Float?            @map("average_consumption")
+  expectedConsumption Float?            @map("expected_consumption")
+  acquisitionDate     DateTime?         @map("acquisition_date")
+  acquisitionValue    Float?            @map("acquisition_value")
   photos              Json?
   notes               String?
-  currentDriverId     String?         @map("current_driver_id") @db.Uuid
-  currentDriver       User?           @relation("CurrentDriverVehicles", fields: [currentDriverId], references: [id], onDelete: SetNull)
+  currentDriverId     String?           @map("current_driver_id") @db.Uuid
+  currentDriver       User?             @relation("CurrentDriverVehicles", fields: [currentDriverId], references: [id], onDelete: SetNull)
   fuelRecords         FuelRecord[]
   maintenancePlans    MaintenancePlan[]
   serviceOrders       ServiceOrder[]
   documents           Document[]
-  createdAt           DateTime        @default(now()) @map("created_at")
-  updatedAt           DateTime        @updatedAt @map("updated_at")
+  fines               Fine[]
+  currentTires        Tire[]            @relation("CurrentVehicleTires")
+  tireInspections     TireInspection[]  @relation("VehicleTireInspections")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
 
   @@unique([tenantId, plate])
   @@index([tenantId])
@@ -246,33 +284,34 @@ model AuditLog {
 }
 
 model Driver {
-  id               String    @id @default(uuid()) @db.Uuid
-  tenantId         String    @map("tenant_id") @db.Uuid
-  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id               String         @id @default(uuid()) @db.Uuid
+  tenantId         String         @map("tenant_id") @db.Uuid
+  tenant           Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name             String
   cpf              String
   phone            String?
   email            String?
-  birthDate        DateTime? @map("birth_date")
-  cnhNumber        String?   @map("cnh_number")
-  cnhCategory      String?   @map("cnh_category")
-  cnhExpiration    DateTime? @map("cnh_expiration")
-  cnhPoints        Int?      @default(0) @map("cnh_points")
-  emergencyContact String?   @map("emergency_contact")
-  emergencyPhone   String?   @map("emergency_phone")
+  birthDate        DateTime?      @map("birth_date")
+  cnhNumber        String?        @map("cnh_number")
+  cnhCategory      String?        @map("cnh_category")
+  cnhExpiration    DateTime?      @map("cnh_expiration")
+  cnhPoints        Int?           @default(0) @map("cnh_points")
+  emergencyContact String?        @map("emergency_contact")
+  emergencyPhone   String?        @map("emergency_phone")
   department       String?
-  isActive         Boolean   @default(true) @map("is_active")
-  photoUrl         String?   @map("photo_url")
-  hireDate         DateTime? @map("hire_date")
-  score            Float?    @default(100)
+  isActive         Boolean        @default(true) @map("is_active")
+  photoUrl         String?        @map("photo_url")
+  hireDate         DateTime?      @map("hire_date")
+  score            Float?         @default(100)
   notes            String?
-  userId           String?    @unique @map("user_id") @db.Uuid
-  user             User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId           String?        @unique @map("user_id") @db.Uuid
+  user             User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
   fuelRecords      FuelRecord[]
   serviceOrders    ServiceOrder[]
   documents        Document[]
-  createdAt        DateTime   @default(now()) @map("created_at")
-  updatedAt        DateTime   @updatedAt @map("updated_at")
+  fines            Fine[]
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
 
   @@unique([tenantId, cpf])
   @@index([tenantId])
@@ -310,29 +349,29 @@ model Document {
 }
 
 model FuelRecord {
-  id              String    @id @default(uuid()) @db.Uuid
-  tenantId        String    @map("tenant_id") @db.Uuid
-  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  vehicleId       String    @map("vehicle_id") @db.Uuid
-  vehicle         Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  driverId        String?   @map("driver_id") @db.Uuid
-  driver          Driver?   @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vehicleId       String   @map("vehicle_id") @db.Uuid
+  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driverId        String?  @map("driver_id") @db.Uuid
+  driver          Driver?  @relation(fields: [driverId], references: [id], onDelete: SetNull)
   date            DateTime
   mileage         Int
   liters          Float
-  pricePerLiter   Float     @map("price_per_liter")
-  totalCost       Float     @map("total_cost")
-  fuelType        FuelType  @map("fuel_type")
-  fullTank        Boolean   @default(true) @map("full_tank")
-  gasStation      String?   @map("gas_station")
+  pricePerLiter   Float    @map("price_per_liter")
+  totalCost       Float    @map("total_cost")
+  fuelType        FuelType @map("fuel_type")
+  fullTank        Boolean  @default(true) @map("full_tank")
+  gasStation      String?  @map("gas_station")
   notes           String?
-  receiptUrl      String?   @map("receipt_url")
-  kmPerLiter      Float?    @map("km_per_liter")
-  anomaly         Boolean   @default(false)
-  anomalyReason   String?   @map("anomaly_reason")
-  createdByUserId String?   @map("created_by_user_id") @db.Uuid
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  receiptUrl      String?  @map("receipt_url")
+  kmPerLiter      Float?   @map("km_per_liter")
+  anomaly         Boolean  @default(false)
+  anomalyReason   String?  @map("anomaly_reason")
+  createdByUserId String?  @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@index([tenantId])
   @@index([tenantId, vehicleId])
@@ -391,6 +430,7 @@ model ServiceOrder {
   partsCost        Float?             @map("parts_cost")
   notes            String?
   photos           Json?
+  invoiceUrl       String?            @map("invoice_url")
   approvedByUserId String?            @map("approved_by_user_id") @db.Uuid
   approvedByUser   User?              @relation("ApprovedByUserServiceOrders", fields: [approvedByUserId], references: [id], onDelete: SetNull)
   createdByUserId  String?            @map("created_by_user_id") @db.Uuid
@@ -422,5 +462,96 @@ model ServiceOrderItem {
 
   @@index([serviceOrderId])
   @@map("service_order_items")
+  @@schema("public")
+}
+
+model Fine {
+  id               String       @id @default(uuid()) @db.Uuid
+  tenantId         String       @map("tenant_id") @db.Uuid
+  tenant           Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vehicleId        String       @map("vehicle_id") @db.Uuid
+  vehicle          Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driverId         String?      @map("driver_id") @db.Uuid
+  driver           Driver?      @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  date             DateTime
+  autoNumber       String       @map("auto_number")
+  location         String
+  description      String
+  severity         FineSeverity
+  points           Int
+  amount           Float
+  discountAmount   Float?       @map("discount_amount")
+  dueDate          DateTime     @map("due_date")
+  status           FineStatus   @default(PENDING)
+  payrollDeduction Boolean      @default(false) @map("payroll_deduction")
+  notes            String?
+  fileUrl          String?      @map("file_url")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@index([tenantId, vehicleId])
+  @@index([tenantId, driverId])
+  @@index([tenantId, status])
+  @@index([tenantId, date])
+  @@index([tenantId, severity])
+  @@map("fines")
+  @@schema("public")
+}
+
+model Tire {
+  id                  String           @id @default(uuid()) @db.Uuid
+  tenantId            String           @map("tenant_id") @db.Uuid
+  tenant              Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  brand               String
+  model               String
+  size                String
+  serialNumber        String           @map("serial_number")
+  dot                 String
+  status              TireStatus       @default(NEW)
+  currentVehicleId    String?          @map("current_vehicle_id") @db.Uuid
+  currentVehicle      Vehicle?         @relation("CurrentVehicleTires", fields: [currentVehicleId], references: [id], onDelete: SetNull)
+  position            String?
+  currentGrooveDepth  Float            @map("current_groove_depth")
+  originalGrooveDepth Float            @map("original_groove_depth")
+  retreatCount        Int              @default(0) @map("retreat_count")
+  costNew             Float            @map("cost_new")
+  costRetreat         Float            @default(0) @map("cost_retreat")
+  totalKm             Int              @default(0) @map("total_km")
+  inspections         TireInspection[]
+  createdAt           DateTime         @default(now()) @map("created_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+
+  @@unique([tenantId, serialNumber])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, currentVehicleId])
+  @@map("tires")
+  @@schema("public")
+}
+
+model TireInspection {
+  id                String   @id @default(uuid()) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tireId            String   @map("tire_id") @db.Uuid
+  tire              Tire     @relation(fields: [tireId], references: [id], onDelete: Cascade)
+  vehicleId         String   @map("vehicle_id") @db.Uuid
+  vehicle           Vehicle  @relation("VehicleTireInspections", fields: [vehicleId], references: [id], onDelete: Cascade)
+  inspectedByUserId String   @map("inspected_by_user_id") @db.Uuid
+  inspectedByUser   User     @relation("InspectedByUserTireInspections", fields: [inspectedByUserId], references: [id], onDelete: Restrict)
+  date              DateTime
+  grooveDepth       Float    @map("groove_depth")
+  position          String
+  photos            Json?
+  notes             String?
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId])
+  @@index([tenantId, tireId])
+  @@index([tenantId, vehicleId])
+  @@index([tenantId, inspectedByUserId])
+  @@index([tenantId, date])
+  @@map("tire_inspections")
   @@schema("public")
 }

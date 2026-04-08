@@ -229,6 +229,7 @@ export type ServiceOrderWithRelations = {
   partsCost: number | null;
   notes: string | null;
   photos: string[];
+  invoiceUrl: string | null;
   approvedByUserId: string | null;
   createdByUserId: string | null;
   createdAt: Date;

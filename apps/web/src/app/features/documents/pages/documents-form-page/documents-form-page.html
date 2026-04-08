@@ -1,0 +1,266 @@
+<po-page-edit
+  [p-breadcrumb]="breadcrumb"
+  [p-title]="title"
+  [p-subtitle]="subtitle"
+  [p-disable-submit]="!canSave"
+  (p-cancel)="cancel()"
+  (p-save)="save()"
+  (p-save-new)="saveAndCreateNew()"
+>
+  <section class="documents-form-page">
+    <div class="documents-form-page__main">
+      <form
+        class="documents-form-page__form"
+        [formGroup]="form"
+        novalidate
+      >
+        <section class="documents-form-page__section">
+          <div class="documents-form-page__section-head">
+            <span class="documents-form-page__eyebrow">Cadastro essencial</span>
+            <h2>Vínculo operacional e tipo</h2>
+          </div>
+
+          <div class="documents-form-page__grid documents-form-page__grid--identity">
+            <div class="documents-form-page__field">
+              <po-combo
+                formControlName="type"
+                name="type"
+                p-label="Tipo do documento"
+                [p-options]="typeOptions"
+              ></po-combo>
+              @for (error of getControlErrors('type'); track error) {
+                <small class="documents-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="documents-form-page__field">
+              <po-input
+                formControlName="description"
+                name="description"
+                p-label="Descrição"
+                p-placeholder="Ex: IPVA 2026 do utilitário"
+              ></po-input>
+              @for (error of getControlErrors('description'); track error) {
+                <small class="documents-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <po-combo
+              formControlName="vehicleId"
+              name="vehicleId"
+              p-label="Veículo"
+              p-placeholder="Selecione um veículo"
+              [p-options]="vehicleOptions"
+            ></po-combo>
+
+            <po-combo
+              formControlName="driverId"
+              name="driverId"
+              p-label="Motorista"
+              p-placeholder="Selecione um motorista"
+              [p-options]="driverOptions"
+            ></po-combo>
+          </div>
+
+          @if (relationError) {
+            <small class="documents-form-page__error documents-form-page__error--section">
+              {{ relationError }}
+            </small>
+          }
+        </section>
+
+        <po-divider p-label="Prazo e alerta"></po-divider>
+
+        <section class="documents-form-page__section">
+          <div class="documents-form-page__grid documents-form-page__grid--schedule">
+            <div class="documents-form-page__field">
+              <po-datepicker
+                formControlName="expirationDate"
+                name="expirationDate"
+                p-label="Data de vencimento"
+                p-format="dd/mm/yyyy"
+              ></po-datepicker>
+              @for (error of getControlErrors('expirationDate'); track error) {
+                <small class="documents-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="documents-form-page__field">
+              <po-number
+                formControlName="alertDaysBefore"
+                name="alertDaysBefore"
+                p-label="Alertar com antecedência"
+                [p-min]="0"
+                [p-max]="365"
+                p-help="Use 0 para alertar apenas no vencimento."
+              ></po-number>
+              @for (error of getControlErrors('alertDaysBefore'); track error) {
+                <small class="documents-form-page__error">{{ error }}</small>
+              }
+            </div>
+
+            <div class="documents-form-page__field">
+              <po-decimal
+                formControlName="cost"
+                name="cost"
+                p-label="Custo"
+                [p-decimals-length]="2"
+                [p-min]="0"
+              ></po-decimal>
+              @for (error of getControlErrors('cost'); track error) {
+                <small class="documents-form-page__error">{{ error }}</small>
+              }
+            </div>
+          </div>
+
+          <div class="documents-form-page__alert-presets">
+            <span>Presets rápidos</span>
+
+            <div class="documents-form-page__alert-pills">
+              @for (days of alertPresetDays; track days) {
+                <button
+                  type="button"
+                  class="documents-form-page__alert-pill"
+                  [class.documents-form-page__alert-pill--active]="isAlertPresetActive(days)"
+                  (click)="applyAlertPreset(days)"
+                >
+                  {{ days === 0 ? 'No vencimento' : days + ' dias' }}
+                </button>
+              }
+            </div>
+          </div>
+        </section>
+
+        <po-divider p-label="Anexo e observações"></po-divider>
+
+        <section class="documents-form-page__section">
+          <div class="documents-form-page__upload-shell">
+            <div class="documents-form-page__uploader">
+              <po-upload
+                name="document-file"
+                p-label="Arquivo do documento"
+                p-help="PDF ou imagem de até 4 MB. O upload local gera o anexo persistido do cadastro."
+                [ngModel]="attachmentUploadFiles"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="handleAttachmentFilesChange($event)"
+                [p-restrictions]="attachmentRestrictions"
+                [p-drag-drop]="true"
+                [p-hide-send-button]="true"
+                [p-required-url]="false"
+              ></po-upload>
+
+              @if (isReadingAttachment) {
+                <p class="documents-form-page__upload-hint">
+                  Convertendo arquivo selecionado para anexar ao cadastro...
+                </p>
+              } @else {
+                <p class="documents-form-page__upload-hint">
+                  Você também pode informar uma URL externa quando o arquivo já estiver hospedado.
+                </p>
+              }
+
+              <div class="documents-form-page__upload-actions">
+                @if (hasAttachment) {
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Abrir anexo"
+                    (p-click)="openAttachment()"
+                  ></po-button>
+                }
+
+                @if (canSwitchToExternalUrlMode) {
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Trocar por URL"
+                    (p-click)="switchToExternalUrlMode()"
+                  ></po-button>
+                }
+
+                @if (canRestoreAttachment) {
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Restaurar anexo atual"
+                    (p-click)="restoreInitialAttachment()"
+                  ></po-button>
+                }
+              </div>
+            </div>
+
+            <div class="documents-form-page__attachment-panel">
+              @if (hasAttachment) {
+                @if (showImagePreview) {
+                  <figure class="documents-form-page__attachment-card documents-form-page__attachment-card--image">
+                    <img
+                      [src]="currentAttachmentUrl"
+                      alt="Pré-visualização do anexo"
+                    />
+                    <figcaption>
+                      <strong>{{ attachmentName }}</strong>
+                      <small>{{ attachmentHelper }}</small>
+                    </figcaption>
+                  </figure>
+                } @else {
+                  <section class="documents-form-page__attachment-card">
+                    <span class="documents-form-page__attachment-icon">ARQ</span>
+                    <div>
+                      <strong>{{ attachmentName }}</strong>
+                      <small>{{ attachmentHelper }}</small>
+                    </div>
+                  </section>
+                }
+              } @else {
+                <section class="documents-form-page__attachment-empty">
+                  <h3>Nenhum anexo preparado</h3>
+                  <p>Selecione um arquivo ou informe uma URL para completar o cadastro.</p>
+                </section>
+              }
+            </div>
+          </div>
+
+          @if (showFileUrlField) {
+            <div class="documents-form-page__field">
+              <po-input
+                formControlName="fileUrl"
+                name="fileUrl"
+                p-label="URL do arquivo"
+                [p-help]="fileUrlHelpText"
+                p-placeholder="https://arquivos.exemplo.com/documento.pdf"
+              ></po-input>
+              @for (error of getControlErrors('fileUrl'); track error) {
+                <small class="documents-form-page__error">{{ error }}</small>
+              }
+            </div>
+          }
+
+          <po-textarea
+            formControlName="notes"
+            name="notes"
+            p-label="Observações"
+            [p-rows]="4"
+          ></po-textarea>
+        </section>
+      </form>
+    </div>
+
+    <aside class="documents-form-page__aside">
+      <po-widget p-title="Prévia rápida">
+        <span class="documents-form-page__preview-type">{{ selectedTypeLabel }}</span>
+        <strong>{{ targetSummary }}</strong>
+        <small>Vencimento: {{ expirationSummary }}</small>
+        <div class="documents-form-page__preview-meta">
+          <span>{{ alertSummary }}</span>
+          <small>{{ hasAttachment ? attachmentName : 'Sem anexo carregado' }}</small>
+        </div>
+      </po-widget>
+
+      <po-widget p-title="Checklist">
+        <ul class="documents-form-page__checklist">
+          <li>Todo documento precisa de veículo ou motorista.</li>
+          <li>CNH exige vínculo com motorista.</li>
+          <li>Upload local gera o anexo persistido via cadastro.</li>
+          <li>Configure a antecedência do alerta conforme a rotina operacional.</li>
+        </ul>
+      </po-widget>
+    </aside>
+  </section>
+</po-page-edit>

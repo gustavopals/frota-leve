@@ -405,6 +405,47 @@ describe('Documents E2E', () => {
     );
   });
 
+  it('POST /documents aceita anexo inline maior que URL tradicional', async () => {
+    const inlineFileUrl = `data:application/pdf;base64,${'A'.repeat(2500)}`;
+    const txMock: MockTransactionClient = {
+      document: {
+        create: jest.fn().mockResolvedValue({
+          ...VALID_DOCUMENT_WITH_RELATIONS,
+          ...VALID_DOCUMENT,
+          description: BASE_PAYLOAD.description,
+          fileUrl: inlineFileUrl,
+        }),
+        update: jest.fn(),
+        delete: jest.fn(),
+      },
+      auditLog: {
+        create: jest.fn().mockResolvedValue({}),
+      },
+    };
+
+    prisma.$transaction.mockImplementation((fn: (tx: MockTransactionClient) => Promise<unknown>) =>
+      fn(txMock),
+    );
+
+    const res = await request(app)
+      .post('/api/v1/documents')
+      .set('Authorization', `Bearer ${makeToken(OWNER)}`)
+      .send({
+        ...BASE_PAYLOAD,
+        fileUrl: inlineFileUrl,
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body.fileUrl).toBe(inlineFileUrl);
+    expect(txMock.document.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          fileUrl: inlineFileUrl,
+        }),
+      }),
+    );
+  });
+
   it('POST /documents returns 400 when vínculo não é informado', async () => {
     const { vehicleId: _vehicleId, ...payloadWithoutTarget } = BASE_PAYLOAD;
 

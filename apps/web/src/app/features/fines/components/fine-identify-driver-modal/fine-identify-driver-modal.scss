@@ -1,0 +1,105 @@
+.identify-driver-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  &__eyebrow {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-neutral-50, #8898aa);
+    margin-bottom: 0.25rem;
+  }
+
+  &__fine-summary {
+    h3 {
+      margin: 0 0 0.25rem;
+      font-size: 1.1rem;
+    }
+
+    p {
+      margin: 0 0 1rem;
+      color: var(--color-neutral-60, #6c7a89);
+      font-size: 0.875rem;
+    }
+  }
+
+  &__fine-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+
+  &__meta-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.625rem 0.875rem;
+    background: var(--color-neutral-10, #f5f6f8);
+    border-radius: 6px;
+
+    span {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-neutral-50, #8898aa);
+    }
+
+    strong {
+      font-size: 0.875rem;
+    }
+  }
+
+  &__divider {
+    border: none;
+    border-top: 1px solid var(--color-neutral-20, #e4e7eb);
+    margin: 0;
+  }
+
+  &__form-header {
+    h4 {
+      margin: 0.25rem 0 0.375rem;
+      font-size: 0.95rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--color-neutral-60, #6c7a89);
+      line-height: 1.5;
+    }
+  }
+
+  &__fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  &__field {
+    flex: 1 1 200px;
+
+    &--full {
+      flex: 1 1 100%;
+    }
+  }
+
+  &__confirmation {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    background: var(--color-feedback-positive-lightest, #e8f5e9);
+    border-left: 3px solid var(--color-feedback-positive-base, #388e3c);
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+
+  &__confirmation-icon {
+    color: var(--color-feedback-positive-base, #388e3c);
+    font-weight: 700;
+  }
+}

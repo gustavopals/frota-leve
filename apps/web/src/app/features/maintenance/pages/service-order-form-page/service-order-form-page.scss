@@ -1,0 +1,291 @@
+:host {
+  display: block;
+}
+
+.service-order-form-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.8fr);
+  gap: 1.5rem;
+}
+
+.service-order-form-page__main,
+.service-order-form-page__aside {
+  min-width: 0;
+}
+
+.service-order-form-page__form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.service-order-form-page__section {
+  display: grid;
+  gap: 1rem;
+}
+
+.service-order-form-page__section-head {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.service-order-form-page__section-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.service-order-form-page__section-head--inline {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.service-order-form-page__section-head--compact h2 {
+  font-size: 1rem;
+}
+
+.service-order-form-page__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4f575e;
+}
+
+.service-order-form-page__grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.service-order-form-page__grid--identity {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.service-order-form-page__grid--costs {
+  grid-template-columns: minmax(220px, 0.55fr) minmax(0, 1.45fr);
+  align-items: start;
+}
+
+.service-order-form-page__field {
+  min-width: 0;
+}
+
+.service-order-form-page__field--wide {
+  grid-column: 1 / -1;
+}
+
+.service-order-form-page__error {
+  display: block;
+  margin-top: 0.25rem;
+  color: #b42318;
+  font-size: 0.78rem;
+}
+
+.service-order-form-page__items {
+  display: grid;
+  gap: 1rem;
+}
+
+.service-order-form-page__item-card,
+.service-order-form-page__invoice-card,
+.service-order-form-page__empty-state {
+  border: 1px solid #d5d9dd;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.service-order-form-page__item-card {
+  padding: 1rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.service-order-form-page__item-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.service-order-form-page__item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eaecf0;
+}
+
+.service-order-form-page__item-footer strong,
+.service-order-form-page__summary-list strong,
+.service-order-form-page__preview-type {
+  display: block;
+}
+
+.service-order-form-page__item-footer small,
+.service-order-form-page__summary-list small,
+.service-order-form-page__preview-meta small,
+.service-order-form-page__photo-card small,
+.service-order-form-page__invoice-card small,
+.service-order-form-page__hint {
+  color: #5f6980;
+}
+
+.service-order-form-page__attachments-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.service-order-form-page__attachment-column {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.service-order-form-page__attachment-actions,
+.service-order-form-page__photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.service-order-form-page__photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.85rem;
+}
+
+.service-order-form-page__photo-card {
+  overflow: hidden;
+  border: 1px solid #d5d9dd;
+  border-radius: 16px;
+  background: #ffffff;
+  display: grid;
+}
+
+.service-order-form-page__photo-card img,
+.service-order-form-page__invoice-card--image img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: linear-gradient(135deg, #f8fafc, #eef2f6);
+}
+
+.service-order-form-page__photo-card figcaption,
+.service-order-form-page__invoice-card {
+  padding: 0.85rem;
+}
+
+.service-order-form-page__photo-card figcaption {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.service-order-form-page__photo-actions {
+  padding: 0 0.85rem 0.85rem;
+}
+
+.service-order-form-page__invoice-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.service-order-form-page__invoice-card--image {
+  overflow: hidden;
+}
+
+.service-order-form-page__invoice-card--image figcaption {
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.service-order-form-page__invoice-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 800;
+}
+
+.service-order-form-page__empty-state {
+  padding: 1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.service-order-form-page__empty-state--inline h3,
+.service-order-form-page__empty-state--inline p {
+  margin: 0;
+}
+
+.service-order-form-page__aside {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.service-order-form-page__preview-type {
+  margin-bottom: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a3b12;
+}
+
+.service-order-form-page__preview-meta {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.85rem;
+}
+
+.service-order-form-page__summary-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.service-order-form-page__summary-list article {
+  padding: 0.85rem 0.95rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f8fafc, #eef2f6);
+}
+
+.service-order-form-page__checklist {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+@media (max-width: 1180px) {
+  .service-order-form-page {
+    grid-template-columns: 1fr;
+  }
+
+  .service-order-form-page__aside {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .service-order-form-page__grid--identity,
+  .service-order-form-page__grid--costs,
+  .service-order-form-page__attachments-grid,
+  .service-order-form-page__item-grid,
+  .service-order-form-page__aside {
+    grid-template-columns: 1fr;
+  }
+
+  .service-order-form-page__section-head--inline,
+  .service-order-form-page__item-footer {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .service-order-form-page__item-footer {
+    justify-content: stretch;
+  }
+}
