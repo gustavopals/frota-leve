@@ -21,17 +21,31 @@ packages/ai        AI integration placeholder (TASK 3.1)
 
 **Path aliases** (`tsconfig.base.json`): `@frota-leve/shared`, `@frota-leve/database`, `@frota-leve/ai`
 
+`@frota-leve/database` re-exports the Prisma client singleton (`prisma`) and all Prisma-generated types. Always import from this alias, never from `@prisma/client` directly.
+
 ### API Module Pattern (`apps/api/src/modules/<feature>/`)
 
-- `<feature>.routes.ts` — Express router
-- `<feature>.controller.ts` — request handlers, extracts tenant/user context
-- `<feature>.service.ts` — business logic, always scoped by `tenantId`
-- `<feature>.validators.ts` — Zod schemas (from `@frota-leve/shared`)
-- `<feature>.types.ts` — module-specific types
+- `<feature>.routes.ts` — Express router, wires middleware + controller methods
+- `<feature>.controller.ts` — request handlers; each controller class defines a private `getActorContext(req)` returning `{ tenantId, tenantPlan, userId, ipAddress, userAgent }`
+- `<feature>.service.ts` — business logic, always scoped by `tenantId`; check plan limits via `PLAN_LIMITS` from `@frota-leve/shared`
+- `<feature>.validators.ts` — Zod schemas exported as both schema and inferred type (`type XInput = z.infer<typeof xSchema>`)
+- `<feature>.types.ts` — module-specific types not in shared
 
-Middleware order: `requestId → rateLimiter → morgan → body parsing → routes → errorHandler`
+**Middleware order**: `requestId → rateLimiter → morgan → body parsing → routes → errorHandler`
 
-Auth flow: `authenticate` (JWT) → `tenantMiddleware` → `authorize(...roles)`
+**Auth flow**: `authenticate` (JWT) → `tenantMiddleware` → `authorize(...roles)`
+
+**`validate` middleware** usage in routes:
+
+```ts
+router.post('/', authenticate, tenantMiddleware, validate(createSchema, 'body'), controller.create);
+```
+
+**File uploads**: use the `upload` middleware from `src/middlewares/upload.ts` (multer). Several modules (vehicles, drivers, fines) support CSV/XLSX import via `POST /import?preview=true|false`.
+
+**Background schedulers**: modules with time/mileage-based alerts (maintenance, documents, tires) have a `<feature>-alert.scheduler.ts` that runs on a daily interval. Start schedulers in `server.ts`.
+
+**API base prefix**: all routes are under `/api/v1/`.
 
 ### Angular Architecture (Standalone — Angular 21)
 
@@ -46,7 +60,21 @@ Zero NgModules. All components are standalone by default.
 - **Lazy loading**: `loadChildren: () => import('./feature.routes').then(m => m.FEATURE_ROUTES)`
 - **Change Detection**: prefer `ChangeDetectionStrategy.OnPush`
 
-Frontend structure: `app/core/` (guards, interceptors, services), `app/features/` (lazy-loaded).
+**Frontend feature structure** (`app/features/<feature>/`):
+
+- `<feature>.routes.ts` — `Routes` array constant
+- `<feature>.service.ts` — HTTP calls via `ApiService` (inject from `core/services/api`)
+- `<feature>.types.ts`, `<feature>.constants.ts`, `<feature>.utils.ts` — domain types/data
+
+**`ApiService`** (`core/services/api`) wraps all HTTP verbs. Use it for all API calls. Use `HttpClient` directly only for file uploads (FormData) and blob downloads.
+
+**Interceptors** (wired in `app.config.ts`):
+
+- `authInterceptor` — attaches `Authorization: Bearer <token>`
+- `tenantInterceptor` — attaches tenant header
+- `errorInterceptor` — global HTTP error handling
+
+**Role-protected routes**: use `roleGuard` with `data: { roles: ['OWNER', 'ADMIN', ...] }`.
 
 ## Key Commands
 
@@ -84,7 +112,7 @@ Single test: `cd apps/api && npx jest path/to/file.spec.ts` (e2e: `--config jest
 
 Every query and endpoint MUST be scoped by `tenantId`:
 
-- **Controllers**: use `getActorContext(req)` → `{ tenantId, plan, userId, ... }`
+- **Controllers**: call `this.getActorContext(req)` → `{ tenantId, tenantPlan, userId, ... }`
 - **Services**: always `where: { tenantId }` in Prisma queries
 - **Never** allow cross-tenant data access
 - All tenant-scoped tables have `@@index([tenantId])`
@@ -92,11 +120,18 @@ Every query and endpoint MUST be scoped by `tenantId`:
 ## Key Architectural Decisions
 
 1. **Validation**: Zod schemas in `packages/shared/src/dtos/`, shared by api and web. Backend uses `validate(schema, target)` middleware.
-2. **Error handling**: Custom classes in `apps/api/src/shared/errors/`. Response format: `{ success, data?, error?: { code, message, details } }`
+2. **Error handling**: Custom classes in `apps/api/src/shared/errors/` (`NotFoundError`, `ValidationError`, `UnauthorizedError`, `ForbiddenError`, `ConflictError`, `PlanLimitError`, `TooManyRequestsError`). Response format: `{ success, data?, error?: { code, message, details } }`
 3. **Auth**: JWT (15m) + refresh token (7d) with rotation, blacklisted in Redis. bcryptjs 12 rounds.
 4. **Logging**: Winston with correlation ID. Human-readable dev, JSON prod, silent test.
 5. **Pagination**: `{ data, meta: { page, limit, total, totalPages } }`
 6. **Env config**: `apps/api/src/config/env.ts` validates all vars at boot via Zod.
+7. **Plan limits**: `PLAN_LIMITS` from `@frota-leve/shared` maps `PlanType` → `{ maxVehicles, maxUsers, hasAI, hasAPI, hasTires }`. Services must enforce these before creating resources, throwing `PlanLimitError`.
+
+## User Roles
+
+`OWNER > ADMIN > MANAGER > OPERATOR > DRIVER > FINANCIAL > VIEWER`
+
+Role authorization in routes: `authorize('OWNER', 'ADMIN')`. Frontend guards: `data: { roles: [...] }` with `roleGuard`.
 
 ## ROADMAP Task Reference
 

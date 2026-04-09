@@ -1,0 +1,234 @@
+.incidents-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-neutral-05, #f8f9fb);
+  border: 1px solid var(--color-neutral-20, #e4e7eb);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+  }
+
+  &__field {
+    flex: 1 1 160px;
+
+    &--search { flex: 2 1 240px; }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+}
+
+.incidents-loading {
+  min-height: 120px;
+  position: relative;
+}
+
+.incidents-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+
+  &__label {
+    font-size: 0.875rem;
+    color: var(--color-neutral-60, #6c7a89);
+  }
+
+  &__controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+.incidents-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+  color: var(--color-neutral-50, #8898aa);
+
+  &__icon { font-size: 2.5rem; }
+  &__text { font-size: 0.9rem; margin: 0; }
+}
+
+// ─── Timeline modal ───────────────────────────────────────────
+
+.incidents-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-neutral-20, #e4e7eb);
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  &__vehicle {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-neutral-80, #2e3f55);
+  }
+
+  &__meta {
+    font-size: 0.8rem;
+    color: var(--color-neutral-60, #6c7a89);
+  }
+
+  &__location {
+    font-size: 0.8rem;
+    color: var(--color-neutral-60, #6c7a89);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  &__steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  &__step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    position: relative;
+
+    &:not(:last-child) {
+      &::after {
+        content: '';
+        position: absolute;
+        left: 9px;
+        top: calc(0.6rem + 18px);
+        bottom: 0;
+        width: 2px;
+        background: var(--color-neutral-20, #e4e7eb);
+      }
+    }
+
+    &--done {
+      &::after {
+        background: var(--color-feedback-positive-base, #2c9952) !important;
+      }
+    }
+  }
+
+  &__step-indicator {
+    width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  &__step-icon {
+    font-size: 1.1rem;
+
+    &--done {
+      color: var(--color-feedback-positive-base, #2c9952);
+    }
+  }
+
+  &__step-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--color-neutral-30, #ced4da);
+    background: #fff;
+
+    &--current {
+      border-color: var(--color-action-default, #0066cc);
+      background: var(--color-action-default, #0066cc);
+    }
+  }
+
+  &__step-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  &__step-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-neutral-80, #2e3f55);
+
+    .incidents-timeline__step--done & {
+      color: var(--color-neutral-60, #6c7a89);
+    }
+  }
+
+  &__step-date {
+    font-size: 0.75rem;
+    color: var(--color-neutral-50, #8898aa);
+  }
+
+  &__details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-neutral-20, #e4e7eb);
+  }
+
+  &__detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 120px;
+
+    &--full { flex: 1 1 100%; }
+  }
+
+  &__detail-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-neutral-50, #8898aa);
+  }
+
+  &__detail-value {
+    font-size: 0.85rem;
+    color: var(--color-neutral-80, #2e3f55);
+  }
+
+  &__flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  &__flag {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    background: var(--color-action-lightest, #e8f0fe);
+    color: var(--color-action-default, #0066cc);
+    font-weight: 500;
+  }
+}

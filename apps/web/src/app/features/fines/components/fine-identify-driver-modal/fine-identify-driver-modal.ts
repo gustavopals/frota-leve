@@ -133,16 +133,28 @@ export class FineIdentifyDriverModal {
       });
   }
 
+  private buildNotesWithDetranDate(
+    existingNotes: string | null,
+    detranDeliveryDate: string,
+  ): string {
+    const detranLine = `Entrega ao DETRAN: ${detranDeliveryDate}`;
+    return existingNotes?.trim() ? `${detranLine}\n${existingNotes.trim()}` : detranLine;
+  }
+
   private submit(): void {
     if (!this.fine || this.form.invalid || this.isSaving) return;
 
     const fine = this.fine;
-    const { driverId } = this.form.value;
+    const { driverId, detranDeliveryDate } = this.form.value;
 
     if (!driverId) return;
 
     this.isSaving = true;
     this.cdr.markForCheck();
+
+    const notes = detranDeliveryDate
+      ? this.buildNotesWithDetranDate(fine.notes, detranDeliveryDate)
+      : fine.notes;
 
     const payload = {
       vehicleId: fine.vehicleId,
@@ -158,7 +170,7 @@ export class FineIdentifyDriverModal {
       dueDate: fine.dueDate,
       status: FineStatus.DRIVER_IDENTIFIED,
       payrollDeduction: fine.payrollDeduction,
-      notes: fine.notes,
+      notes,
       fileUrl: fine.fileUrl,
     };
 

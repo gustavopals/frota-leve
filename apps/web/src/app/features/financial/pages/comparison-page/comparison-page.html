@@ -1,0 +1,239 @@
+<po-page-default
+  p-title="Comparativo entre veículos"
+  p-subtitle="Leitura side-by-side do custo operacional dentro da mesma família de ativos."
+  [p-actions]="pageActions"
+  [p-breadcrumb]="breadcrumb"
+>
+  <section class="comparison-page__hero">
+    <div class="comparison-page__hero-copy">
+      <span class="comparison-page__eyebrow">Benchmark operacional</span>
+      <h2>{{ heroTitle }}</h2>
+      <p>{{ heroDescription }}</p>
+
+      @if (benchmarkMetrics.length > 0) {
+        <div class="comparison-page__hero-metrics">
+          @for (item of benchmarkMetrics; track item.label) {
+            <article class="comparison-page__hero-metric">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+              <small>{{ item.detail }}</small>
+            </article>
+          }
+        </div>
+      }
+    </div>
+
+    <form class="comparison-page__controls" [formGroup]="filtersForm" novalidate>
+      <po-combo
+        formControlName="vehicleId"
+        name="vehicleId"
+        p-label="Veículo de referência"
+        p-placeholder="Selecione o ativo..."
+        [p-options]="vehicleOptions"
+        [p-disabled]="isLoading || isLoadingOptions"
+      ></po-combo>
+
+      <div class="comparison-page__control-actions">
+        <po-button
+          p-kind="primary"
+          p-label="Comparar agora"
+          [p-disabled]="!filtersForm.controls.vehicleId.value || isLoading"
+          (p-click)="applyFilters()"
+        ></po-button>
+
+        @if (selectedVehicleId) {
+          <po-button
+            p-kind="tertiary"
+            p-label="Abrir TCO"
+            (p-click)="openTco(selectedVehicleId)"
+          ></po-button>
+
+          <po-button
+            p-kind="tertiary"
+            p-label="Abrir veículo"
+            (p-click)="openVehicle(selectedVehicleId)"
+          ></po-button>
+        }
+      </div>
+    </form>
+  </section>
+
+  @if (!selectedVehicleId && !isLoadingOptions) {
+    <section class="comparison-page__state">
+      <div>
+        <span class="comparison-page__state-label">Seleção inicial</span>
+        <h3>
+          @if (vehicleOptions.length > 0) {
+            Escolha o veículo que vai servir de referência
+          } @else {
+            Cadastre veículos para habilitar o benchmark
+          }
+        </h3>
+        <p>
+          @if (vehicleOptions.length > 0) {
+            O comparativo usa ativos da mesma marca, modelo e ano para montar a tabela lado a lado.
+          } @else {
+            Sem veículos cadastrados não há base para construir o comparativo operacional.
+          }
+        </p>
+      </div>
+
+      @if (vehicleOptions.length === 0) {
+        <po-button p-kind="primary" p-label="Abrir veículos" (p-click)="openVehicle(null)"></po-button>
+      }
+    </section>
+  }
+
+  @if (isLoading && selectedVehicleId) {
+    <section class="comparison-page__state">
+      <po-loading-overlay [p-screen-lock]="false"></po-loading-overlay>
+      <div>
+        <span class="comparison-page__state-label">Comparando</span>
+        <h3>Consolidando os veículos similares do grupo</h3>
+      </div>
+    </section>
+  } @else if (hasLoadError && selectedVehicleId) {
+    <section class="comparison-page__state comparison-page__state--error">
+      <div>
+        <span class="comparison-page__state-label">Falha ao carregar</span>
+        <h3>Não foi possível montar o comparativo deste ativo</h3>
+        <p>Verifique se o veículo ainda existe e se há base comparável no tenant.</p>
+      </div>
+
+      <po-button
+        p-kind="primary"
+        p-label="Tentar novamente"
+        (p-click)="refreshComparison()"
+      ></po-button>
+    </section>
+  }
+
+  @if (comparison; as currentComparison) {
+    <section class="comparison-page__content">
+      <article class="comparison-page__panel comparison-page__panel--wide">
+        <header class="comparison-page__panel-header">
+          <div>
+            <span class="comparison-page__panel-kicker">Matriz</span>
+            <h3>Comparativo side-by-side por custo operacional</h3>
+          </div>
+
+          <div class="comparison-page__panel-meta">
+            <strong>{{ comparisonColumns.length }} colunas</strong>
+            <small>até {{ currentComparison.benchmark.vehicleCount }} veículos comparáveis</small>
+          </div>
+        </header>
+
+        <div class="comparison-page__matrix-shell">
+          <table class="comparison-page__matrix">
+            <thead>
+              <tr>
+                <th class="comparison-page__row-head comparison-page__row-head--sticky">
+                  <span>Indicador</span>
+                  <small>Leitura fixa da referência e dos similares</small>
+                </th>
+
+                @for (column of comparisonColumns; track column.id) {
+                  <th
+                    class="comparison-page__matrix-cell comparison-page__matrix-cell--head"
+                    [class.comparison-page__matrix-cell--reference]="column.isReference"
+                  >
+                    <div class="comparison-page__vehicle-head">
+                      <span class="comparison-page__vehicle-badge">
+                        {{ column.isReference ? 'Referência' : 'Similar' }}
+                      </span>
+                      <strong>{{ formatPlate(column.vehicle.vehicle.plate) }}</strong>
+                      <small>
+                        {{ column.vehicle.vehicle.brand }}
+                        {{ column.vehicle.vehicle.model }}
+                        {{ column.vehicle.vehicle.year }}
+                      </small>
+                    </div>
+
+                    <div class="comparison-page__vehicle-actions">
+                      <po-button
+                        p-kind="tertiary"
+                        p-size="small"
+                        p-label="TCO"
+                        (p-click)="openTco(column.vehicle.vehicle.id)"
+                      ></po-button>
+                      <po-button
+                        p-kind="tertiary"
+                        p-size="small"
+                        p-label="Veículo"
+                        (p-click)="openVehicle(column.vehicle.vehicle.id)"
+                      ></po-button>
+                    </div>
+                  </th>
+                }
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (row of comparisonRows; track row.key) {
+                <tr>
+                  <th class="comparison-page__row-head" scope="row">
+                    <span>{{ row.label }}</span>
+                    <small>{{ row.helper }}</small>
+                  </th>
+
+                  @for (cell of row.cells; track cell.vehicleId) {
+                    <td
+                      class="comparison-page__matrix-cell"
+                      [class.comparison-page__matrix-cell--reference]="cell.isReference"
+                    >
+                      <strong>{{ cell.main }}</strong>
+                      <small>{{ cell.detail }}</small>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="comparison-page__panel">
+        <header class="comparison-page__panel-header">
+          <div>
+            <span class="comparison-page__panel-kicker">Leitura rápida</span>
+            <h3>Resumo do grupo comparável</h3>
+          </div>
+        </header>
+
+        <div class="comparison-page__notes">
+          <p>
+            A referência aparece sempre na primeira coluna. Os similares são ordenados pelo backend
+            com base no custo por quilômetro para destacar os pares mais críticos do grupo.
+          </p>
+
+          <p>
+            @if (hasPeers) {
+              {{ currentComparison.similarVehicles.length }} similar(es) foram carregados para esta
+              leitura.
+            } @else {
+              Não há outro veículo com a mesma combinação de marca, modelo e ano para comparar neste
+              tenant.
+            }
+          </p>
+        </div>
+      </article>
+
+      @if (comparisonWarnings.length > 0) {
+        <article class="comparison-page__panel">
+          <header class="comparison-page__panel-header">
+            <div>
+              <span class="comparison-page__panel-kicker">Observações</span>
+              <h3>Premissas do comparativo</h3>
+            </div>
+          </header>
+
+          <div class="comparison-page__warnings">
+            @for (warning of comparisonWarnings; track warning) {
+              <p>{{ warning }}</p>
+            }
+          </div>
+        </article>
+      }
+    </section>
+  }
+</po-page-default>

@@ -932,8 +932,8 @@ Uma task só está **pronta** quando:
 - [x] **2.4.3** — Backend: `POST /fines/import` — importação de planilha de multas
 - [x] **2.4.4** — Backend: `GET /fines/stats` — total de multas por período, por motorista, por tipo, valor total
 - [x] **2.4.5** — Frontend: listagem com filtros e ações de workflow (identificar condutor, registrar recurso, registrar pagamento)
-- [ ] **2.4.6** — Frontend: modal de identificação do condutor (selecionar motorista + data de entrega ao DETRAN)
-- [ ] **2.4.7** — Frontend: dashboard de multas (ranking de motoristas, tipos mais frequentes, custo acumulado)
+- [x] **2.4.6** — Frontend: modal de identificação do condutor (selecionar motorista + data de entrega ao DETRAN)
+- [x] **2.4.7** — Frontend: dashboard de multas (ranking de motoristas, tipos mais frequentes, custo acumulado)
 
 ---
 
@@ -955,9 +955,9 @@ Uma task só está **pronta** quando:
 - [x] **2.5.4** — Backend: `PATCH /tires/:id/move` — movimentar pneu entre veículos/posições
 - [x] **2.5.5** — Backend: alerta de troca quando sulco < limite configurável (ex: 3mm)
 - [x] **2.5.6** — Backend: cálculo de custo por km rodado por pneu e comparativo entre marcas
-- [ ] **2.5.7** — Frontend: mapa visual do veículo mostrando posição dos pneus (SVG interativo com eixos)
-- [ ] **2.5.8** — Frontend: histórico de inspeções com gráfico de desgaste ao longo do tempo
-- [ ] **2.5.9** — Gate de plano: middleware que bloqueia acesso ao módulo de pneus para plano ESSENTIAL
+- [x] **2.5.7** — Frontend: mapa visual do veículo mostrando posição dos pneus (SVG interativo com eixos)
+- [x] **2.5.8** — Frontend: histórico de inspeções com gráfico de desgaste ao longo do tempo
+- [x] **2.5.9** — Gate de plano: middleware que bloqueia acesso ao módulo de pneus para plano ESSENTIAL
 
 ---
 
@@ -965,11 +965,11 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.6.1** — Migration: tabela `Incident` (id, tenantId, vehicleId, driverId?, date, location, type, description, thirdPartyInvolved, policeReport, insurerNotified, insuranceClaimNumber, estimatedCost, actualCost, status [REGISTERED, UNDER_ANALYSIS, IN_REPAIR, CONCLUDED], photos, documents, downtime, notes, createdAt)
-- [ ] **2.6.2** — Backend CRUD com fluxo de status
-- [ ] **2.6.3** — Backend: `GET /incidents/stats` — frequência, custo médio, tempo de indisponibilidade
-- [ ] **2.6.4** — Frontend: formulário com upload de múltiplas fotos e documentos
-- [ ] **2.6.5** — Frontend: listagem com timeline de acompanhamento
+- [x] **2.6.1** — Migration: tabela `Incident` (id, tenantId, vehicleId, driverId?, date, location, type, description, thirdPartyInvolved, policeReport, insurerNotified, insuranceClaimNumber, estimatedCost, actualCost, status [REGISTERED, UNDER_ANALYSIS, IN_REPAIR, CONCLUDED], photos, documents, downtime, notes, createdAt)
+- [x] **2.6.2** — Backend CRUD com fluxo de status
+- [x] **2.6.3** — Backend: `GET /incidents/stats` — frequência, custo médio, tempo de indisponibilidade
+- [x] **2.6.4** — Frontend: formulário com upload de múltiplas fotos e documentos
+- [x] **2.6.5** — Frontend: listagem com timeline de acompanhamento
 
 ---
 
@@ -977,19 +977,19 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.7.1** — Backend: `GET /financial/tco/:vehicleId` — calcular TCO somando:
+- [x] **2.7.1** — Backend: `GET /financial/tco/:vehicleId` — calcular TCO somando:
   - Combustível (sum de fuel_records.totalCost)
   - Manutenção (sum de service_orders.totalCost)
   - Pneus (sum de compras e recapagens)
   - Multas (sum de fines.amount com status PAID)
   - Documentos (sum de documents.cost — IPVA, seguro, etc.)
   - Depreciação (valor aquisição - valor FIPE atual, se disponível)
-- [ ] **2.7.2** — Backend: `GET /financial/tco/:vehicleId` com custo/km (TCO / km total rodado)
-- [ ] **2.7.3** — Backend: `GET /financial/overview` — visão consolidada: total de gastos por categoria, evolução mensal, budget vs realizado
-- [ ] **2.7.4** — Backend: `GET /financial/comparison` — comparar custo de veículos semelhantes (mesmo modelo/ano)
-- [ ] **2.7.5** — Frontend: dashboard financeiro com gráficos de evolução, breakdown por categoria (donut), ranking de veículos mais caros
-- [ ] **2.7.6** — Frontend: tela de TCO por veículo com detalhamento de cada componente de custo
-- [ ] **2.7.7** — Frontend: comparativo entre veículos (tabela side-by-side)
+- [x] **2.7.2** — Backend: `GET /financial/tco/:vehicleId` com custo/km (TCO / km total rodado)
+- [x] **2.7.3** — Backend: `GET /financial/overview` — visão consolidada: total de gastos por categoria, evolução mensal, budget vs realizado
+- [x] **2.7.4** — Backend: `GET /financial/comparison` — comparar custo de veículos semelhantes (mesmo modelo/ano)
+- [x] **2.7.5** — Frontend: dashboard financeiro com gráficos de evolução, breakdown por categoria (donut), ranking de veículos mais caros
+- [x] **2.7.6** — Frontend: tela de TCO por veículo com detalhamento de cada componente de custo
+- [x] **2.7.7** — Frontend: comparativo entre veículos (tabela side-by-side)
 
 ---
 
@@ -997,7 +997,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.8.1** — Migration: tabelas `ChecklistTemplate`, `ChecklistItem`, `ChecklistExecution`, `ChecklistExecutionItem`
+- [x] **2.8.1** — Migration: tabelas `ChecklistTemplate`, `ChecklistItem`, `ChecklistExecution`, `ChecklistExecutionItem`
 
   ```
   ChecklistTemplate: id, tenantId, name, vehicleCategory?, items (Json array of {label, required, photoRequired})
@@ -1008,13 +1008,13 @@ Uma task só está **pronta** quando:
   ChecklistExecutionItem: id, executionId, label, status (OK, ATTENTION, NON_COMPLIANT), photo?, notes?
   ```
 
-- [ ] **2.8.2** — Backend: CRUD de templates de checklist
-- [ ] **2.8.3** — Backend: `POST /checklists/execute` — registrar execução de checklist
-- [ ] **2.8.4** — Backend: quando item é NON_COMPLIANT → criar automaticamente uma OS de manutenção corretiva
-- [ ] **2.8.5** — Backend: `GET /checklists/compliance` — % de conformidade da frota por período
-- [ ] **2.8.6** — Frontend: editor de templates de checklist (drag-and-drop dos itens)
-- [ ] **2.8.7** — Frontend: histórico de execuções com filtro por veículo/motorista/período
-- [ ] **2.8.8** — (O preenchimento do checklist será feito via app mobile — Fase 4)
+- [x] **2.8.2** — Backend: CRUD de templates de checklist
+- [x] **2.8.3** — Backend: `POST /checklists/execute` — registrar execução de checklist
+- [x] **2.8.4** — Backend: quando item é NON_COMPLIANT → criar automaticamente uma OS de manutenção corretiva
+- [x] **2.8.5** — Backend: `GET /checklists/compliance` — % de conformidade da frota por período
+- [x] **2.8.6** — Frontend: editor de templates de checklist (drag-and-drop dos itens)
+- [x] **2.8.7** — Frontend: histórico de execuções com filtro por veículo/motorista/período
+- [x] **2.8.8** — Execução do checklist mantida fora do web app; preenchimento transferido para o app mobile na **Fase 4** (ver **4.2.2**)
 
 ---
 
@@ -1022,19 +1022,19 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **2.9.1** — Migration: tabela `Notification` (id, tenantId, userId, type, title, message, entityType, entityId, isRead, readAt, createdAt)
-- [ ] **2.9.2** — Backend: `NotificationService` centralizado com métodos `create()`, `markAsRead()`, `markAllAsRead()`, `getUnread()`
-- [ ] **2.9.3** — Backend: `GET /notifications` — listagem paginada (com filtro read/unread)
-- [ ] **2.9.4** — Backend: `PATCH /notifications/:id/read` e `PATCH /notifications/read-all`
-- [ ] **2.9.5** — Backend: job agendado (cron diário) que gera notificações para:
+- [x] **2.9.1** — Migration: tabela `Notification` (id, tenantId, userId, type, title, message, entityType, entityId, isRead, readAt, createdAt)
+- [x] **2.9.2** — Backend: `NotificationService` centralizado com métodos `create()`, `markAsRead()`, `markAllAsRead()`, `getUnread()`
+- [x] **2.9.3** — Backend: `GET /notifications` — listagem paginada (com filtro read/unread)
+- [x] **2.9.4** — Backend: `PATCH /notifications/:id/read` e `PATCH /notifications/read-all`
+- [x] **2.9.5** — Backend: job agendado (cron diário) que gera notificações para:
   - Manutenções vencendo (conforme plano)
   - Documentos expirando (conforme alertDaysBefore)
   - CNHs de motoristas vencendo
   - Multas com prazo de recurso chegando
-- [ ] **2.9.6** — Backend: envio de e-mail para notificações críticas (manutenção vencida, documento expirado)
-- [ ] **2.9.7** — Frontend: ícone de sino no header com badge de contagem de não-lidas
-- [ ] **2.9.8** — Frontend: dropdown/painel de notificações com lista e ação de "marcar como lida"
-- [ ] **2.9.9** — Frontend: link na notificação que leva diretamente à entidade (ex: clicar na notificação de manutenção abre a OS)
+- [x] **2.9.6** — Backend: envio de e-mail para notificações críticas (manutenção vencida, documento expirado)
+- [x] **2.9.7** — Frontend: ícone de sino no header com badge de contagem de não-lidas
+- [x] **2.9.8** — Frontend: dropdown/painel de notificações com lista e ação de "marcar como lida"
+- [x] **2.9.9** — Frontend: link na notificação que leva diretamente à entidade (ex: clicar na notificação de manutenção abre a OS)
 
 ---
 
@@ -1173,7 +1173,7 @@ Uma task só está **pronta** quando:
 **Subtasks:**
 
 - [ ] **4.2.1** — **Home**: resumo do veículo vinculado (placa, km, próximas manutenções, score)
-- [ ] **4.2.2** — **Checklist**: preencher checklist de inspeção com fotos, assinatura digital, envio offline
+- [ ] **4.2.2** — **Checklist**: preencher checklist de inspeção com fotos, assinatura digital, envio offline (continuação direta da decisão de escopo da **2.8.8**)
 - [ ] **4.2.3** — **Abastecimento**: registrar abastecimento com câmera (OCR do cupom) + campos manuais
 - [ ] **4.2.4** — **Reportar problema**: formulário rápido com tipo de problema, descrição, foto, localização GPS automática
 - [ ] **4.2.5** — **Notificações**: lista de alertas (manutenção, CNH, multas atribuídas)

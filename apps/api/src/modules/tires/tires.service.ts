@@ -883,6 +883,42 @@ export class TiresService {
     };
   }
 
+  async listInspections(
+    context: TireActorContext,
+    tireId: string,
+    query: { page: number; pageSize: number },
+  ): Promise<TireListResponse<ReturnType<TiresService['toTireInspectionResponse']>>> {
+    const { tenantId } = context;
+
+    const tire = await prisma.tire.findFirst({
+      where: { id: tireId, tenantId },
+      select: { id: true },
+    });
+
+    if (!tire) throw new NotFoundError('Pneu não encontrado');
+
+    const { page, pageSize } = query;
+
+    const [items, total] = await Promise.all([
+      prisma.tireInspection.findMany({
+        where: { tireId, tenantId },
+        include: tireInspectionInclude,
+        orderBy: { date: 'asc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.tireInspection.count({ where: { tireId, tenantId } }),
+    ]);
+
+    const totalPages = Math.ceil(total / pageSize);
+
+    return {
+      items: items.map((i) => this.toTireInspectionResponse(i)),
+      hasNext: page < totalPages,
+      meta: { page, pageSize, total, totalPages },
+    };
+  }
+
   async registerInspection(
     context: TireActorContext,
     tireId: string,

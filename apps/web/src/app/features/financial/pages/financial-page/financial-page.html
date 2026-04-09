@@ -1,8 +1,272 @@
-<app-feature-placeholder
-  title="Financeiro"
-  subtitle="Custos, TCO e consolidacao mensal"
-  eyebrow="Feature lazy"
-  description="Area protegida para dashboards financeiros, custos operacionais e visao de rentabilidade."
+<po-page-default
+  p-title="Financeiro"
+  p-subtitle="Evolução mensal, composição de custo e ranking dos veículos que mais pressionam a operação."
+  [p-actions]="pageActions"
 >
-  <p>Financeiro - em construcao.</p>
-</app-feature-placeholder>
+  <section class="financial-page__hero">
+    <div class="financial-page__hero-copy">
+      <span class="financial-page__eyebrow">Dashboard financeiro</span>
+      <h2>{{ heroTitle }}</h2>
+      <p>{{ heroDescription }}</p>
+    </div>
+
+    <div class="financial-page__preset-group">
+      @for (option of presetOptions; track trackByPreset($index, option)) {
+        <button
+          type="button"
+          class="financial-page__preset"
+          [class.financial-page__preset--active]="selectedPreset === option.value"
+          [attr.aria-pressed]="selectedPreset === option.value"
+          [title]="option.description"
+          (click)="selectPreset(option.value)"
+        >
+          <span>{{ option.label }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (isLoading && !hasLoadedOnce) {
+    <section class="financial-page__state">
+      <po-loading-overlay [p-screen-lock]="false"></po-loading-overlay>
+      <div>
+        <span class="financial-page__state-label">Montando painel</span>
+        <h3>Consolidando custos da frota</h3>
+      </div>
+    </section>
+  } @else if (hasLoadError) {
+    <section class="financial-page__state financial-page__state--error">
+      <div>
+        <span class="financial-page__state-label">Falha ao carregar</span>
+        <h3>Não foi possível montar o dashboard financeiro</h3>
+      </div>
+      <po-button
+        p-kind="primary"
+        p-label="Tentar novamente"
+        [p-loading]="isLoading"
+        (p-click)="refreshDashboard()"
+      ></po-button>
+    </section>
+  }
+
+  @if (overview; as currentOverview) {
+    <section class="financial-page__metrics">
+      @for (metric of metrics; track metric.label) {
+        <article class="financial-page__metric" [attr.data-tone]="metric.tone">
+          <span class="financial-page__metric-label">{{ metric.label }}</span>
+          <strong class="financial-page__metric-value">{{ metric.value }}</strong>
+          <small class="financial-page__metric-detail">{{ metric.detail }}</small>
+        </article>
+      }
+    </section>
+
+    <section class="financial-page__content">
+      <article class="financial-page__panel financial-page__panel--wide">
+        <header class="financial-page__panel-header">
+          <div>
+            <span class="financial-page__panel-kicker">Curva mensal</span>
+            <h3>Evolução dos gastos por categoria</h3>
+          </div>
+          <div class="financial-page__panel-meta">
+            <strong>{{ formatCurrency(currentOverview.summary.total) }}</strong>
+            <small>{{ dateRangeLabel }}</small>
+          </div>
+        </header>
+
+        @if (hasOverviewData) {
+          <po-chart
+            [p-type]="columnChartType"
+            [p-series]="evolutionSeries"
+            [p-categories]="evolutionCategories"
+            [p-options]="evolutionChartOptions"
+            [p-height]="300"
+          ></po-chart>
+        } @else {
+          <p class="financial-page__empty">
+            Nenhum custo consolidado para o período selecionado.
+          </p>
+        }
+      </article>
+
+      <article class="financial-page__panel">
+        <header class="financial-page__panel-header">
+          <div>
+            <span class="financial-page__panel-kicker">Composição</span>
+            <h3>Breakdown por categoria</h3>
+          </div>
+          <div class="financial-page__panel-meta">
+            <strong>{{ formatCurrency(currentOverview.summary.total) }}</strong>
+            <small>Total operacional</small>
+          </div>
+        </header>
+
+        @if (categorySeries.length > 0) {
+          <po-chart
+            [p-type]="donutChartType"
+            [p-series]="categorySeries"
+            [p-options]="categoryChartOptions"
+            [p-height]="260"
+          ></po-chart>
+
+          <div class="financial-page__legend">
+            @for (item of categoryLegend; track item.key) {
+              @if (item.value > 0) {
+                <div class="financial-page__legend-row">
+                  <div class="financial-page__legend-main">
+                    <span
+                      class="financial-page__legend-dot"
+                      [style.background]="item.color"
+                    ></span>
+                    <span>{{ item.label }}</span>
+                  </div>
+                  <strong>{{ formatCurrency(item.value) }}</strong>
+                  <small>{{ formatShare(item.share) }}</small>
+                </div>
+              }
+            }
+          </div>
+        } @else {
+          <p class="financial-page__empty">
+            O breakdown será liberado assim que o período tiver movimentação financeira.
+          </p>
+        }
+      </article>
+
+      <article class="financial-page__panel financial-page__panel--wide">
+        <header class="financial-page__panel-header">
+          <div>
+            <span class="financial-page__panel-kicker">Prioridade de custo</span>
+            <h3>Veículos mais caros no período</h3>
+          </div>
+          <div class="financial-page__panel-meta">
+            <strong>{{ ranking.length }}</strong>
+            <small>itens destacados</small>
+          </div>
+        </header>
+
+        @if (hasRankingData) {
+          <div class="financial-page__ranking">
+            @for (item of ranking; track item.vehicleId; let index = $index) {
+              <article class="financial-page__ranking-row">
+                <div class="financial-page__ranking-index">{{ index + 1 }}</div>
+
+                <div class="financial-page__ranking-main">
+                  <div class="financial-page__ranking-title">
+                    <h4>{{ item.plate }}</h4>
+                    <span>{{ item.categoryLabel }}</span>
+                  </div>
+
+                  <div class="financial-page__ranking-bar">
+                    <span
+                      class="financial-page__ranking-bar-fill"
+                      [style.width.%]="(item.total / ranking[0].total) * 100"
+                    ></span>
+                  </div>
+
+                  <div class="financial-page__ranking-components">
+                    @for (component of categoryLegend; track component.key) {
+                      @if (item.components[component.key] > 0) {
+                        <span>
+                          {{ component.label }}:
+                          {{ formatCurrency(item.components[component.key]) }}
+                        </span>
+                      }
+                    }
+                  </div>
+                </div>
+
+                <div class="financial-page__ranking-end">
+                  <strong>{{ formatCurrency(item.total) }}</strong>
+                  <small>{{ formatCostPerKm(item.costPerKm) }}</small>
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Ver TCO"
+                    (p-click)="openTcoPage(item.vehicleId)"
+                  ></po-button>
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Comparar"
+                    (p-click)="openComparisonPage(item.vehicleId)"
+                  ></po-button>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="financial-page__empty">
+            Sem custo por veículo suficiente para montar o ranking neste recorte.
+          </p>
+        }
+      </article>
+
+      <article class="financial-page__panel">
+        <header class="financial-page__panel-header">
+          <div>
+            <span class="financial-page__panel-kicker">Leitura rápida</span>
+            <h3>Sinais do período</h3>
+          </div>
+        </header>
+
+        <div class="financial-page__insights">
+          <div class="financial-page__insight">
+            <span>Categoria dominante</span>
+            <strong>
+              {{ dominantCategory?.label ?? 'Sem categoria dominante' }}
+            </strong>
+            <small>
+              @if (dominantCategory) {
+                {{ formatShare(dominantCategory.share) }} do total
+              } @else {
+                Sem base suficiente
+              }
+            </small>
+          </div>
+
+          <div class="financial-page__insight">
+            <span>Pico de gasto</span>
+            <strong>{{ peakMonth?.label ?? 'Sem pico identificado' }}</strong>
+            <small>
+              @if (peakMonth) {
+                {{ formatCurrency(peakMonth.total) }}
+              } @else {
+                Sem série mensal
+              }
+            </small>
+          </div>
+
+          <div class="financial-page__insight">
+            <span>Budget</span>
+            <strong>
+              {{
+                currentOverview.budget.configured
+                  ? formatCurrency(currentOverview.budget.totalBudget ?? 0)
+                  : 'Não configurado'
+              }}
+            </strong>
+            <small>
+              {{
+                currentOverview.budget.configured
+                  ? varianceLabel
+                  : 'O endpoint permite monthlyBudget para comparar planejado x realizado'
+              }}
+            </small>
+          </div>
+        </div>
+
+        @if (currentOverview.warnings.length > 0) {
+          <div class="financial-page__warnings">
+            @for (warning of currentOverview.warnings; track warning) {
+              <p>{{ warning }}</p>
+            }
+          </div>
+        }
+      </article>
+    </section>
+  }
+
+  @if (isLoading && hasLoadedOnce) {
+    <div class="financial-page__loading-overlay">
+      <po-loading-overlay [p-screen-lock]="false" p-text="Atualizando painel..."></po-loading-overlay>
+    </div>
+  }
+</po-page-default>

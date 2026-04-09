@@ -1,0 +1,276 @@
+<po-page-default
+  p-title="Histórico de execuções"
+  p-subtitle="Filtre as execuções por veículo, motorista e período e inspecione cada checklist concluído."
+  [p-actions]="pageActions"
+  [p-breadcrumb]="breadcrumb"
+>
+  <section class="checklist-history__head">
+    <div class="checklist-history__filters" [formGroup]="filtersForm">
+      <po-combo
+        formControlName="vehicleId"
+        name="vehicleId"
+        p-label="Veículo"
+        [p-options]="vehicleOptions"
+        [p-disabled]="isLoadingOptions"
+      ></po-combo>
+
+      <po-combo
+        formControlName="driverId"
+        name="driverId"
+        p-label="Motorista"
+        [p-options]="driverOptions"
+        [p-disabled]="isLoadingOptions"
+      ></po-combo>
+
+      <po-datepicker
+        formControlName="dateFrom"
+        p-label="Data de"
+      ></po-datepicker>
+
+      <po-datepicker
+        formControlName="dateTo"
+        p-label="Data até"
+      ></po-datepicker>
+
+      <div class="checklist-history__filter-actions">
+        <po-button
+          p-kind="primary"
+          p-label="Aplicar filtros"
+          [p-disabled]="isLoading"
+          (p-click)="applyFilters()"
+        ></po-button>
+        <po-button
+          p-label="Limpar"
+          [p-disabled]="isLoading"
+          (p-click)="clearFilters()"
+        ></po-button>
+      </div>
+    </div>
+
+    <div class="checklist-history__metrics">
+      @for (metric of summaryMetrics; track metric.label) {
+        <article class="checklist-history__metric">
+          <span>{{ metric.label }}</span>
+          <strong>{{ metric.value }}</strong>
+          <small>{{ metric.detail }}</small>
+        </article>
+      }
+    </div>
+  </section>
+
+  @if (isLoading && !hasLoadedOnce) {
+    <section class="checklist-history__state">
+      <po-loading-overlay [p-screen-lock]="false"></po-loading-overlay>
+      <div>
+        <span class="checklist-history__state-label">Carregando</span>
+        <h3>Buscando execuções de checklist</h3>
+      </div>
+    </section>
+  } @else if (hasLoadError) {
+    <section class="checklist-history__state checklist-history__state--error">
+      <div>
+        <span class="checklist-history__state-label">Falha ao carregar</span>
+        <h3>Não foi possível buscar o histórico de execuções</h3>
+      </div>
+
+      <po-button p-kind="primary" p-label="Tentar novamente" (p-click)="reload()"></po-button>
+    </section>
+  }
+
+  <section class="checklist-history__workspace">
+    <div class="checklist-history__list-shell">
+      <header class="checklist-history__section-head">
+        <div>
+          <span class="checklist-history__section-kicker">Fila de execuções</span>
+          <h3>Resultados do filtro</h3>
+        </div>
+        <small>{{ paginationLabel }}</small>
+      </header>
+
+      @if (hasLoadedOnce && items.length === 0 && !isLoading) {
+        <section class="checklist-history__empty">
+          <h4>Nenhuma execução encontrada</h4>
+          <p>Ajuste veículo, motorista ou janela de datas para ampliar a busca.</p>
+        </section>
+      } @else {
+        <div class="checklist-history__list">
+          @for (item of items; track item.id) {
+            <article
+              class="checklist-history__row"
+              [class.checklist-history__row--active]="item.id === selectedExecutionId"
+              (click)="selectExecution(item)"
+            >
+              <div class="checklist-history__row-main">
+                <div class="checklist-history__row-head">
+                  <strong>{{ item.template.name }}</strong>
+                  <po-tag
+                    [p-value]="item.statusMeta.label"
+                    [p-type]="item.statusMeta.type"
+                  ></po-tag>
+                </div>
+
+                <span class="checklist-history__row-vehicle">{{ item.vehicleLabel }}</span>
+                <small>{{ item.executedAtLabel }}</small>
+              </div>
+
+              <div class="checklist-history__row-meta">
+                <span>{{ item.itemCount }} itens</span>
+                <small>{{ item.driverLabel }}</small>
+              </div>
+            </article>
+          }
+        </div>
+
+        @if (totalItems > 0) {
+          <footer class="checklist-history__pagination">
+            <po-button
+              p-kind="tertiary"
+              p-label="Anterior"
+              [p-disabled]="!hasPreviousPage || isLoading"
+              (p-click)="goToPreviousPage()"
+            ></po-button>
+            <span>{{ currentPage }} / {{ totalPages }}</span>
+            <po-button
+              p-kind="tertiary"
+              p-label="Próxima"
+              [p-disabled]="!hasNext || isLoading"
+              (p-click)="goToNextPage()"
+            ></po-button>
+          </footer>
+        }
+      }
+    </div>
+
+    <aside class="checklist-history__detail-shell">
+      <header class="checklist-history__section-head">
+        <div>
+          <span class="checklist-history__section-kicker">Execução selecionada</span>
+          <h3>{{ detailTitle }}</h3>
+        </div>
+      </header>
+
+      @if (selectedExecution; as selected) {
+        <div class="checklist-history__detail-top">
+          <div class="checklist-history__detail-copy">
+            <p>{{ detailDescription }}</p>
+            <div class="checklist-history__detail-actions">
+              <po-button
+                p-kind="tertiary"
+                p-label="Abrir veículo"
+                (p-click)="openVehicle(selected.vehicle.id)"
+              ></po-button>
+              @if (selected.driverId) {
+                <po-button
+                  p-kind="tertiary"
+                  p-label="Abrir motorista"
+                  (p-click)="openDriver(selected.driverId)"
+                ></po-button>
+              }
+              @if (selected.correctiveServiceOrderId) {
+                <po-button
+                  p-kind="tertiary"
+                  p-label="Abrir OS corretiva"
+                  (p-click)="openServiceOrder(selected.correctiveServiceOrderId)"
+                ></po-button>
+              }
+            </div>
+          </div>
+
+          <div class="checklist-history__detail-statuses">
+            @for (item of detailStatusCounts; track item.label) {
+              <div class="checklist-history__detail-status">
+                <po-tag [p-value]="item.label" [p-type]="item.type"></po-tag>
+                <strong>{{ item.value }}</strong>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="checklist-history__detail-grid">
+          <article class="checklist-history__detail-card">
+            <span>Template</span>
+            <strong>{{ selected.template.name }}</strong>
+            <small>
+              {{
+                selected.template.vehicleCategory
+                  ? vehicleCategoryLabels[selected.template.vehicleCategory]
+                  : 'Sem categoria específica'
+              }}
+            </small>
+          </article>
+
+          <article class="checklist-history__detail-card">
+            <span>Veículo</span>
+            <strong>{{ selected.vehicleLabel }}</strong>
+            <small>{{ selected.vehicle.year }}</small>
+          </article>
+
+          <article class="checklist-history__detail-card">
+            <span>Motorista</span>
+            <strong>{{ selected.driver?.name ?? 'Sem motorista' }}</strong>
+            <small>
+              {{
+                selected.driver
+                  ? 'CPF ' + formatCPF(selected.driver.cpf)
+                  : 'Execução sem condutor vinculado'
+              }}
+            </small>
+          </article>
+
+          <article class="checklist-history__detail-card">
+            <span>Contexto</span>
+            <strong>{{ selected.location ?? 'Sem localização' }}</strong>
+            <small>{{ selected.signatureUrl ? 'Com assinatura registrada' : 'Sem assinatura' }}</small>
+          </article>
+        </div>
+
+        <section class="checklist-history__items">
+          @for (item of selected.items; track item.id) {
+            <article class="checklist-history__item">
+              <div class="checklist-history__item-copy">
+                <div class="checklist-history__item-head">
+                  <strong>{{ item.label }}</strong>
+                  <po-tag
+                    [p-value]="getItemStatusMeta(item.status).label"
+                    [p-type]="getItemStatusMeta(item.status).type"
+                  ></po-tag>
+                </div>
+
+                @if (item.notes) {
+                  <p>{{ item.notes }}</p>
+                } @else {
+                  <p>Sem observações registradas para este item.</p>
+                }
+              </div>
+
+              <div class="checklist-history__item-meta">
+                <small>{{ formatDateTime(item.createdAt) }}</small>
+                @if (item.photoUrl) {
+                  <a [href]="item.photoUrl" target="_blank" rel="noreferrer">Abrir foto</a>
+                }
+              </div>
+            </article>
+          }
+        </section>
+
+        @if (selected.notes || selected.signatureUrl) {
+          <section class="checklist-history__notes">
+            @if (selected.notes) {
+              <p>{{ selected.notes }}</p>
+            }
+            @if (selected.signatureUrl) {
+              <a [href]="selected.signatureUrl" target="_blank" rel="noreferrer">
+                Abrir assinatura registrada
+              </a>
+            }
+          </section>
+        }
+      } @else {
+        <section class="checklist-history__empty">
+          <h4>Sem execução selecionada</h4>
+          <p>Escolha uma execução na fila para ver os itens preenchidos.</p>
+        </section>
+      }
+    </aside>
+  </section>
+</po-page-default>

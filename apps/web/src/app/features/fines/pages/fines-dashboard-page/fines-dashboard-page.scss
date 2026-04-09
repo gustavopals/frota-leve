@@ -1,0 +1,109 @@
+.fines-dashboard {
+  &__filters {
+    margin-bottom: 1.5rem;
+  }
+
+  &__filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+  }
+
+  &__filter-field {
+    flex: 1 1 160px;
+  }
+
+  &__filter-clear {
+    flex: 0 0 auto;
+    align-self: flex-end;
+    margin-bottom: 0.25rem;
+  }
+
+  &__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem 1rem;
+    color: var(--color-neutral-60, #6c7a89);
+  }
+
+  &__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  &__widget {
+    min-height: 90px;
+  }
+
+  &__metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.25rem 0;
+  }
+
+  &__metric-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-neutral-50, #8898aa);
+    font-weight: 600;
+  }
+
+  &__metric-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--color-neutral-90, #1a2332);
+
+    &--danger {
+      color: var(--color-feedback-negative-base, #c9302c);
+    }
+  }
+
+  &__section {
+    margin-bottom: 2rem;
+  }
+
+  &__section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-neutral-80, #2e3f55);
+  }
+
+  &__section-hint {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--color-neutral-50, #8898aa);
+  }
+
+  &__empty {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--color-neutral-60, #6c7a89);
+
+    h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.875rem;
+    }
+  }
+
+  &__loading-overlay {
+    position: relative;
+    height: 60px;
+  }
+}

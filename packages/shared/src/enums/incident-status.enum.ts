@@ -1,0 +1,6 @@
+export enum IncidentStatus {
+  REGISTERED = 'REGISTERED',
+  UNDER_ANALYSIS = 'UNDER_ANALYSIS',
+  IN_REPAIR = 'IN_REPAIR',
+  CONCLUDED = 'CONCLUDED',
+}

@@ -1,0 +1,220 @@
+<po-page-default
+  p-title="Templates de checklist"
+  p-subtitle="Monte a sequência da inspeção, defina obrigatoriedade e arraste os itens para ordenar o fluxo."
+  [p-actions]="pageActions"
+  [p-breadcrumb]="breadcrumb"
+>
+  <section class="checklist-editor__head">
+    <div class="checklist-editor__head-copy">
+      <span class="checklist-editor__eyebrow">Editor operacional</span>
+      <h2>{{ headerTitle }}</h2>
+      <p>{{ headerDescription }}</p>
+    </div>
+
+    <div class="checklist-editor__metrics">
+      @for (metric of summaryMetrics; track metric.label) {
+        <article class="checklist-editor__metric">
+          <span>{{ metric.label }}</span>
+          <strong>{{ metric.value }}</strong>
+          <small>{{ metric.detail }}</small>
+        </article>
+      }
+    </div>
+  </section>
+
+  @if (isLoadingList && !hasLoadedOnce) {
+    <section class="checklist-editor__state">
+      <po-loading-overlay [p-screen-lock]="false"></po-loading-overlay>
+      <div>
+        <span class="checklist-editor__state-label">Carregando</span>
+        <h3>Montando o workspace de templates</h3>
+      </div>
+    </section>
+  } @else if (hasLoadError) {
+    <section class="checklist-editor__state checklist-editor__state--error">
+      <div>
+        <span class="checklist-editor__state-label">Falha ao carregar</span>
+        <h3>Não foi possível buscar os templates de checklist</h3>
+      </div>
+
+      <po-button p-kind="primary" p-label="Tentar novamente" (p-click)="applyFilters()"></po-button>
+    </section>
+  }
+
+  <section class="checklist-editor__workspace">
+    <aside class="checklist-editor__rail">
+      <header class="checklist-editor__rail-header">
+        <div>
+          <span class="checklist-editor__section-kicker">Biblioteca</span>
+          <h3>Templates salvos</h3>
+        </div>
+        <small>{{ templates.length }} encontrados</small>
+      </header>
+
+      <form class="checklist-editor__filters" [formGroup]="filtersForm" novalidate>
+        <po-input
+          formControlName="search"
+          p-label="Buscar template"
+          p-placeholder="Pré-viagem, entrega, vistoria..."
+          (p-enter)="applyFilters()"
+        ></po-input>
+
+        <po-combo
+          formControlName="vehicleCategory"
+          name="vehicleCategory"
+          p-label="Categoria"
+          [p-options]="filterCategoryOptions"
+        ></po-combo>
+
+        <div class="checklist-editor__filter-actions">
+          <po-button
+            p-kind="primary"
+            p-label="Aplicar"
+            [p-disabled]="isLoadingList"
+            (p-click)="applyFilters()"
+          ></po-button>
+          <po-button p-label="Limpar" [p-disabled]="isLoadingList" (p-click)="clearFilters()"></po-button>
+        </div>
+      </form>
+
+      <div class="checklist-editor__template-list">
+        @for (template of templates; track trackTemplate($index, template)) {
+          <button
+            type="button"
+            class="checklist-editor__template-card"
+            [class.checklist-editor__template-card--active]="template.id === selectedTemplateId"
+            (click)="selectTemplate(template)"
+          >
+            <div class="checklist-editor__template-card-head">
+              <strong>{{ template.name }}</strong>
+              <span>{{ template.itemCount }} itens</span>
+            </div>
+            <small>{{ template.categoryLabel }}</small>
+            <small>Atualizado em {{ template.updatedAtLabel }}</small>
+          </button>
+        } @empty {
+          <section class="checklist-editor__empty-list">
+            <h4>Nenhum template encontrado</h4>
+            <p>Refine os filtros ou crie um novo template em branco.</p>
+          </section>
+        }
+      </div>
+    </aside>
+
+    <section class="checklist-editor__editor">
+      <header class="checklist-editor__editor-header">
+        <div>
+          <span class="checklist-editor__section-kicker">
+            {{ editorMode === 'editing' ? 'Template ativo' : 'Rascunho' }}
+          </span>
+          <h3>{{ activeTemplateLabel }}</h3>
+        </div>
+
+        <div class="checklist-editor__editor-actions">
+          <po-button
+            p-kind="tertiary"
+            p-label="Recarregar"
+            [p-disabled]="isSaving"
+            (p-click)="resetEditor()"
+          ></po-button>
+
+          @if (editorMode === 'editing') {
+            <po-button
+              p-kind="tertiary"
+              p-label="Excluir"
+              [p-disabled]="!canDelete"
+              (p-click)="deleteTemplate()"
+            ></po-button>
+          }
+
+          <po-button
+            p-kind="primary"
+            [p-label]="isSaving ? 'Salvando...' : 'Salvar template'"
+            [p-disabled]="!canSave"
+            (p-click)="saveTemplate()"
+          ></po-button>
+        </div>
+      </header>
+
+      <form class="checklist-editor__form" [formGroup]="editorForm" novalidate>
+        <section class="checklist-editor__settings">
+          <po-input
+            formControlName="name"
+            p-label="Nome do template"
+            p-placeholder="Ex: Pré-saída diária"
+            p-required
+          ></po-input>
+
+          <po-combo
+            formControlName="vehicleCategory"
+            name="editorVehicleCategory"
+            p-label="Categoria de veículo"
+            [p-options]="editorCategoryOptions"
+          ></po-combo>
+        </section>
+
+        <section class="checklist-editor__builder">
+          <div class="checklist-editor__builder-head">
+            <div>
+              <span class="checklist-editor__section-kicker">Itens do checklist</span>
+              <h4>Arraste para ordenar a sequência da inspeção</h4>
+            </div>
+            <po-button p-kind="primary" p-label="Adicionar item" (p-click)="addItem()"></po-button>
+          </div>
+
+          <div
+            class="checklist-editor__items"
+            cdkDropList
+            formArrayName="items"
+            (cdkDropListDropped)="dropItem($event)"
+          >
+            @for (itemControl of itemControls; track trackItemControl($index, itemControl); let index = $index) {
+              <article class="checklist-editor__item" cdkDrag [formGroupName]="index">
+                <div class="checklist-editor__item-grip" cdkDragHandle aria-label="Reordenar item">
+                  <span class="an an-dots-six-vertical"></span>
+                </div>
+
+                <div class="checklist-editor__item-main">
+                  <div class="checklist-editor__item-head">
+                    <span class="checklist-editor__item-index">{{ index + 1 }}</span>
+                    <po-input
+                      class="checklist-editor__item-field"
+                      formControlName="label"
+                      p-label="Item"
+                      p-placeholder="Ex: Conferir nível de óleo"
+                      p-required
+                    ></po-input>
+                  </div>
+
+                  <div class="checklist-editor__item-options">
+                    <po-checkbox p-label="Obrigatório" formControlName="required"></po-checkbox>
+                    <po-checkbox p-label="Exige foto" formControlName="photoRequired"></po-checkbox>
+                  </div>
+                </div>
+
+                <div class="checklist-editor__item-actions">
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Duplicar"
+                    (p-click)="duplicateItem(index)"
+                  ></po-button>
+                  <po-button
+                    p-kind="tertiary"
+                    p-label="Remover"
+                    (p-click)="removeItem(index)"
+                  ></po-button>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      </form>
+
+      <footer class="checklist-editor__editor-footer">
+        <span [class.checklist-editor__editor-footer--dirty]="editorDirty">
+          {{ editorDirty ? 'Existem alterações não salvas no editor.' : 'Editor sincronizado com o último estado salvo.' }}
+        </span>
+      </footer>
+    </section>
+  </section>
+</po-page-default>

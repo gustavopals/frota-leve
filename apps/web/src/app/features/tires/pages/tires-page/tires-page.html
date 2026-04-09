@@ -1,8 +1,190 @@
-<app-feature-placeholder
-  title="Pneus"
-  subtitle="Vida util, recapagens e movimentacoes"
-  eyebrow="Feature lazy"
-  description="Espaco reservado para controle de desgaste, rodizio e custo por quilometro."
+<po-page-list
+  p-title="Pneus"
+  p-subtitle="Controle de vida útil, desgaste, recapagens e posição dos pneus na frota."
+  [p-actions]="pageActions"
 >
-  <p>Pneus - em construcao.</p>
-</app-feature-placeholder>
+  <po-tabs>
+    <!-- ─── Tab: Lista de pneus ─────────────────────────────────────────── -->
+    <po-tab p-label="Lista de pneus" p-icon="an an-list-bullets">
+      <!-- Filtros -->
+      <section class="tires-page__filters" [formGroup]="filtersForm">
+        <div class="tires-page__filter-row">
+          <po-input
+            class="tires-page__filter-field tires-page__filter-field--wide"
+            p-label="Buscar"
+            p-placeholder="Marca, modelo, série, medida..."
+            formControlName="search"
+            (p-change-model)="applyFilters()"
+          ></po-input>
+
+          <po-combo
+            class="tires-page__filter-field"
+            p-label="Status"
+            [p-options]="statusOptions"
+            formControlName="status"
+            (p-change)="applyFilters()"
+          ></po-combo>
+
+          <po-button
+            class="tires-page__filter-clear"
+            p-kind="tertiary"
+            p-label="Limpar"
+            p-icon="an an-x"
+            (p-click)="clearFilters()"
+          ></po-button>
+        </div>
+      </section>
+
+      <!-- Carregamento inicial -->
+      @if (isLoading && !hasLoadedOnce) {
+        <section class="tires-page__state">
+          <po-loading-overlay [p-screen-lock]="false"></po-loading-overlay>
+          <p>Carregando pneus...</p>
+        </section>
+      }
+
+      <!-- Tabela -->
+      @if (hasLoadedOnce) {
+        <section class="tires-page__table-section">
+          <po-table
+            [p-columns]="columns"
+            [p-items]="listItems"
+            [p-actions]="tableActions"
+            [p-loading]="isLoading"
+            [p-striped]="true"
+            [p-sort]="true"
+            [p-hide-detail]="true"
+          >
+            <ng-template p-table-cell-template let-column="column" let-row="row">
+              @if (column.property === '_healthColor') {
+                <span
+                  class="tires-page__health-dot"
+                  [style.background]="row._healthColor"
+                  [title]="row._statusLabel"
+                ></span>
+              }
+              @if (column.property === '_wearPct') {
+                <span [class.tires-page__critical]="row.currentGrooveDepth <= 3">
+                  {{ row._wearPct }}
+                </span>
+              }
+              @if (column.property === '_statusLabel') {
+                <po-tag [p-value]="row._statusLabel" [p-type]="row._statusTagType"></po-tag>
+              }
+            </ng-template>
+          </po-table>
+
+          <!-- Paginação -->
+          @if (totalItems > 0) {
+            <footer class="tires-page__pagination">
+              <span class="tires-page__pagination-label">{{ paginationLabel }}</span>
+              <div class="tires-page__pagination-controls">
+                <po-button
+                  p-kind="tertiary"
+                  p-label="Anterior"
+                  p-icon="an an-caret-left"
+                  [p-disabled]="!hasPreviousPage || isLoading"
+                  (p-click)="goToPreviousPage()"
+                ></po-button>
+                <span class="tires-page__pagination-page">{{ currentPage }} / {{ totalPages }}</span>
+                <po-button
+                  p-kind="tertiary"
+                  p-label="Próxima"
+                  p-icon="an an-caret-right"
+                  [p-disabled]="!hasNext || isLoading"
+                  (p-click)="goToNextPage()"
+                ></po-button>
+              </div>
+            </footer>
+          }
+
+          @if (hasLoadedOnce && listItems.length === 0) {
+            <section class="tires-page__empty">
+              <h3>Nenhum pneu encontrado</h3>
+              <p>Tente ajustar os filtros ou cadastre pneus na frota.</p>
+            </section>
+          }
+        </section>
+      }
+    </po-tab>
+
+    <!-- ─── Tab: Mapa do veículo ────────────────────────────────────────── -->
+    <po-tab p-label="Mapa por veículo" p-icon="an an-map-trifold">
+      <div class="tires-page__map-layout">
+        <!-- Seletor de veículo -->
+        <div class="tires-page__map-controls" [formGroup]="mapVehicleForm">
+          <po-combo
+            class="tires-page__map-vehicle-select"
+            p-label="Selecione o veículo"
+            p-placeholder="Buscar veículo..."
+            p-help="Mostra apenas veículos com pneus em uso cadastrados."
+            [p-options]="mapVehicleOptions"
+            formControlName="vehicleId"
+            (p-change)="onMapVehicleChange($event)"
+          ></po-combo>
+        </div>
+
+        @if (!selectedVehicleId) {
+          <div class="tires-page__map-empty">
+            <p>Selecione um veículo para visualizar o mapa de pneus.</p>
+          </div>
+        }
+
+        @if (selectedVehicleId && isLoadingMap) {
+          <div class="tires-page__map-loading">
+            <po-loading-overlay [p-screen-lock]="false" p-text="Carregando pneus..."></po-loading-overlay>
+          </div>
+        }
+
+        @if (selectedVehicleId && !isLoadingMap) {
+          <div class="tires-page__map-content">
+            <!-- SVG -->
+            <div class="tires-page__map-svg-wrapper">
+              <app-vehicle-tire-map
+                [tires]="mapTires"
+                (slotClick)="onMapSlotClick($event)"
+              ></app-vehicle-tire-map>
+            </div>
+
+            <!-- Detalhes do pneu selecionado -->
+            <div class="tires-page__map-detail">
+              @if (!selectedMapTire) {
+                <div class="tires-page__map-hint">
+                  <p>Clique em uma posição para ver os detalhes do pneu.</p>
+                </div>
+              }
+
+              @if (selectedMapTire) {
+                <div class="tires-page__tire-card">
+                  <span class="tires-page__tire-card-eyebrow">Posição {{ selectedMapTire.position }}</span>
+                  <h4>{{ selectedMapTire.brand }} {{ selectedMapTire.model }}</h4>
+                  <dl class="tires-page__tire-card-props">
+                    <dt>Medida</dt><dd>{{ selectedMapTire.size }}</dd>
+                    <dt>Série</dt><dd>{{ selectedMapTire.serialNumber }}</dd>
+                    <dt>DOT</dt><dd>{{ selectedMapTire.dot }}</dd>
+                    <dt>Sulco atual</dt>
+                    <dd [class.tires-page__critical]="selectedMapTire.currentGrooveDepth <= 3">
+                      {{ selectedMapTire.currentGrooveDepth.toFixed(1) }} mm
+                    </dd>
+                    <dt>Sulco original</dt><dd>{{ selectedMapTire.originalGrooveDepth.toFixed(1) }} mm</dd>
+                    <dt>Km rodados</dt><dd>{{ selectedMapTire.totalKm.toLocaleString('pt-BR') }} km</dd>
+                    <dt>Recapagens</dt><dd>{{ selectedMapTire.retreatCount }}</dd>
+                  </dl>
+                  <po-button
+                    p-kind="secondary"
+                    p-label="Ver histórico de inspeções"
+                    p-icon="an an-chart-line-up"
+                    (p-click)="openHistoryFromMap()"
+                  ></po-button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </po-tab>
+  </po-tabs>
+</po-page-list>
+
+<!-- Modal de histórico de inspeções -->
+<app-tire-inspection-history-modal #historyModal></app-tire-inspection-history-modal>

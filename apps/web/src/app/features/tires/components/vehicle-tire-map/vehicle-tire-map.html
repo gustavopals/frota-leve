@@ -1,0 +1,98 @@
+<div class="tire-map">
+  <svg
+    class="tire-map__svg"
+    [attr.viewBox]="'0 0 300 ' + svgHeight()"
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Mapa visual de posição dos pneus do veículo"
+  >
+    <!-- Corpo do veículo -->
+    <rect x="70" y="30" width="160" height="370" rx="22" ry="22"
+      fill="#e9ecef" stroke="#c1c9d2" stroke-width="2" />
+
+    <!-- Para-brisa dianteiro -->
+    <rect x="90" y="46" width="120" height="55" rx="10"
+      fill="#c8d8ea" opacity="0.75" />
+
+    <!-- Janela traseira -->
+    <rect x="90" y="295" width="120" height="50" rx="10"
+      fill="#c8d8ea" opacity="0.75" />
+
+    <!-- Eixo dianteiro (E1) -->
+    <line x1="30" y1="100" x2="270" y2="100"
+      stroke="#8898aa" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Eixo traseiro (E2) -->
+    <line x1="30" y1="280" x2="270" y2="280"
+      stroke="#8898aa" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Slots de pneu -->
+    @for (slot of slots(); track slot.code) {
+      <g
+        class="tire-map__slot"
+        [attr.transform]="'translate(' + (slot.cx - slot.width / 2) + ',' + (slot.cy - slot.height / 2) + ')'"
+        (click)="onSlotClick(slot)"
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="slotTooltip(slot)"
+        (keydown.enter)="onSlotClick(slot)"
+        (keydown.space)="onSlotClick(slot)"
+      >
+        <title>{{ slotTooltip(slot) }}</title>
+        <rect
+          [attr.width]="slot.width"
+          [attr.height]="slot.height"
+          rx="4"
+          [attr.fill]="slotFill(slot)"
+          [attr.stroke]="slotStroke(slot)"
+          stroke-width="1.5"
+        />
+        <text
+          [attr.x]="slot.width / 2"
+          [attr.y]="slot.height / 2 + 4"
+          text-anchor="middle"
+          font-size="7"
+          font-family="system-ui, sans-serif"
+          font-weight="600"
+          fill="#fff"
+          style="pointer-events:none;user-select:none;"
+        >{{ slot.code }}</text>
+      </g>
+    }
+
+    <!-- Estepe (ES) — círculo separado na base -->
+    @let spare = slots()[slots().length - 1];
+    @if (spare.code === 'ES') {
+      <g
+        class="tire-map__slot"
+        [attr.transform]="'translate(' + (spare.cx - 14) + ',' + (spare.cy - 14) + ')'"
+        (click)="onSlotClick(spare)"
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="slotTooltip(spare)"
+        (keydown.enter)="onSlotClick(spare)"
+      >
+        <title>{{ slotTooltip(spare) }}</title>
+        <circle cx="14" cy="14" r="14"
+          [attr.fill]="slotFill(spare)"
+          [attr.stroke]="slotStroke(spare)"
+          stroke-width="1.5"
+        />
+        <text x="14" y="18" text-anchor="middle"
+          font-size="7" font-family="system-ui,sans-serif" font-weight="600"
+          fill="#fff" style="pointer-events:none;user-select:none;"
+        >ES</text>
+      </g>
+    }
+  </svg>
+
+  <!-- Legenda -->
+  <div class="tire-map__legend">
+    @for (item of legendItems(); track item.label) {
+      <span class="tire-map__legend-item">
+        <span class="tire-map__legend-dot" [style.background]="item.color"></span>
+        <span class="tire-map__legend-label">{{ item.label }}</span>
+      </span>
+    }
+  </div>
+</div>

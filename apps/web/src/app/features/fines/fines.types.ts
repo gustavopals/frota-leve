@@ -104,3 +104,56 @@ export type FineDriverOption = {
   name: string;
   cpf: string;
 };
+
+export type FineStatsFilters = {
+  dateFrom?: string;
+  dateTo?: string;
+  granularity?: 'day' | 'month';
+};
+
+export type FineStatsSummary = {
+  total: number;
+  totalAmount: number;
+  totalDiscount: number;
+  netAmount: number;
+  totalPoints: number;
+  dateFrom: string | null;
+  dateTo: string | null;
+};
+
+export type FineStatsByStatus = {
+  status: string;
+  count: number;
+  amount: number;
+};
+
+export type FineStatsBySeverity = {
+  severity: string;
+  count: number;
+  amount: number;
+  points: number;
+};
+
+export type FineStatsByDriver = {
+  driverId: string | null;
+  driverName: string | null;
+  driverCpf: string | null;
+  count: number;
+  amount: number;
+  points: number;
+};
+
+export type FineStatsByPeriod = {
+  period: string;
+  label: string;
+  count: number;
+  amount: number;
+};
+
+export type FineStatsResponse = {
+  summary: FineStatsSummary;
+  byStatus: FineStatsByStatus[];
+  bySeverity: FineStatsBySeverity[];
+  byDriver: FineStatsByDriver[];
+  byPeriod: FineStatsByPeriod[];
+};

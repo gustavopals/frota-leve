@@ -1,0 +1,251 @@
+<po-page-default
+  [p-title]="pageTitle"
+  p-subtitle="Preencha os dados do sinistro, faça upload de fotos e documentos."
+  [p-actions]="pageActions"
+>
+  @if (isLoading) {
+    <div class="incident-form__loading">
+      <po-loading-overlay [p-screen-lock]="false" p-text="Carregando sinistro..."></po-loading-overlay>
+    </div>
+  }
+
+  @if (!isLoading) {
+    <form [formGroup]="form" (ngSubmit)="submit()" class="incident-form">
+
+      <!-- ─── Seção: Dados principais ─────────────────────────────── -->
+      <section class="incident-form__section">
+        <h3 class="incident-form__section-title">Dados do sinistro</h3>
+
+        <div class="incident-form__row">
+          <po-combo
+            class="incident-form__field incident-form__field--large"
+            p-label="Veículo *"
+            p-placeholder="Selecione o veículo..."
+            [p-options]="vehicleOptions"
+            formControlName="vehicleId"
+            [p-required]="true"
+          ></po-combo>
+
+          <po-combo
+            class="incident-form__field"
+            p-label="Motorista envolvido"
+            p-placeholder="Selecione o motorista..."
+            [p-options]="driverOptions"
+            formControlName="driverId"
+          ></po-combo>
+        </div>
+
+        <div class="incident-form__row">
+          <po-datepicker
+            class="incident-form__field"
+            p-label="Data do sinistro *"
+            p-format="dd/mm/yyyy"
+            formControlName="date"
+            p-required
+          ></po-datepicker>
+
+          <po-combo
+            class="incident-form__field"
+            p-label="Tipo *"
+            [p-options]="typeOptions"
+            formControlName="type"
+            [p-required]="true"
+          ></po-combo>
+
+          @if (isEditing) {
+            <po-combo
+              class="incident-form__field"
+              p-label="Status"
+              [p-options]="statusOptions"
+              formControlName="status"
+            ></po-combo>
+          }
+        </div>
+
+        <div class="incident-form__row">
+          <po-input
+            class="incident-form__field incident-form__field--full"
+            p-label="Local *"
+            p-placeholder="Endereço, cidade, rodovia..."
+            p-max-length="200"
+            formControlName="location"
+            p-required
+          ></po-input>
+        </div>
+
+        <div class="incident-form__row">
+          <po-textarea
+            class="incident-form__field incident-form__field--full"
+            p-label="Descrição *"
+            p-placeholder="Descreva o que ocorreu..."
+            p-max-length="2000"
+            [p-rows]="4"
+            formControlName="description"
+            [p-required]="true"
+          ></po-textarea>
+        </div>
+      </section>
+
+      <!-- ─── Seção: Informações adicionais ──────────────────────── -->
+      <section class="incident-form__section">
+        <h3 class="incident-form__section-title">Informações adicionais</h3>
+
+        <div class="incident-form__row">
+          <div class="incident-form__checkboxes">
+            <po-checkbox
+              p-label="Terceiros envolvidos"
+              formControlName="thirdPartyInvolved"
+            ></po-checkbox>
+            <po-checkbox
+              p-label="B.O. registrado"
+              formControlName="policeReport"
+            ></po-checkbox>
+            <po-checkbox
+              p-label="Seguradora notificada"
+              formControlName="insurerNotified"
+            ></po-checkbox>
+          </div>
+        </div>
+
+        <div class="incident-form__row">
+          <po-input
+            class="incident-form__field"
+            p-label="Nº do sinistro (seguradora)"
+            p-placeholder="Ex: SIN-2024-001234"
+            p-max-length="80"
+            formControlName="insuranceClaimNumber"
+          ></po-input>
+
+          <po-decimal
+            class="incident-form__field"
+            p-label="Custo estimado (R$)"
+            p-placeholder="0,00"
+            [p-decimals-length]="2"
+            formControlName="estimatedCost"
+          ></po-decimal>
+
+          <po-decimal
+            class="incident-form__field"
+            p-label="Custo real (R$)"
+            p-placeholder="0,00"
+            [p-decimals-length]="2"
+            formControlName="actualCost"
+          ></po-decimal>
+
+          <po-number
+            class="incident-form__field"
+            p-label="Indisponibilidade (dias)"
+            p-placeholder="0"
+            formControlName="downtime"
+          ></po-number>
+        </div>
+
+        <div class="incident-form__row">
+          <po-textarea
+            class="incident-form__field incident-form__field--full"
+            p-label="Observações"
+            p-max-length="4000"
+            [p-rows]="3"
+            formControlName="notes"
+          ></po-textarea>
+        </div>
+      </section>
+
+      <!-- ─── Seção: Upload de fotos ──────────────────────────────── -->
+      <section class="incident-form__section">
+        <h3 class="incident-form__section-title">Fotos do sinistro</h3>
+
+        <!-- Fotos já salvas (modo edição) -->
+        @if (existingPhotoUrls.length > 0) {
+          <div class="incident-form__existing-files">
+            <span class="incident-form__existing-label">Fotos existentes:</span>
+            <div class="incident-form__photo-grid">
+              @for (url of existingPhotoUrls; track url; let i = $index) {
+                <div class="incident-form__photo-item">
+                  @if (isImageUrl(url)) {
+                    <img [src]="url" [alt]="fileBaseName(url)" class="incident-form__photo-thumb" />
+                  } @else {
+                    <span class="an an-file-image incident-form__photo-icon"></span>
+                  }
+                  <button
+                    type="button"
+                    class="incident-form__photo-remove"
+                    (click)="removeExistingPhoto(i)"
+                  >
+                    <span class="an an-x"></span>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <app-incident-file-uploader
+          label="Fotos"
+          accept="image/*"
+          help-text="JPG, PNG, WEBP até 10 MB cada. Máx. 20 fotos."
+          [maxFiles]="20"
+          [disabled]="isBusy"
+          (filesChanged)="onPhotosChanged($event)"
+        ></app-incident-file-uploader>
+      </section>
+
+      <!-- ─── Seção: Upload de documentos ────────────────────────── -->
+      <section class="incident-form__section">
+        <h3 class="incident-form__section-title">Documentos</h3>
+
+        <!-- Documentos já salvos (modo edição) -->
+        @if (existingDocUrls.length > 0) {
+          <div class="incident-form__existing-files">
+            <span class="incident-form__existing-label">Documentos existentes:</span>
+            <ul class="incident-form__doc-list">
+              @for (url of existingDocUrls; track url; let i = $index) {
+                <li class="incident-form__doc-item">
+                  <span class="an an-file-text incident-form__doc-icon"></span>
+                  <a [href]="url" target="_blank" class="incident-form__doc-link">
+                    {{ fileBaseName(url) }}
+                  </a>
+                  <button
+                    type="button"
+                    class="incident-form__doc-remove"
+                    (click)="removeExistingDoc(i)"
+                  >
+                    <span class="an an-x"></span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        <app-incident-file-uploader
+          label="Documentos"
+          accept="application/pdf,.doc,.docx"
+          help-text="PDF, DOC, DOCX até 10 MB cada. Máx. 20 documentos."
+          [maxFiles]="20"
+          [disabled]="isBusy"
+          (filesChanged)="onDocsChanged($event)"
+        ></app-incident-file-uploader>
+      </section>
+
+      <!-- ─── Ações ───────────────────────────────────────────────── -->
+      <div class="incident-form__actions">
+        <po-button
+          p-kind="secondary"
+          p-label="Cancelar"
+          [p-disabled]="isBusy"
+          (p-click)="cancel()"
+        ></po-button>
+
+        <po-button
+          p-kind="primary"
+          [p-type]="poButtonType.Submit"
+          [p-label]="saveLabel"
+          [p-disabled]="form.invalid || isBusy"
+          [p-loading]="isBusy"
+        ></po-button>
+      </div>
+
+    </form>
+  }
+</po-page-default>

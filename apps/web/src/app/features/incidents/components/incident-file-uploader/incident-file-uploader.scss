@@ -1,0 +1,130 @@
+.file-uploader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &__drop-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 1.5rem 1rem;
+    border: 2px dashed var(--color-neutral-30, #ced4da);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: center;
+    min-height: 90px;
+
+    &:hover:not(&--disabled),
+    &--over {
+      border-color: var(--color-action-default, #0066cc);
+      background: var(--color-action-lightest, #e8f0fe);
+    }
+
+    &--disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-action-default, #0066cc);
+      outline-offset: 2px;
+    }
+  }
+
+  &__drop-icon {
+    font-size: 1.5rem;
+    color: var(--color-neutral-50, #8898aa);
+  }
+
+  &__drop-label {
+    font-size: 0.875rem;
+    color: var(--color-neutral-70, #4a5568);
+    font-weight: 500;
+  }
+
+  &__drop-help {
+    font-size: 0.75rem;
+    color: var(--color-neutral-50, #8898aa);
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-neutral-05, #f8f9fb);
+    border: 1px solid var(--color-neutral-20, #e4e7eb);
+    border-radius: 6px;
+  }
+
+  &__thumb {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  &__doc-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    text-align: center;
+    color: var(--color-neutral-50, #8898aa);
+    flex-shrink: 0;
+  }
+
+  &__item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  &__item-name {
+    font-size: 0.825rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__item-size {
+    font-size: 0.725rem;
+    color: var(--color-neutral-50, #8898aa);
+  }
+
+  &__remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    color: var(--color-neutral-50, #8898aa);
+    display: flex;
+    align-items: center;
+    transition: color 0.15s;
+    flex-shrink: 0;
+
+    &:hover:not(:disabled) {
+      color: var(--color-feedback-negative-base, #c9302c);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+}

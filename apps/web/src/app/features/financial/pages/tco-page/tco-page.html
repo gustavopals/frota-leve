@@ -1,0 +1,251 @@
+<po-page-default
+  p-title="TCO por veículo"
+  p-subtitle="Custo total de propriedade com visão operacional e depreciação opcional."
+  [p-actions]="pageActions"
+  [p-breadcrumb]="breadcrumb"
+>
+  <section class="tco-page__hero">
+    <div class="tco-page__hero-copy">
+      <span class="tco-page__eyebrow">Leitura por ativo</span>
+      <h2>{{ heroTitle }}</h2>
+      <p>{{ heroDescription }}</p>
+
+      @if (heroMetrics.length > 0) {
+        <div class="tco-page__hero-metrics">
+          @for (item of heroMetrics; track item.label) {
+            <article class="tco-page__hero-metric">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+              <small>{{ item.detail }}</small>
+            </article>
+          }
+        </div>
+      }
+    </div>
+
+    <form class="tco-page__controls" [formGroup]="filtersForm" novalidate>
+      <po-combo
+        formControlName="vehicleId"
+        name="vehicleId"
+        p-label="Veículo"
+        p-placeholder="Selecione o ativo..."
+        [p-options]="vehicleOptions"
+        [p-disabled]="isLoading || isLoadingOptions"
+      ></po-combo>
+
+      <po-decimal
+        formControlName="currentMarketValue"
+        p-label="Valor atual de mercado"
+        p-placeholder="Opcional para depreciação"
+        [p-decimals-length]="2"
+        [p-disabled]="isLoading ? 'true' : 'false'"
+      ></po-decimal>
+
+      <div class="tco-page__control-actions">
+        <po-button
+          p-kind="primary"
+          p-label="Calcular TCO"
+          [p-disabled]="!filtersForm.controls.vehicleId.value || isLoading"
+          (p-click)="applyFilters()"
+        ></po-button>
+
+        <po-button
+          p-label="Remover depreciação"
+          [p-disabled]="
+            filtersForm.controls.currentMarketValue.value === null ||
+            filtersForm.controls.currentMarketValue.value === undefined ||
+            isLoading
+          "
+          (p-click)="clearCurrentMarketValue()"
+        ></po-button>
+
+        @if (selectedVehicleId) {
+          <po-button
+            p-kind="tertiary"
+            p-label="Abrir veículo"
+            (p-click)="openVehicleDetails()"
+          ></po-button>
+
+          <po-button
+            p-kind="tertiary"
+            p-label="Comparar similares"
+            (p-click)="openComparisonPage()"
+          ></po-button>
+        }
+      </div>
+    </form>
+  </section>
+
+  @if (!selectedVehicleId && !isLoadingOptions) {
+    <section class="tco-page__state">
+      <div>
+        <span class="tco-page__state-label">Seleção inicial</span>
+        <h3>
+          @if (vehicleOptions.length > 0) {
+            Escolha um veículo para montar o TCO detalhado
+          } @else {
+            Cadastre veículos para destravar a análise de TCO
+          }
+        </h3>
+        <p>
+          @if (vehicleOptions.length > 0) {
+            O cálculo soma combustível, manutenção, pneus, multas e documentos. Informe o valor atual de mercado para adicionar depreciação.
+          } @else {
+            Sem ativos cadastrados não há base para custo por quilômetro nem para custo total de propriedade.
+          }
+        </p>
+      </div>
+
+      @if (vehicleOptions.length === 0) {
+        <po-button p-kind="primary" p-label="Abrir veículos" (p-click)="openVehiclesPage()"></po-button>
+      }
+    </section>
+  }
+
+  @if (isLoading && selectedVehicleId) {
+    <section class="tco-page__state">
+      <po-loading-overlay [p-screen-lock]="false"></po-loading-overlay>
+      <div>
+        <span class="tco-page__state-label">Calculando</span>
+        <h3>Consolidando o TCO do veículo selecionado</h3>
+      </div>
+    </section>
+  } @else if (hasLoadError && selectedVehicleId) {
+    <section class="tco-page__state tco-page__state--error">
+      <div>
+        <span class="tco-page__state-label">Falha ao carregar</span>
+        <h3>Não foi possível calcular o TCO deste veículo</h3>
+        <p>Verifique se o ativo ainda existe e tente novamente.</p>
+      </div>
+
+      <po-button p-kind="primary" p-label="Tentar novamente" (p-click)="refreshTco()"></po-button>
+    </section>
+  }
+
+  @if (tco; as currentTco) {
+    <section class="tco-page__content">
+      <article class="tco-page__panel tco-page__panel--wide">
+        <header class="tco-page__panel-header">
+          <div>
+            <span class="tco-page__panel-kicker">Composição</span>
+            <h3>Detalhamento dos componentes de custo</h3>
+          </div>
+
+          <div class="tco-page__panel-meta">
+            <strong>{{ formatCurrency(currentTco.totals.tco) }}</strong>
+            <small>TCO consolidado</small>
+          </div>
+        </header>
+
+        <div class="tco-page__composition">
+          <div class="tco-page__component-list">
+            @for (item of componentDetails; track item.key) {
+              <article class="tco-page__component-row">
+                <div class="tco-page__component-copy">
+                  <div class="tco-page__component-head">
+                    <span class="tco-page__component-dot" [style.background]="item.color"></span>
+                    <div>
+                      <strong>{{ item.label }}</strong>
+                      <small>{{ item.description }}</small>
+                    </div>
+                  </div>
+
+                  <div class="tco-page__component-bar">
+                    <span
+                      class="tco-page__component-bar-fill"
+                      [style.width.%]="item.barWidth"
+                      [style.background]="item.color"
+                    ></span>
+                  </div>
+                </div>
+
+                <div class="tco-page__component-values">
+                  <strong>{{ formatCurrency(item.value) }}</strong>
+                  <small>{{ formatShare(item.share) }} • {{ item.note }}</small>
+                </div>
+              </article>
+            }
+          </div>
+
+          <div class="tco-page__chart-shell">
+            @if (chartSeries.length > 0) {
+              <po-chart
+                [p-type]="donutChartType"
+                [p-series]="chartSeries"
+                [p-options]="chartOptions"
+                [p-height]="280"
+              ></po-chart>
+            }
+
+            <div class="tco-page__chart-caption">
+              <strong>
+                {{ currentTco.depreciation.included ? 'Depreciação incluída' : 'Modo operacional' }}
+              </strong>
+              <p>
+                @if (currentTco.depreciation.included) {
+                  O valor atual de mercado entrou na conta e recalculou o TCO final.
+                } @else {
+                  O painel considera apenas os custos operacionais conhecidos até aqui.
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="tco-page__panel">
+        <header class="tco-page__panel-header">
+          <div>
+            <span class="tco-page__panel-kicker">Base do cálculo</span>
+            <h3>Premissas do veículo</h3>
+          </div>
+        </header>
+
+        <div class="tco-page__summary-grid">
+          @for (item of selectedVehicleSummary; track item.label) {
+            <article class="tco-page__summary-item">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+              <small>{{ item.detail }}</small>
+            </article>
+          }
+        </div>
+      </article>
+
+      <article class="tco-page__panel">
+        <header class="tco-page__panel-header">
+          <div>
+            <span class="tco-page__panel-kicker">Indicadores</span>
+            <h3>Leitura rápida do TCO</h3>
+          </div>
+        </header>
+
+        <div class="tco-page__assumptions">
+          @for (item of assumptionRows; track item.label) {
+            <div class="tco-page__assumption-row">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+            </div>
+          }
+        </div>
+      </article>
+
+      @if (currentTco.warnings.length > 0) {
+        <article class="tco-page__panel tco-page__panel--wide">
+          <header class="tco-page__panel-header">
+            <div>
+              <span class="tco-page__panel-kicker">Observações</span>
+              <h3>Limites e premissas do cálculo atual</h3>
+            </div>
+          </header>
+
+          <div class="tco-page__warnings">
+            @for (warning of currentTco.warnings; track warning) {
+              <p>{{ warning }}</p>
+            }
+          </div>
+        </article>
+      }
+    </section>
+  }
+</po-page-default>

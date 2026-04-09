@@ -15,6 +15,7 @@
     "services:logs": "npm run logs --workspace=packages/database",
     "db:migrate": "npm run migrate:dev --workspace=packages/database",
     "db:seed": "npm run db:seed --workspace=packages/database",
+    "db:seed:dev": "npm run db:seed:dev --workspace=packages/database",
     "db:reset": "npm run db:reset --workspace=packages/database",
     "db:studio": "npm run db:studio --workspace=packages/database",
     "test": "turbo run test",
