@@ -24,7 +24,8 @@
     "type-check:staged": "node tools/run-type-check-on-staged.mjs",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,yaml,yml}\" --ignore-path .gitignore",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,yaml,yml}\" --ignore-path .gitignore",
-    "prepare": "husky"
+    "prepare": "husky",
+    "validate-coolify": "docker compose -f docker-compose.coolify.yml up --build -d && docker compose -f docker-compose.coolify.yml logs --follow"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.16.0",
