@@ -38,7 +38,7 @@
         p-label="Valor atual de mercado"
         p-placeholder="Opcional para depreciação"
         [p-decimals-length]="2"
-        [p-disabled]="isLoading"
+        [p-disabled]="isLoading ? 'true' : 'false'"
       ></po-decimal>
 
       <div class="tco-page__control-actions">

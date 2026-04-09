@@ -41,7 +41,7 @@
             p-label="Data do sinistro *"
             p-format="dd/mm/yyyy"
             formControlName="date"
-            [p-required]="true"
+            p-required
           ></po-datepicker>
 
           <po-combo
@@ -69,7 +69,7 @@
             p-placeholder="Endereço, cidade, rodovia..."
             p-max-length="200"
             formControlName="location"
-            [p-required]="true"
+            p-required
           ></po-input>
         </div>
 
@@ -234,12 +234,12 @@
           p-kind="secondary"
           p-label="Cancelar"
           [p-disabled]="isBusy"
-          (p-click)="router.navigate(['/incidents'])"
+          (p-click)="cancel()"
         ></po-button>
 
         <po-button
           p-kind="primary"
-          p-type="submit"
+          [p-type]="poButtonType.Submit"
           [p-label]="saveLabel"
           [p-disabled]="form.invalid || isBusy"
           [p-loading]="isBusy"

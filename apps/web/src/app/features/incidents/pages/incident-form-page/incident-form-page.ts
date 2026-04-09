@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import type { PoComboOption, PoPageAction } from '@po-ui/ng-components';
 import {
   PoButtonModule,
+  PoButtonType,
   PoFieldModule,
   PoLoadingModule,
   PoPageModule,
@@ -54,6 +55,7 @@ export class IncidentFormPage {
 
   readonly typeOptions: PoComboOption[] = INCIDENT_TYPE_OPTIONS;
   readonly statusOptions: PoComboOption[] = INCIDENT_STATUS_OPTIONS.filter((o) => o.value !== '');
+  protected readonly poButtonType = PoButtonType;
 
   vehicleOptions: PoComboOption[] = [];
   driverOptions: PoComboOption[] = [];
@@ -108,7 +110,7 @@ export class IncidentFormPage {
     return [
       {
         label: 'Cancelar',
-        action: () => void this.router.navigate(['/incidents']),
+        action: () => this.cancel(),
       },
     ];
   }
@@ -129,6 +131,10 @@ export class IncidentFormPage {
 
   protected onDocsChanged(files: PendingFile[]): void {
     this.pendingDocs = files;
+  }
+
+  protected cancel(): void {
+    void this.router.navigate(['/incidents']);
   }
 
   protected removeExistingPhoto(index: number): void {
