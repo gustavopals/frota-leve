@@ -36,7 +36,9 @@ COPY --from=builder /app/packages/database/dist ./packages/database/dist
 COPY --from=builder /app/packages/database/prisma ./packages/database/prisma
 COPY apps/api/docker/start-prod.sh ./apps/api/docker/start-prod.sh
 
-RUN chmod +x /app/apps/api/docker/start-prod.sh
+RUN chmod +x /app/apps/api/docker/start-prod.sh && \
+    mkdir -p /app/apps/api/uploads/incidents && \
+    chown -R node:node /app/apps/api/uploads
 
 EXPOSE 3000
 
