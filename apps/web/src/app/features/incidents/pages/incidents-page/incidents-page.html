@@ -191,19 +191,19 @@
             <span class="incidents-timeline__detail-value">{{ timelineIncident.driver.name }}</span>
           </div>
         }
-        @if (timelineIncident.estimatedCost != null) {
+        @if (timelineIncident.estimatedCost !== null && timelineIncident.estimatedCost !== undefined) {
           <div class="incidents-timeline__detail-row">
             <span class="incidents-timeline__detail-label">Custo estimado</span>
             <span class="incidents-timeline__detail-value">{{ formatCurrency(timelineIncident.estimatedCost) }}</span>
           </div>
         }
-        @if (timelineIncident.actualCost != null) {
+        @if (timelineIncident.actualCost !== null && timelineIncident.actualCost !== undefined) {
           <div class="incidents-timeline__detail-row">
             <span class="incidents-timeline__detail-label">Custo real</span>
             <span class="incidents-timeline__detail-value">{{ formatCurrency(timelineIncident.actualCost) }}</span>
           </div>
         }
-        @if (timelineIncident.downtime != null) {
+        @if (timelineIncident.downtime !== null && timelineIncident.downtime !== undefined) {
           <div class="incidents-timeline__detail-row">
             <span class="incidents-timeline__detail-label">Indisponibilidade</span>
             <span class="incidents-timeline__detail-value">{{ timelineIncident.downtime }} dia(s)</span>

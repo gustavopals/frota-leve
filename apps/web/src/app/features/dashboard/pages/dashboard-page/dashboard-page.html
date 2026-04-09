@@ -30,19 +30,19 @@
         }
       </div>
       <small class="dashboard-page__sync">
-        @if (isLoading && summary) { Atualizando... } @else { Sinc: {{ lastUpdatedLabel }} }
+        @if (isLoading() && summary()) { Atualizando... } @else { Sinc: {{ lastUpdatedLabel }} }
       </small>
     </div>
   </section>
 
-  @if (!summary && isLoading) {
+  @if (!summary() && isLoading()) {
     <section class="dashboard-page__state">
       <div>
         <span class="dashboard-page__state-label">Carregando painel</span>
         <h3>Buscando indicadores da {{ tenantName }}</h3>
       </div>
     </section>
-  } @else if (!summary && hasLoadError) {
+  } @else if (!summary() && hasLoadError()) {
     <section class="dashboard-page__state dashboard-page__state--error">
       <div>
         <span class="dashboard-page__state-label">Falha ao carregar</span>
@@ -51,13 +51,13 @@
       <po-button
         p-kind="primary"
         p-label="Tentar novamente"
-        [p-loading]="isLoading"
+        [p-loading]="isLoading()"
         (p-click)="reload()"
       ></po-button>
     </section>
   }
 
-  @if (summary; as currentSummary) {
+  @if (summary(); as currentSummary) {
     <!-- Faixa de KPIs: 4 cartões compactos -->
     <section class="dashboard-page__metrics">
       <po-widget p-title="Frota" class="dashboard-page__metric">

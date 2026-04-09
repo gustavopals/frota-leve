@@ -19,6 +19,7 @@
     "generate": "node ./scripts/prisma-command.mjs generate",
     "migrate:dev": "node ./scripts/prisma-command.mjs migrate dev",
     "db:seed": "node ./scripts/prisma-command.mjs db seed",
+    "db:seed:dev": "node ./scripts/run-seed-dev.mjs",
     "db:reset": "node ./scripts/prisma-command.mjs migrate reset --force",
     "db:studio": "node ./scripts/prisma-command.mjs studio",
     "build": "npm run generate && tsc",

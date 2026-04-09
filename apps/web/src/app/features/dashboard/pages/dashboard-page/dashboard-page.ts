@@ -1,5 +1,5 @@
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import type {
   DashboardAlertItem,
@@ -79,9 +79,9 @@ export class DashboardPage {
     },
   ];
 
-  summary: DashboardSummaryResponse | null = null;
-  isLoading = false;
-  hasLoadError = false;
+  readonly summary = signal<DashboardSummaryResponse | null>(null);
+  readonly isLoading = signal(false);
+  readonly hasLoadError = signal(false);
 
   constructor() {
     this.loadSummary();
@@ -94,8 +94,8 @@ export class DashboardPage {
   protected get pageActions(): PoPageAction[] {
     return [
       {
-        label: this.isLoading ? 'Atualizando...' : 'Atualizar painel',
-        disabled: this.isLoading,
+        label: this.isLoading() ? 'Atualizando...' : 'Atualizar painel',
+        disabled: this.isLoading(),
         action: () => {
           this.reload();
         },
@@ -108,31 +108,33 @@ export class DashboardPage {
   }
 
   protected get heroTitle(): string {
-    if (!this.summary) {
+    const s = this.summary();
+    if (!s) {
       return `Visao principal da ${this.tenantName}`;
     }
 
-    if (this.summary.vehicles.total === 0 && this.summary.drivers.total === 0) {
+    if (s.vehicles.total === 0 && s.drivers.total === 0) {
       return 'Cadastre a frota e os motoristas para destravar os indicadores';
     }
 
-    if (this.summary.alerts.totalPending > 0) {
-      return `${this.summary.alerts.totalPending} alertas merecem prioridade agora`;
+    if (s.alerts.totalPending > 0) {
+      return `${s.alerts.totalPending} alertas merecem prioridade agora`;
     }
 
     return 'Operacao estabilizada para o inicio do dia';
   }
 
   protected get heroDescription(): string {
-    if (!this.summary) {
+    const s = this.summary();
+    if (!s) {
       return 'O painel consolida disponibilidade da frota, condutores, pendencias e os primeiros sinais de custo da operacao.';
     }
 
-    if (this.summary.vehicles.total === 0 && this.summary.drivers.total === 0) {
+    if (s.vehicles.total === 0 && s.drivers.total === 0) {
       return 'A base do dashboard ja esta conectada. Assim que os primeiros cadastros entrarem, os cards e graficos passam a refletir a operacao real.';
     }
 
-    if (this.summary.alerts.totalPending > 0) {
+    if (s.alerts.totalPending > 0) {
       return 'Use este resumo para distribuir tratativas entre manutencao, documentos, multas e vencimentos de CNH antes que virem indisponibilidade.';
     }
 
@@ -140,27 +142,28 @@ export class DashboardPage {
   }
 
   protected get heroSnapshot(): DashboardMetricPill[] {
+    const s = this.summary();
     return [
       {
         label: 'ativos',
-        value: String(this.summary?.vehicles.active ?? 0),
+        value: String(s?.vehicles.active ?? 0),
         tone: 'success',
       },
       {
         label: 'motoristas ativos',
-        value: String(this.summary?.drivers.active ?? 0),
+        value: String(s?.drivers.active ?? 0),
         tone: 'neutral',
       },
       {
         label: 'alertas pendentes',
-        value: String(this.summary?.alerts.totalPending ?? 0),
-        tone: (this.summary?.alerts.totalPending ?? 0) > 0 ? 'warning' : 'success',
+        value: String(s?.alerts.totalPending ?? 0),
+        tone: (s?.alerts.totalPending ?? 0) > 0 ? 'warning' : 'success',
       },
     ];
   }
 
   protected get vehicleBreakdown(): DashboardMetricPill[] {
-    const vehicles = this.summary?.vehicles;
+    const vehicles = this.summary()?.vehicles;
 
     return [
       {
@@ -187,7 +190,7 @@ export class DashboardPage {
   }
 
   protected get driverBreakdown(): DashboardMetricPill[] {
-    const drivers = this.summary?.drivers;
+    const drivers = this.summary()?.drivers;
 
     return [
       {
@@ -204,7 +207,7 @@ export class DashboardPage {
   }
 
   protected get alertBreakdown(): DashboardMetricPill[] {
-    const alerts = this.summary?.alerts;
+    const alerts = this.summary()?.alerts;
 
     return [
       {
@@ -231,7 +234,7 @@ export class DashboardPage {
   }
 
   protected get currentMonthCostBreakdown(): DashboardMetricPill[] {
-    const costs = this.summary?.costs.breakdownCurrentMonth;
+    const costs = this.summary()?.costs.breakdownCurrentMonth;
 
     return [
       {
@@ -258,27 +261,27 @@ export class DashboardPage {
   }
 
   protected get hasCostData(): boolean {
-    return Boolean(this.summary?.costs.monthlySeries.some((item) => item.total > 0));
+    return Boolean(this.summary()?.costs.monthlySeries.some((item) => item.total > 0));
   }
 
   protected get hasVehicleStatusData(): boolean {
-    return (this.summary?.vehicles.total ?? 0) > 0;
+    return (this.summary()?.vehicles.total ?? 0) > 0;
   }
 
   protected get alerts(): DashboardAlertItem[] {
-    return this.summary?.alerts.items ?? [];
+    return this.summary()?.alerts.items ?? [];
   }
 
   protected get recentActivity() {
-    return this.summary?.recentActivity ?? [];
+    return this.summary()?.recentActivity ?? [];
   }
 
   protected get costCategories(): string[] {
-    return this.summary?.costs.monthlySeries.map((item) => item.month) ?? [];
+    return this.summary()?.costs.monthlySeries.map((item) => item.month) ?? [];
   }
 
   protected get costSeries(): PoChartSerie[] {
-    const series = this.summary?.costs.monthlySeries ?? [];
+    const series = this.summary()?.costs.monthlySeries ?? [];
 
     return [
       {
@@ -305,7 +308,7 @@ export class DashboardPage {
   }
 
   protected get statusChartSeries(): PoChartSerie[] {
-    const vehicles = this.summary?.vehicles;
+    const vehicles = this.summary()?.vehicles;
 
     if (!vehicles) {
       return [];
@@ -346,14 +349,14 @@ export class DashboardPage {
       legend: true,
       legendPosition: 'right',
       legendVerticalPosition: 'top',
-      textCenterGraph: `${this.summary?.vehicles.total ?? 0} veiculos`,
+      textCenterGraph: `${this.summary()?.vehicles.total ?? 0} veiculos`,
       descriptionChart: 'Distribuicao da frota por status operacional.',
       rendererOption: 'svg',
     };
   }
 
   protected get statusLegend(): DashboardStatusLegendItem[] {
-    const vehicles = this.summary?.vehicles;
+    const vehicles = this.summary()?.vehicles;
     const total = vehicles?.total ?? 0;
 
     return [
@@ -396,11 +399,11 @@ export class DashboardPage {
   }
 
   protected get lastUpdatedLabel(): string {
-    return formatDashboardDateTime(this.summary?.generatedAt);
+    return formatDashboardDateTime(this.summary()?.generatedAt);
   }
 
   protected get costVariationLabel(): string {
-    return getDashboardVariationLabel(this.summary?.costs.variation ?? 0);
+    return getDashboardVariationLabel(this.summary()?.costs.variation ?? 0);
   }
 
   protected get costReadinessLabel(): string {
@@ -462,27 +465,27 @@ export class DashboardPage {
   }
 
   private loadSummary(): void {
-    if (this.isLoading) {
+    if (this.isLoading()) {
       return;
     }
 
-    this.isLoading = true;
-    this.hasLoadError = false;
+    this.isLoading.set(true);
+    this.hasLoadError.set(false);
 
     this.dashboardService
       .getSummary()
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => {
-          this.isLoading = false;
+          this.isLoading.set(false);
         }),
       )
       .subscribe({
         next: (summary) => {
-          this.summary = summary;
+          this.summary.set(summary);
         },
         error: () => {
-          this.hasLoadError = true;
+          this.hasLoadError.set(true);
         },
       });
   }
