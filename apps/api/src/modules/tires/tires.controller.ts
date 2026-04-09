@@ -4,6 +4,7 @@ import { tiresService } from './tires.service';
 import type {
   CreateTireInspectionInput,
   CreateTireInput,
+  ListTireInspectionsQueryInput,
   ListTiresQueryInput,
   MoveTireInput,
   ReplaceTireInput,
@@ -88,6 +89,19 @@ export class TiresController {
   remove = (req: Request, res: Response, next: NextFunction): void => {
     void tiresService
       .deleteTire(this.getActorContext(req), (req.params as TireIdParams).id)
+      .then((result) => {
+        res.status(200).json(result);
+      })
+      .catch(next);
+  };
+
+  listInspections = (req: Request, res: Response, next: NextFunction): void => {
+    void tiresService
+      .listInspections(
+        this.getActorContext(req),
+        (req.params as TireIdParams).id,
+        req.query as unknown as ListTireInspectionsQueryInput,
+      )
       .then((result) => {
         res.status(200).json(result);
       })

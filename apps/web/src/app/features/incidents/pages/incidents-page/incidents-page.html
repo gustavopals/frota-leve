@@ -1,8 +1,245 @@
-<app-feature-placeholder
-  title="Sinistros"
-  subtitle="Ocorrencias, evidencias e acompanhamento"
-  eyebrow="Feature lazy"
-  description="Modulo reservado para incidentes, anexos fotograficos e tratativas operacionais."
+<po-page-default
+  p-title="Sinistros"
+  p-subtitle="Registro e acompanhamento de ocorrências da frota."
+  [p-actions]="pageActions"
 >
-  <p>Sinistros - em construcao.</p>
-</app-feature-placeholder>
+  <!-- ─── Filtros ──────────────────────────────────────────── -->
+  <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="incidents-filters">
+    <div class="incidents-filters__row">
+      <po-input
+        class="incidents-filters__field incidents-filters__field--search"
+        p-label="Buscar"
+        p-placeholder="Placa, local, descrição..."
+        formControlName="search"
+      ></po-input>
+
+      <po-combo
+        class="incidents-filters__field"
+        p-label="Status"
+        p-placeholder="Todos"
+        [p-options]="statusOptions"
+        formControlName="status"
+      ></po-combo>
+
+      <po-combo
+        class="incidents-filters__field"
+        p-label="Tipo"
+        p-placeholder="Todos"
+        [p-options]="typeOptions"
+        formControlName="type"
+      ></po-combo>
+
+      <po-datepicker
+        class="incidents-filters__field"
+        p-label="Data início"
+        p-format="dd/mm/yyyy"
+        formControlName="dateFrom"
+      ></po-datepicker>
+
+      <po-datepicker
+        class="incidents-filters__field"
+        p-label="Data fim"
+        p-format="dd/mm/yyyy"
+        formControlName="dateTo"
+      ></po-datepicker>
+    </div>
+
+    <div class="incidents-filters__actions">
+      <po-button
+        p-kind="secondary"
+        p-label="Limpar"
+        p-icon="an an-x"
+        (p-click)="clearFilters()"
+      ></po-button>
+      <po-button
+        p-kind="primary"
+        p-label="Filtrar"
+        p-icon="an an-magnifying-glass"
+        (p-click)="applyFilters()"
+      ></po-button>
+    </div>
+  </form>
+
+  <!-- ─── Loading ──────────────────────────────────────────── -->
+  @if (isLoading) {
+    <div class="incidents-loading">
+      <po-loading-overlay [p-screen-lock]="false" p-text="Carregando sinistros..."></po-loading-overlay>
+    </div>
+  }
+
+  <!-- ─── Tabela ────────────────────────────────────────────── -->
+  @if (!isLoading || hasLoadedOnce) {
+    <po-table
+      [p-columns]="columns"
+      [p-items]="items"
+      [p-actions]="tableActions"
+      [p-loading]="isLoading"
+      p-sort="true"
+      p-striped="true"
+    >
+      <!-- Status com tag colorida -->
+      <ng-template p-column-cell-template [p-column]="'_statusLabel'" let-row>
+        <po-tag
+          [p-label]="row._statusLabel"
+          [p-type]="row._statusTagType"
+          p-inverse="true"
+        ></po-tag>
+      </ng-template>
+    </po-table>
+  }
+
+  <!-- ─── Paginação ─────────────────────────────────────────── -->
+  @if (hasLoadedOnce && totalItems > 0) {
+    <div class="incidents-pagination">
+      <span class="incidents-pagination__label">{{ paginationLabel }}</span>
+      <div class="incidents-pagination__controls">
+        <po-button
+          p-kind="secondary"
+          p-label="Anterior"
+          p-icon="an an-caret-left"
+          [p-disabled]="!hasPreviousPage || isLoading"
+          (p-click)="goToPreviousPage()"
+        ></po-button>
+        <po-button
+          p-kind="secondary"
+          p-label="Próxima"
+          p-icon="an an-caret-right"
+          p-icon-right="true"
+          [p-disabled]="!hasNext || isLoading"
+          (p-click)="goToNextPage()"
+        ></po-button>
+      </div>
+    </div>
+  }
+
+  <!-- ─── Estado vazio ──────────────────────────────────────── -->
+  @if (hasLoadedOnce && !isLoading && items.length === 0) {
+    <div class="incidents-empty">
+      <span class="an an-warning incidents-empty__icon"></span>
+      <p class="incidents-empty__text">Nenhum sinistro encontrado com os filtros aplicados.</p>
+    </div>
+  }
+</po-page-default>
+
+<!-- ─── Modal: Timeline ───────────────────────────────────── -->
+<po-modal
+  #timelineModal
+  p-title="Timeline do sinistro"
+  [p-primary-action]="{ label: 'Fechar', action: closeTimeline.bind(this) }"
+  [p-secondary-action]="{ label: 'Editar', action: editFromTimeline.bind(this), disabled: !timelineIncident || timelineIncident.status === 'CONCLUDED' }"
+  p-size="md"
+>
+  @if (timelineIncident) {
+    <div class="incidents-timeline">
+
+      <!-- Cabeçalho do sinistro -->
+      <div class="incidents-timeline__header">
+        <div class="incidents-timeline__info">
+          <span class="incidents-timeline__vehicle">
+            {{ timelineIncident.vehicle.plate }} — {{ timelineIncident.vehicle.brand }} {{ timelineIncident.vehicle.model }}
+          </span>
+          <span class="incidents-timeline__meta">
+            {{ formatIncidentType(timelineIncident.type) }} · {{ formatIncidentDate(timelineIncident.date) }}
+          </span>
+          @if (timelineIncident.location) {
+            <span class="incidents-timeline__location">
+              <span class="an an-map-pin"></span> {{ timelineIncident.location }}
+            </span>
+          }
+        </div>
+        <po-tag
+          [p-label]="formatIncidentStatus(timelineIncident.status)"
+          [p-type]="getStatusTagType(timelineIncident.status)"
+          p-inverse="true"
+        ></po-tag>
+      </div>
+
+      <!-- Steps da timeline -->
+      <div class="incidents-timeline__steps">
+        @for (step of timelineSteps; track step.status) {
+          <div class="incidents-timeline__step" [class.incidents-timeline__step--done]="step.done" [class.incidents-timeline__step--current]="step.current">
+            <div class="incidents-timeline__step-indicator">
+              @if (step.done) {
+                <span class="an an-check-circle incidents-timeline__step-icon incidents-timeline__step-icon--done"></span>
+              } @else if (step.current) {
+                <span class="incidents-timeline__step-dot incidents-timeline__step-dot--current"></span>
+              } @else {
+                <span class="incidents-timeline__step-dot"></span>
+              }
+            </div>
+            <div class="incidents-timeline__step-body">
+              <span class="incidents-timeline__step-label">{{ step.label }}</span>
+              @if (step.date) {
+                <span class="incidents-timeline__step-date">{{ formatIncidentDate(step.date) }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Detalhes adicionais -->
+      <div class="incidents-timeline__details">
+        @if (timelineIncident.description) {
+          <div class="incidents-timeline__detail-row">
+            <span class="incidents-timeline__detail-label">Descrição</span>
+            <span class="incidents-timeline__detail-value">{{ timelineIncident.description }}</span>
+          </div>
+        }
+        @if (timelineIncident.driver) {
+          <div class="incidents-timeline__detail-row">
+            <span class="incidents-timeline__detail-label">Motorista</span>
+            <span class="incidents-timeline__detail-value">{{ timelineIncident.driver.name }}</span>
+          </div>
+        }
+        @if (timelineIncident.estimatedCost != null) {
+          <div class="incidents-timeline__detail-row">
+            <span class="incidents-timeline__detail-label">Custo estimado</span>
+            <span class="incidents-timeline__detail-value">{{ formatCurrency(timelineIncident.estimatedCost) }}</span>
+          </div>
+        }
+        @if (timelineIncident.actualCost != null) {
+          <div class="incidents-timeline__detail-row">
+            <span class="incidents-timeline__detail-label">Custo real</span>
+            <span class="incidents-timeline__detail-value">{{ formatCurrency(timelineIncident.actualCost) }}</span>
+          </div>
+        }
+        @if (timelineIncident.downtime != null) {
+          <div class="incidents-timeline__detail-row">
+            <span class="incidents-timeline__detail-label">Indisponibilidade</span>
+            <span class="incidents-timeline__detail-value">{{ timelineIncident.downtime }} dia(s)</span>
+          </div>
+        }
+        @if (timelineIncident.insuranceClaimNumber) {
+          <div class="incidents-timeline__detail-row">
+            <span class="incidents-timeline__detail-label">Nº sinistro (seg.)</span>
+            <span class="incidents-timeline__detail-value">{{ timelineIncident.insuranceClaimNumber }}</span>
+          </div>
+        }
+        <div class="incidents-timeline__detail-row">
+          <span class="incidents-timeline__detail-label">Flags</span>
+          <span class="incidents-timeline__detail-value incidents-timeline__flags">
+            @if (timelineIncident.thirdPartyInvolved) {
+              <span class="incidents-timeline__flag">Terceiros</span>
+            }
+            @if (timelineIncident.policeReport) {
+              <span class="incidents-timeline__flag">B.O.</span>
+            }
+            @if (timelineIncident.insurerNotified) {
+              <span class="incidents-timeline__flag">Seguradora</span>
+            }
+            @if (!timelineIncident.thirdPartyInvolved && !timelineIncident.policeReport && !timelineIncident.insurerNotified) {
+              <span>—</span>
+            }
+          </span>
+        </div>
+        @if (timelineIncident.notes) {
+          <div class="incidents-timeline__detail-row incidents-timeline__detail-row--full">
+            <span class="incidents-timeline__detail-label">Observações</span>
+            <span class="incidents-timeline__detail-value">{{ timelineIncident.notes }}</span>
+          </div>
+        }
+      </div>
+
+    </div>
+  }
+</po-modal>

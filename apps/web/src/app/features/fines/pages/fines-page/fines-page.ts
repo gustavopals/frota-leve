@@ -1,13 +1,16 @@
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   ElementRef,
   ViewChild,
   inject,
   viewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FineStatus } from '@frota-leve/shared/src/enums/fine-status.enum';
 import type {
   PoComboOption,
@@ -87,10 +90,13 @@ export class FinesPage {
   private readonly identifyDriverModal =
     viewChild.required<FineIdentifyDriverModal>('identifyDriverModal');
 
+  private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
   private readonly finesService = inject(FinesService);
   private readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly statusOptions: PoComboOption[] = FINE_STATUS_OPTIONS;
@@ -112,6 +118,7 @@ export class FinesPage {
   isLoading = false;
   isImporting = false;
   hasLoadedOnce = false;
+  private focusedFineId: string | null = null;
 
   readonly columns: PoTableColumn[] = [
     { property: '_vehicleLabel', label: 'Veículo', width: '13%' },
@@ -156,11 +163,31 @@ export class FinesPage {
   ];
 
   constructor() {
-    this.load();
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const fineId = params.get('fineId');
+
+      if (!fineId) {
+        this.focusedFineId = null;
+        this.load();
+        return;
+      }
+
+      if (fineId === this.focusedFineId) {
+        return;
+      }
+
+      this.focusedFineId = fineId;
+      this.focusFineFromNotification(fineId);
+    });
   }
 
   protected get pageActions(): PoPageAction[] {
     return [
+      {
+        label: 'Dashboard',
+        icon: 'an an-chart-bar',
+        action: () => void this.router.navigate(['/fines/dashboard']),
+      },
       {
         label: 'Importar planilha',
         icon: 'an an-upload-simple',
@@ -360,6 +387,30 @@ export class FinesPage {
           this.notificationService.error('Não foi possível carregar as multas.');
         },
       });
+  }
+
+  private focusFineFromNotification(fineId: string): void {
+    this.finesService.getById(fineId).subscribe({
+      next: (fine) => {
+        const referenceDate = fine.date.slice(0, 10);
+
+        this.filtersForm.patchValue({
+          search: fine.autoNumber,
+          status: fine.status,
+          severity: fine.severity,
+          dateFrom: referenceDate,
+          dateTo: referenceDate,
+        });
+        this.currentPage = 1;
+        this.load();
+      },
+      error: () => {
+        this.notificationService.warning(
+          'Não foi possível abrir a multa diretamente a partir da notificação.',
+        );
+        void this.router.navigate(['/fines']);
+      },
+    });
   }
 
   private toTableItem(fine: FineRecord): FineTableItem {

@@ -1,7 +1,8 @@
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ServiceOrderStatus } from '@frota-leve/shared/src/enums/os-status.enum';
 import type {
   PoBreadcrumb,
@@ -188,8 +189,10 @@ function createEmptyServiceOrderResponse(page: number, pageSize: number): Servic
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MaintenancePage {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
   private readonly maintenanceService = inject(MaintenanceService);
   private readonly notificationService = inject(NotificationService);
@@ -346,12 +349,29 @@ export class MaintenancePage {
   currentServiceOrderPage = 1;
   readonly planPageSize = 10;
   readonly serviceOrderPageSize = 10;
+  private focusedPlanId: string | null = null;
 
   constructor() {
     this.loadVehicleOptions();
     this.loadDashboard();
-    this.loadPlans();
     this.loadServiceOrders();
+
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const planId = params.get('planId');
+
+      if (!planId) {
+        this.focusedPlanId = null;
+        this.loadPlans();
+        return;
+      }
+
+      if (planId === this.focusedPlanId) {
+        return;
+      }
+
+      this.focusedPlanId = planId;
+      this.focusPlanFromNotification(planId);
+    });
   }
 
   protected get pageActions(): PoPageAction[] {
@@ -752,6 +772,27 @@ export class MaintenancePage {
     this.loadDashboard();
     this.loadPlans(this.currentPlanPage);
     this.loadServiceOrders(this.currentServiceOrderPage, true);
+  }
+
+  private focusPlanFromNotification(planId: string): void {
+    this.maintenanceService.getPlanById(planId).subscribe({
+      next: (plan) => {
+        this.planFiltersForm.patchValue({
+          search: plan.name,
+          vehicleId: plan.vehicleId,
+          type: plan.type,
+          activity: plan.isActive ? 'active' : 'inactive',
+        });
+        this.currentPlanPage = 1;
+        this.loadPlans(1);
+      },
+      error: () => {
+        this.notificationService.warning(
+          'Não foi possível abrir o plano de manutenção diretamente a partir da notificação.',
+        );
+        void this.router.navigate(['/maintenance']);
+      },
+    });
   }
 
   private loadVehicleOptions(): void {

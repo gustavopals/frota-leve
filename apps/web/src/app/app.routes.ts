@@ -48,6 +48,13 @@ export const APP_ROUTES: Routes = [
           import('./features/maintenance/maintenance.routes').then((m) => m.MAINTENANCE_ROUTES),
       },
       {
+        path: 'checklists',
+        canActivate: [roleGuard],
+        data: { roles: ['OWNER', 'ADMIN', 'MANAGER'] },
+        loadChildren: () =>
+          import('./features/checklists/checklists.routes').then((m) => m.CHECKLISTS_ROUTES),
+      },
+      {
         path: 'tires',
         loadChildren: () => import('./features/tires/tires.routes').then((m) => m.TIRES_ROUTES),
       },

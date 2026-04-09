@@ -1,13 +1,18 @@
 export { prisma } from './client';
 export {
+  ChecklistExecutionStatus,
+  ChecklistItemStatus,
   DocumentStatus,
   DocumentType,
   FineSeverity,
   FineStatus,
+  IncidentStatus,
+  IncidentType,
   Prisma,
   PrismaClient,
   FuelType,
   MaintenanceType,
+  NotificationType,
   PlanType,
   ServiceOrderStatus,
   TenantStatus,

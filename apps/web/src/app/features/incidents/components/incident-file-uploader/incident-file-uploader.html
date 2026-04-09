@@ -1,0 +1,65 @@
+<div class="file-uploader">
+  <input
+    #fileInput
+    type="file"
+    [attr.accept]="accept()"
+    multiple
+    style="display:none"
+    (change)="onInputChange($event)"
+  />
+
+  <div
+    class="file-uploader__drop-zone"
+    [class.file-uploader__drop-zone--over]="isDragOver"
+    [class.file-uploader__drop-zone--disabled]="!canAddMore"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+    (drop)="onDrop($event)"
+    (click)="triggerPick()"
+    role="button"
+    tabindex="0"
+    [attr.aria-label]="'Adicionar ' + label()"
+    (keydown.enter)="triggerPick()"
+  >
+    <span class="file-uploader__drop-icon an an-upload-simple"></span>
+    <span class="file-uploader__drop-label">
+      @if (canAddMore) {
+        Clique ou arraste arquivos aqui
+      } @else {
+        Limite de {{ maxFiles() }} arquivo(s) atingido
+      }
+    </span>
+    @if (helpText()) {
+      <span class="file-uploader__drop-help">{{ helpText() }}</span>
+    }
+  </div>
+
+  @if (pendingFiles.length > 0) {
+    <ul class="file-uploader__list">
+      @for (pf of pendingFiles; track pf.name + $index; let i = $index) {
+        <li class="file-uploader__item">
+          @if (pf.isImage && pf.preview) {
+            <img class="file-uploader__thumb" [src]="pf.preview" [alt]="pf.name" />
+          } @else {
+            <span class="file-uploader__doc-icon an an-file-text"></span>
+          }
+
+          <div class="file-uploader__item-info">
+            <span class="file-uploader__item-name" [title]="pf.name">{{ pf.name }}</span>
+            <span class="file-uploader__item-size">{{ pf.sizeLabel }}</span>
+          </div>
+
+          <button
+            class="file-uploader__remove"
+            type="button"
+            [attr.aria-label]="'Remover ' + pf.name"
+            [disabled]="disabled()"
+            (click)="removeFile(i); $event.stopPropagation()"
+          >
+            <span class="an an-x"></span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</div>

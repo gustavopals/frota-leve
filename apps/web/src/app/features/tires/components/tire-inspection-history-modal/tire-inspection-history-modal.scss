@@ -1,0 +1,55 @@
+.inspection-history {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  &__eyebrow {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-neutral-50, #8898aa);
+    margin-bottom: 0.2rem;
+  }
+
+  &__header {
+    h3 {
+      margin: 0 0 0.25rem;
+      font-size: 1rem;
+    }
+  }
+
+  &__tire-meta {
+    margin: 0;
+    font-size: 0.825rem;
+    color: var(--color-neutral-60, #6c7a89);
+  }
+
+  &__loading {
+    min-height: 80px;
+    position: relative;
+  }
+
+  &__empty {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--color-neutral-60, #6c7a89);
+    font-size: 0.875rem;
+  }
+
+  &__section-title {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-neutral-80, #2e3f55);
+  }
+
+  &__chart-section {
+    margin-bottom: 0.5rem;
+  }
+
+  &__table-section {
+    // espaço para a tabela
+  }
+}

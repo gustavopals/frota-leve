@@ -1,0 +1,151 @@
+<po-page-list
+  p-title="Dashboard de Multas"
+  p-subtitle="Ranking de motoristas, distribuição por gravidade e custo acumulado por período."
+  [p-actions]="pageActions"
+>
+  <!-- Filtros -->
+  <section class="fines-dashboard__filters" [formGroup]="filtersForm">
+    <div class="fines-dashboard__filter-row">
+      <po-datepicker
+        class="fines-dashboard__filter-field"
+        p-label="Data de"
+        formControlName="dateFrom"
+        (p-change-model)="applyFilters()"
+      ></po-datepicker>
+
+      <po-datepicker
+        class="fines-dashboard__filter-field"
+        p-label="Data até"
+        formControlName="dateTo"
+        (p-change-model)="applyFilters()"
+      ></po-datepicker>
+
+      <po-select
+        class="fines-dashboard__filter-field"
+        p-label="Granularidade"
+        [p-options]="granularityOptions"
+        formControlName="granularity"
+        (p-change)="applyFilters()"
+      ></po-select>
+
+      <po-button
+        class="fines-dashboard__filter-clear"
+        p-kind="tertiary"
+        p-label="Limpar filtros"
+        p-icon="an an-x"
+        (p-click)="clearFilters()"
+      ></po-button>
+    </div>
+  </section>
+
+  <!-- Loading inicial -->
+  @if (isLoading && !hasLoadedOnce) {
+    <section class="fines-dashboard__state">
+      <po-loading-overlay [p-screen-lock]="false"></po-loading-overlay>
+      <p>Carregando dados do dashboard...</p>
+    </section>
+  }
+
+  @if (hasLoadedOnce) {
+    <!-- Cards de resumo -->
+    <section class="fines-dashboard__summary">
+      <po-widget class="fines-dashboard__widget">
+        <div class="fines-dashboard__metric">
+          <span class="fines-dashboard__metric-label">Total de multas</span>
+          <strong class="fines-dashboard__metric-value">{{ totalLabel }}</strong>
+        </div>
+      </po-widget>
+
+      <po-widget class="fines-dashboard__widget">
+        <div class="fines-dashboard__metric">
+          <span class="fines-dashboard__metric-label">Custo total</span>
+          <strong class="fines-dashboard__metric-value fines-dashboard__metric-value--danger">
+            {{ totalAmountLabel }}
+          </strong>
+        </div>
+      </po-widget>
+
+      <po-widget class="fines-dashboard__widget">
+        <div class="fines-dashboard__metric">
+          <span class="fines-dashboard__metric-label">Custo líquido</span>
+          <strong class="fines-dashboard__metric-value">{{ netAmountLabel }}</strong>
+        </div>
+      </po-widget>
+
+      <po-widget class="fines-dashboard__widget">
+        <div class="fines-dashboard__metric">
+          <span class="fines-dashboard__metric-label">Total de pontos</span>
+          <strong class="fines-dashboard__metric-value">{{ totalPointsLabel }}</strong>
+        </div>
+      </po-widget>
+    </section>
+
+    @if (stats && stats.summary.total === 0) {
+      <section class="fines-dashboard__empty">
+        <h3>Nenhuma multa encontrada no período</h3>
+        <p>Ajuste os filtros de data ou importe autuações na listagem de multas.</p>
+      </section>
+    }
+
+    @if (stats && stats.summary.total > 0) {
+      <!-- Gráfico de custo por período -->
+      @if (periodChartSeries.length > 0) {
+        <section class="fines-dashboard__section">
+          <h3 class="fines-dashboard__section-title">Custo por período</h3>
+          <po-chart
+            [p-type]="columnChartType"
+            [p-series]="periodChartSeries"
+            [p-categories]="periodChartCategories"
+            [p-options]="columnChartOptions"
+            p-height="260"
+          ></po-chart>
+        </section>
+      }
+
+      <!-- Ranking de motoristas -->
+      <section class="fines-dashboard__section">
+        <h3 class="fines-dashboard__section-title">
+          Ranking de motoristas
+          <span class="fines-dashboard__section-hint">Top 10 por quantidade de infrações</span>
+        </h3>
+        <po-table
+          [p-columns]="driverColumns"
+          [p-items]="driverRows"
+          [p-striped]="true"
+          [p-hide-detail]="true"
+          [p-sort]="false"
+        ></po-table>
+      </section>
+
+      <!-- Distribuição por gravidade -->
+      <section class="fines-dashboard__section">
+        <h3 class="fines-dashboard__section-title">Distribuição por gravidade</h3>
+        <po-table
+          [p-columns]="severityColumns"
+          [p-items]="severityRows"
+          [p-striped]="true"
+          [p-hide-detail]="true"
+          [p-sort]="false"
+        ></po-table>
+      </section>
+
+      <!-- Tabela por período -->
+      <section class="fines-dashboard__section">
+        <h3 class="fines-dashboard__section-title">Detalhamento por período</h3>
+        <po-table
+          [p-columns]="periodColumns"
+          [p-items]="periodRows"
+          [p-striped]="true"
+          [p-hide-detail]="true"
+          [p-sort]="false"
+        ></po-table>
+      </section>
+    }
+  }
+
+  @if (isLoading && hasLoadedOnce) {
+    <div class="fines-dashboard__loading-overlay">
+      <po-loading-overlay [p-screen-lock]="false" p-text="Atualizando..."></po-loading-overlay>
+    </div>
+  }
+</po-page-list>

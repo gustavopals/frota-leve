@@ -3,10 +3,12 @@ import { UserRole } from '@frota-leve/database';
 import { authenticate, authorize } from '../../middlewares/auth';
 import { tenantMiddleware } from '../../middlewares/tenant';
 import { validate } from '../../middlewares/validate';
+import { requirePlanFeature } from '../../middlewares/plan-gate';
 import { TiresController } from './tires.controller';
 import {
   createTireInspectionBodySchema,
   createTireBodySchema,
+  listTireInspectionsQuerySchema,
   listTiresQuerySchema,
   moveTireBodySchema,
   replaceTireBodySchema,
@@ -19,7 +21,8 @@ const tiresController = new TiresController();
 
 export const tiresRouter = Router();
 
-tiresRouter.use(authenticate, tenantMiddleware);
+// Autenticação + verificação de tenant + gate de plano (bloqueia ESSENTIAL)
+tiresRouter.use(authenticate, tenantMiddleware, requirePlanFeature('hasTires'));
 
 tiresRouter.get('/alerts', validate({ query: tireAlertsQuerySchema }), tiresController.listAlerts);
 
@@ -32,6 +35,12 @@ tiresRouter.post(
   authorize(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER),
   validate({ body: createTireBodySchema }),
   tiresController.create,
+);
+
+tiresRouter.get(
+  '/:id/inspections',
+  validate({ params: tireIdParamSchema, query: listTireInspectionsQuerySchema }),
+  tiresController.listInspections,
 );
 
 tiresRouter.post(

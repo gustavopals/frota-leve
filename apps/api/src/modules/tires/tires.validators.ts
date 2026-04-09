@@ -104,7 +104,13 @@ export const listTiresQuerySchema = z
     ...resolveTireSort(value, 'createdAt', 'desc'),
   }));
 
+export const listTireInspectionsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(200).default(50),
+});
+
 export type TireIdParams = z.infer<typeof tireIdParamSchema>;
+export type ListTireInspectionsQueryInput = z.infer<typeof listTireInspectionsQuerySchema>;
 export type CreateTireInput = z.infer<typeof createTireBodySchema>;
 export type ReplaceTireInput = z.infer<typeof replaceTireBodySchema>;
 export type CreateTireInspectionInput = z.infer<typeof createTireInspectionBodySchema>;

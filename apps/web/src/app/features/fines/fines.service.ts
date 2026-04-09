@@ -8,6 +8,8 @@ import type {
   FineListFilters,
   FineListResponse,
   FineRecord,
+  FineStatsFilters,
+  FineStatsResponse,
   FineVehicleOption,
   FineWorkflowPayload,
 } from './fines.types';
@@ -47,12 +49,26 @@ export class FinesService {
     });
   }
 
+  getById(fineId: string): Observable<FineRecord> {
+    return this.apiService.get<FineRecord>(`fines/${fineId}`);
+  }
+
   update(fineId: string, payload: FineWorkflowPayload): Observable<FineRecord> {
     return this.apiService.put<FineRecord, FineWorkflowPayload>(`fines/${fineId}`, payload);
   }
 
   delete(fineId: string): Observable<{ deleted: boolean; mode: string; fineId: string }> {
     return this.apiService.delete(`fines/${fineId}`);
+  }
+
+  getStats(filters: FineStatsFilters = {}): Observable<FineStatsResponse> {
+    return this.apiService.get<FineStatsResponse>('fines/stats', {
+      params: {
+        ...(filters.dateFrom ? { dateFrom: filters.dateFrom } : {}),
+        ...(filters.dateTo ? { dateTo: filters.dateTo } : {}),
+        granularity: filters.granularity ?? 'month',
+      },
+    });
   }
 
   importFile(file: File): Observable<FineImportResult> {

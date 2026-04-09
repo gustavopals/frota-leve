@@ -1,0 +1,60 @@
+<po-modal
+  #historyModal
+  p-title="Histórico de inspeções"
+  p-size="xl"
+  [p-secondary-action]="closeAction"
+>
+  <section class="inspection-history">
+    @if (tire) {
+      <header class="inspection-history__header">
+        <span class="inspection-history__eyebrow">Pneu selecionado</span>
+        <h3 class="inspection-history__tire-label">{{ tireLabel }}</h3>
+        <p class="inspection-history__tire-meta">
+          Sulco original: <strong>{{ tire.originalGrooveDepth.toFixed(1) }} mm</strong> —
+          Sulco atual: <strong>{{ tire.currentGrooveDepth.toFixed(1) }} mm</strong> —
+          Recapagens: <strong>{{ tire.retreatCount }}</strong>
+        </p>
+      </header>
+    }
+
+    @if (isLoading) {
+      <div class="inspection-history__loading">
+        <po-loading-overlay [p-screen-lock]="false" p-text="Carregando histórico..."></po-loading-overlay>
+      </div>
+    }
+
+    @if (hasLoaded && inspections.length === 0) {
+      <div class="inspection-history__empty">
+        <p>Nenhuma inspeção registrada para este pneu ainda.</p>
+      </div>
+    }
+
+    @if (hasLoaded && inspections.length > 0) {
+      <!-- Gráfico de desgaste -->
+      <section class="inspection-history__chart-section">
+        <h4 class="inspection-history__section-title">Desgaste ao longo do tempo</h4>
+        <po-chart
+          [p-type]="lineChartType"
+          [p-series]="chartSeries"
+          [p-categories]="chartCategories"
+          [p-options]="chartOptions"
+          p-height="220"
+        ></po-chart>
+      </section>
+
+      <!-- Tabela de inspeções -->
+      <section class="inspection-history__table-section">
+        <h4 class="inspection-history__section-title">
+          Registros ({{ inspections.length }} inspeção{{ inspections.length !== 1 ? 'ões' : '' }})
+        </h4>
+        <po-table
+          [p-columns]="columns"
+          [p-items]="tableRows"
+          [p-striped]="true"
+          [p-sort]="false"
+          [p-hide-detail]="true"
+        ></po-table>
+      </section>
+    }
+  </section>
+</po-modal>

@@ -9,6 +9,7 @@ import type {
   MaintenancePlanListFilters,
   MaintenancePlanListResponse,
   MaintenancePlanOption,
+  MaintenancePlanRecord,
   MaintenanceStatsFilters,
   MaintenanceStatsResponse,
   MaintenanceVehicleOption,
@@ -78,6 +79,10 @@ export class MaintenanceService {
         pageSize,
       },
     });
+  }
+
+  getPlanById(planId: string): Observable<MaintenancePlanRecord> {
+    return this.apiService.get<MaintenancePlanRecord>(`maintenance/plans/${planId}`);
   }
 
   listServiceOrders(
