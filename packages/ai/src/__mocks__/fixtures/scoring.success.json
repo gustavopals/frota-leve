@@ -1,0 +1,16 @@
+{
+  "providerMessageId": "mock-scoring-001",
+  "stopReason": "end_turn",
+  "rawText": "{\"score\":84,\"recommendations\":[\"Reduzir velocidade media\",\"Treinar conducao defensiva\"]}",
+  "data": {
+    "score": 84,
+    "recommendations": ["Reduzir velocidade media", "Treinar conducao defensiva"]
+  },
+  "usage": {
+    "inputTokens": 260,
+    "outputTokens": 88,
+    "cacheReadTokens": 16,
+    "cacheCreationTokens": 140,
+    "latencyMs": 44
+  }
+}

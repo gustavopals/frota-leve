@@ -1,0 +1,18 @@
+{
+  "providerMessageId": "mock-ocr-001",
+  "stopReason": "tool_use",
+  "rawText": "",
+  "data": {
+    "supplierName": "Posto Exemplo",
+    "totalAmount": 329.9,
+    "fuelVolumeLiters": 55,
+    "confidence": 0.97
+  },
+  "usage": {
+    "inputTokens": 180,
+    "outputTokens": 72,
+    "cacheReadTokens": 0,
+    "cacheCreationTokens": 0,
+    "latencyMs": 42
+  }
+}

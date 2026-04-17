@@ -116,6 +116,13 @@ async function main() {
 
   // Limpar dados existentes (ordem reversa de dependências)
   console.log('🗑️  Limpando dados existentes...');
+  await prisma.aIUsageLog.deleteMany();
+  await prisma.aIChatMessage.deleteMany();
+  await prisma.aIChatSession.deleteMany();
+  await prisma.aIReport.deleteMany();
+  await prisma.aIAnomaly.deleteMany();
+  await prisma.driverScore.deleteMany();
+  await prisma.aITenantQuota.deleteMany();
   await prisma.tireInspection.deleteMany();
   await prisma.tire.deleteMany();
   await prisma.notification.deleteMany();
@@ -184,6 +191,32 @@ async function main() {
         zipCode: '81000-000',
       },
       settings: { locale: 'pt-BR', timezone: 'America/Sao_Paulo' },
+    },
+  });
+
+  const tenant3 = await prisma.tenant.create({
+    data: {
+      name: 'Operação IA Bloqueada Ltda',
+      tradeName: 'IA Bloqueada',
+      cnpj: '55443322000166',
+      email: 'contato@iabloqueada.com',
+      phone: '(41) 97777-2222',
+      plan: PlanType.PROFESSIONAL,
+      status: TenantStatus.ACTIVE,
+      trialEndsAt: null,
+      address: {
+        street: 'Rua do Circuit Breaker',
+        number: '789',
+        neighborhood: 'Centro Cívico',
+        city: 'Curitiba',
+        state: 'PR',
+        zipCode: '80530-000',
+      },
+      settings: {
+        locale: 'pt-BR',
+        timezone: 'America/Sao_Paulo',
+        aiScenario: 'quota-zero',
+      },
     },
   });
 
@@ -259,6 +292,12 @@ async function main() {
       name: 'Thiago Motorista',
       role: UserRole.DRIVER,
     },
+    {
+      tenantId: tenant3.id,
+      email: 'admin@iabloqueada.com',
+      name: 'Helena Owner',
+      role: UserRole.OWNER,
+    },
   ];
 
   const users = await Promise.all(
@@ -279,6 +318,28 @@ async function main() {
     'Usuário MANAGER do tenant principal não encontrado.',
   );
   const t1Drivers = t1Users.filter((u) => u.role === 'DRIVER');
+
+  const t3Users = users.filter((u) => u.tenantId === tenant3.id);
+  const t3Owner = ensureDefined(
+    t3Users.find((u) => u.role === 'OWNER'),
+    'Usuário OWNER do tenant profissional com quota zero não encontrado.',
+  );
+
+  const now = new Date();
+  const currentPeriodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const currentPeriodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  await prisma.aITenantQuota.create({
+    data: {
+      tenantId: tenant3.id,
+      periodStart: currentPeriodStart,
+      periodEnd: currentPeriodEnd,
+      tokenBudget: 0,
+      tokensUsed: 0,
+      costUsdMicros: 0,
+      blockedAt: now,
+    },
+  });
 
   // ─── Motoristas (Driver profile) ──────────────────────────────────────────
 
@@ -1534,11 +1595,35 @@ async function main() {
 
   console.log('   ✅ Dados do tenant 2 criados');
 
+  // ─── Tenant 3: cenário de quota zerada para IA ───────────────────────────
+
+  console.log('🤖 Criando tenant profissional com quota zerada...');
+
+  await prisma.auditLog.create({
+    data: {
+      tenantId: tenant3.id,
+      userId: t3Owner.id,
+      action: 'AI_QUOTA_SEEDED_AS_BLOCKED',
+      entity: 'AITenantQuota',
+      entityId: tenant3.id,
+      changes: {
+        tokenBudget: 0,
+        tokensUsed: 0,
+        blockedAt: now.toISOString(),
+        source: 'seed-dev',
+      },
+      ipAddress: '127.0.0.1',
+      userAgent: 'Mozilla/5.0 (seed)',
+    },
+  });
+
+  console.log('   ✅ Tenant 3 criado com quota zero e circuit breaker ativo');
+
   // ─── Resumo ───────────────────────────────────────────────────────────────
 
   console.log('\n✅ Seed de desenvolvimento concluído com sucesso!\n');
   console.log('📊 Resumo:');
-  console.log(`   • 2 tenants (Professional + Essential/Trial)`);
+  console.log(`   • 3 tenants (Professional + Essential/Trial + Professional quota zero)`);
   console.log(`   • ${users.length} usuários (senha: 123456)`);
   console.log(`   • ${drivers.length + 1} motoristas`);
   console.log(`   • ${vehicles.length + t2Vehicles.length} veículos`);
@@ -1556,6 +1641,7 @@ async function main() {
   console.log('\n🔑 Credenciais de acesso:');
   console.log('   Tenant 1 (Professional): admin@demo.com / 123456');
   console.log('   Tenant 2 (Essential):    admin@lograpida.com / 123456');
+  console.log('   Tenant 3 (AI bloqueada): admin@iabloqueada.com / 123456');
 }
 
 main()

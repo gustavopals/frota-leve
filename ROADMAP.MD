@@ -1065,7 +1065,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **3.0.1** — Adicionar ao `packages/database/prisma/schema.prisma`:
+- [x] **3.0.1** — Adicionar ao `packages/database/prisma/schema.prisma`:
   - `AIUsageLog` (id, tenantId, userId?, feature enum, model, inputTokens, outputTokens, cacheReadTokens, cacheCreationTokens, costUsdMicros Int, latencyMs, status enum [SUCCESS|ERROR|BLOCKED], errorCode?, createdAt) — índices em `tenantId+createdAt`, `feature+createdAt`
   - `AITenantQuota` (tenantId PK, periodStart, periodEnd, tokenBudget, tokensUsed, costUsdMicros, blockedAt?) — reset mensal
   - `AIChatSession` (id, tenantId, userId, title, createdAt, updatedAt, archivedAt?)
@@ -1073,11 +1073,11 @@ Uma task só está **pronta** quando:
   - `AIReport` (id, tenantId, period `YYYY-MM`, kind enum [MONTHLY|ON_DEMAND], content Text, summary Text, dataSnapshot Json, status enum [PENDING|GENERATED|FAILED], generatedAt?, createdAt) — unique `tenantId+period+kind`
   - `AIAnomaly` (id, tenantId, kind enum [FUEL_DEVIATION|MAINT_COST|FINE_PATTERN|COST_PER_KM_TREND|OTHER], severity enum [LOW|MED|HIGH], entityType, entityId, score Float, evidence Json, message Text, status enum [OPEN|ACK|DISMISSED], detectedAt, acknowledgedAt?, acknowledgedBy?) — índice `tenantId+status+detectedAt`
   - `DriverScore` (id, tenantId, driverId, periodStart, periodEnd, score Int 0-100, breakdown Json, recommendations Text, createdAt) — unique `driverId+periodStart`
-- [ ] **3.0.2** — Migration: `npm run db:migrate -- --name ai_core`. Validar com `prisma validate` e testar rollback em dev.
-- [ ] **3.0.3** — Adicionar enums correspondentes em `packages/shared/src/enums/ai.enum.ts` e reexportar.
-- [ ] **3.0.4** — Adicionar variáveis em `apps/api/src/config/env.ts` (Zod): `ANTHROPIC_API_KEY` (required se `AI_ENABLED=true`), `AI_ENABLED` (bool default false em dev), `AI_DEFAULT_MODEL`, `AI_DAILY_COST_USD_LIMIT` (default 50), `AI_TENANT_MONTHLY_TOKEN_BUDGET_PRO` (default 2_000_000), `AI_TENANT_MONTHLY_TOKEN_BUDGET_ENT` (default 20_000_000).
-- [ ] **3.0.5** — Extender `PLAN_LIMITS` em `packages/shared` com `aiMonthlyTokenBudget: number` e `aiModelsAllowed: string[]`. Essential=0; Professional=budget_pro + [haiku, sonnet]; Enterprise=budget_ent + [haiku, sonnet, opus].
-- [ ] **3.0.6** — Adicionar seed de desenvolvimento com tenant PROFESSIONAL tendo quota zerada, para testar circuit breaker.
+- [x] **3.0.2** — Migration: `npm run db:migrate -- --name ai_core`. Validar com `prisma validate` e testar rollback em dev.
+- [x] **3.0.3** — Adicionar enums correspondentes em `packages/shared/src/enums/ai.enum.ts` e reexportar.
+- [x] **3.0.4** — Adicionar variáveis em `apps/api/src/config/env.ts` (Zod): `ANTHROPIC_API_KEY` (required se `AI_ENABLED=true`), `AI_ENABLED` (bool default false em dev), `AI_DEFAULT_MODEL`, `AI_DAILY_COST_USD_LIMIT` (default 50), `AI_TENANT_MONTHLY_TOKEN_BUDGET_PRO` (default 2_000_000), `AI_TENANT_MONTHLY_TOKEN_BUDGET_ENT` (default 20_000_000).
+- [x] **3.0.5** — Extender `PLAN_LIMITS` em `packages/shared` com `aiMonthlyTokenBudget: number` e `aiModelsAllowed: string[]`. Essential=0; Professional=budget_pro + [haiku, sonnet]; Enterprise=budget_ent + [haiku, sonnet, opus].
+- [x] **3.0.6** — Adicionar seed de desenvolvimento com tenant PROFESSIONAL tendo quota zerada, para testar circuit breaker.
 
 **Critério de aceite**: `npm run type-check` verde; `npm run db:migrate` aplica e reverte limpo; enums acessíveis via `@frota-leve/shared`; `env.ts` falha boot se `AI_ENABLED=true` sem chave.
 
@@ -1087,7 +1087,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **3.1.1** — Criar workspace `packages/ai` com estrutura:
+- [x] **3.1.1** — Criar workspace `packages/ai` com estrutura:
   ```
   packages/ai/
   ├── src/
@@ -1128,23 +1128,23 @@ Uma task só está **pronta** quando:
   ├── tsconfig.json
   └── package.json
   ```
-- [ ] **3.1.2** — Adicionar path alias `@frota-leve/ai` em `tsconfig.base.json` e dependência `@anthropic-ai/sdk` (versão compatível com modelos 4.x). Registrar o workspace.
-- [ ] **3.1.3** — Implementar `AiClient` (`client.ts`) com método `invoke<T>(params)`:
+- [x] **3.1.2** — Adicionar path alias `@frota-leve/ai` em `tsconfig.base.json` e dependência `@anthropic-ai/sdk` (versão compatível com modelos 4.x). Registrar o workspace.
+- [x] **3.1.3** — Implementar `AiClient` (`client.ts`) com método `invoke<T>(params)`:
   - Aceita `{ tenantId, userId?, feature, model, system, messages, tools?, toolChoice?, maxTokens, temperature, cacheKey? }`
   - Ordem de execução: `hasAI?` → `quota.checkAndReserve` → `cache.get` (se cacheKey) → SDK call → `pricing.compute` → `AIUsageLog.create` → `quota.commit` → `cache.set`
   - Retry exponencial (3 tentativas) em 429/5xx com jitter; respeita `retry-after`
   - Timeouts: 30s chat, 60s análise, 15s OCR
   - Em erro: persiste log com `status=ERROR` e rethrow com `AIProviderError`
   - **Sempre envia prompt cache** via `cache_control: { type: "ephemeral" }` no bloco system e nos blocos de contexto grandes
-- [ ] **3.1.4** — Implementar `pricing.ts` com tabela de preços por modelo (input/output/cache-read/cache-creation) e função `computeCostUsdMicros(usage, model)`.
-- [ ] **3.1.5** — Implementar `quota.ts`:
+- [x] **3.1.4** — Implementar `pricing.ts` com tabela de preços por modelo (input/output/cache-read/cache-creation) e função `computeCostUsdMicros(usage, model)`.
+- [x] **3.1.5** — Implementar `quota.ts`:
   - `checkAndReserve(tenantId, estimatedTokens)` — lê `AITenantQuota` do mês; se bloqueado ou budget esgotado, lança `AIQuotaExceededError`; reserva estimativa via `UPDATE ... RETURNING` atômico
   - `commit(tenantId, actualTokens, costUsdMicros)` — reconciliação após resposta
   - `refund(tenantId, reservedTokens)` — em caso de erro antes do SDK
   - Job diário reseta período mensal
-- [ ] **3.1.6** — Implementar `cache.ts` com Redis: chave = `ai:cache:{feature}:{sha256(model+system+messages+tools)}`, TTL configurável por feature (OCR 1h, assistente 5min, relatório 24h). Nunca cachear se `messages` contém imagem nova.
-- [ ] **3.1.7** — Implementar `pii-redactor.ts` com regex para CPF (`\d{3}\.\d{3}\.\d{3}-\d{2}`), CNH (11 dígitos isolados), e-mail, telefone BR. Testes unitários cobrindo casos de PII em textos livres.
-- [ ] **3.1.8** — Implementar `MockAnthropicClient` para testes com fixtures em `packages/ai/src/__mocks__/fixtures/`. Switch via env `AI_MOCK=true`.
+- [x] **3.1.6** — Implementar `cache.ts` com Redis: chave = `ai:cache:{feature}:{sha256(model+system+messages+tools)}`, TTL configurável por feature (OCR 1h, assistente 5min, relatório 24h). Nunca cachear se `messages` contém imagem nova.
+- [x] **3.1.7** — Implementar `pii-redactor.ts` com regex para CPF (`\d{3}\.\d{3}\.\d{3}-\d{2}`), CNH (11 dígitos isolados), e-mail, telefone BR. Testes unitários cobrindo casos de PII em textos livres.
+- [x] **3.1.8** — Implementar `MockAnthropicClient` para testes com fixtures em `packages/ai/src/__mocks__/fixtures/`. Switch via env `AI_MOCK=true`.
 
 **Critério de aceite**: unit tests cobrindo quota, pricing, cache-hit/miss, pii-redactor e retry; `AiClient` logando em `AIUsageLog` em 100% das chamadas (inclusive erro); sem leak cross-tenant em testes.
 
