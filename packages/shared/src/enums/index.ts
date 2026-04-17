@@ -15,3 +15,4 @@ export * from './document-status.enum';
 export * from './checklist-execution-status.enum';
 export * from './checklist-status.enum';
 export * from './tire-status.enum';
+export * from './ai.enum';

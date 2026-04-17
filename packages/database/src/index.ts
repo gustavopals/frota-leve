@@ -1,5 +1,7 @@
 export { prisma } from './client';
 export {
+  AIFeature,
+  AIUsageStatus,
   ChecklistExecutionStatus,
   ChecklistItemStatus,
   DocumentStatus,

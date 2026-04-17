@@ -41,6 +41,12 @@ model Tenant {
   notifications        Notification[]
   tires                Tire[]
   tireInspections      TireInspection[]
+  aiUsageLogs          AIUsageLog[]
+  aiTenantQuota        AITenantQuota?
+  aiChatSessions       AIChatSession[]
+  aiReports            AIReport[]
+  aiAnomalies          AIAnomaly[]
+  driverScores         DriverScore[]
 
   @@map("tenants")
   @@schema("public")
@@ -86,6 +92,9 @@ model User {
   createdChecklistExecutions ChecklistExecution[]
   notifications            Notification[]
   performedTireInspections TireInspection[]     @relation("InspectedByUserTireInspections")
+  aiUsageLogs              AIUsageLog[]
+  aiChatSessions           AIChatSession[]
+  acknowledgedAiAnomalies  AIAnomaly[]          @relation("AcknowledgedByUserAiAnomalies")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -246,6 +255,84 @@ enum NotificationType {
   @@schema("public")
 }
 
+enum AIFeature {
+  CHAT
+  ANOMALY_EXPLANATION
+  REPORT_MONTHLY
+  REPORT_ON_DEMAND
+  OCR_FUEL
+  OCR_INVOICE
+  DRIVER_SCORING
+  DRIVER_RECOMMENDATION
+
+  @@map("ai_feature")
+  @@schema("public")
+}
+
+enum AIUsageStatus {
+  SUCCESS
+  ERROR
+  BLOCKED
+
+  @@map("ai_usage_status")
+  @@schema("public")
+}
+
+enum AIChatMessageRole {
+  USER
+  ASSISTANT
+  TOOL
+
+  @@map("ai_chat_message_role")
+  @@schema("public")
+}
+
+enum AIReportKind {
+  MONTHLY
+  ON_DEMAND
+
+  @@map("ai_report_kind")
+  @@schema("public")
+}
+
+enum AIReportStatus {
+  PENDING
+  GENERATED
+  FAILED
+
+  @@map("ai_report_status")
+  @@schema("public")
+}
+
+enum AIAnomalyKind {
+  FUEL_DEVIATION
+  MAINT_COST
+  FINE_PATTERN
+  COST_PER_KM_TREND
+  OTHER
+
+  @@map("ai_anomaly_kind")
+  @@schema("public")
+}
+
+enum AIAnomalySeverity {
+  LOW
+  MED
+  HIGH
+
+  @@map("ai_anomaly_severity")
+  @@schema("public")
+}
+
+enum AIAnomalyStatus {
+  OPEN
+  ACK
+  DISMISSED
+
+  @@map("ai_anomaly_status")
+  @@schema("public")
+}
+
 enum TireStatus {
   NEW
   IN_USE
@@ -368,6 +455,7 @@ model Driver {
   fines            Fine[]
   incidents        Incident[]
   checklistExecutions ChecklistExecution[]
+  driverScores     DriverScore[]
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
 
@@ -755,5 +843,149 @@ model TireInspection {
   @@index([tenantId, inspectedByUserId])
   @@index([tenantId, date])
   @@map("tire_inspections")
+  @@schema("public")
+}
+
+model AIUsageLog {
+  id                 String        @id @default(uuid()) @db.Uuid
+  tenantId           String        @map("tenant_id") @db.Uuid
+  tenant             Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId             String?       @map("user_id") @db.Uuid
+  user               User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  feature            AIFeature
+  model              String
+  inputTokens        Int           @default(0) @map("input_tokens")
+  outputTokens       Int           @default(0) @map("output_tokens")
+  cacheReadTokens    Int           @default(0) @map("cache_read_tokens")
+  cacheCreationTokens Int          @default(0) @map("cache_creation_tokens")
+  costUsdMicros      Int           @default(0) @map("cost_usd_micros")
+  latencyMs          Int           @map("latency_ms")
+  status             AIUsageStatus
+  errorCode          String?       @map("error_code")
+  createdAt          DateTime      @default(now()) @map("created_at")
+
+  @@index([tenantId, createdAt])
+  @@index([feature, createdAt])
+  @@index([tenantId, feature, createdAt])
+  @@index([tenantId, userId, createdAt])
+  @@map("ai_usage_logs")
+  @@schema("public")
+}
+
+model AITenantQuota {
+  tenantId       String    @id @map("tenant_id") @db.Uuid
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  periodStart    DateTime  @map("period_start")
+  periodEnd      DateTime  @map("period_end")
+  tokenBudget    Int       @map("token_budget")
+  tokensUsed     Int       @default(0) @map("tokens_used")
+  costUsdMicros  Int       @default(0) @map("cost_usd_micros")
+  blockedAt      DateTime? @map("blocked_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@index([periodStart, periodEnd])
+  @@index([blockedAt])
+  @@map("ai_tenant_quotas")
+  @@schema("public")
+}
+
+model AIChatSession {
+  id         String          @id @default(uuid()) @db.Uuid
+  tenantId   String          @map("tenant_id") @db.Uuid
+  tenant     Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId     String          @map("user_id") @db.Uuid
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  messages   AIChatMessage[]
+  createdAt  DateTime        @default(now()) @map("created_at")
+  updatedAt  DateTime        @updatedAt @map("updated_at")
+  archivedAt DateTime?       @map("archived_at")
+
+  @@index([tenantId, userId, createdAt])
+  @@index([tenantId, archivedAt])
+  @@map("ai_chat_sessions")
+  @@schema("public")
+}
+
+model AIChatMessage {
+  id         String            @id @default(uuid()) @db.Uuid
+  sessionId  String            @map("session_id") @db.Uuid
+  session    AIChatSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role       AIChatMessageRole
+  content    Json
+  tokensIn   Int?              @map("tokens_in")
+  tokensOut  Int?              @map("tokens_out")
+  model      String?
+  createdAt  DateTime          @default(now()) @map("created_at")
+
+  @@index([sessionId, createdAt])
+  @@map("ai_chat_messages")
+  @@schema("public")
+}
+
+model AIReport {
+  id           String         @id @default(uuid()) @db.Uuid
+  tenantId     String         @map("tenant_id") @db.Uuid
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  period       String
+  kind         AIReportKind
+  content      String
+  summary      String
+  dataSnapshot Json           @map("data_snapshot")
+  status       AIReportStatus
+  generatedAt  DateTime?      @map("generated_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  @@unique([tenantId, period, kind])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, status, createdAt])
+  @@map("ai_reports")
+  @@schema("public")
+}
+
+model AIAnomaly {
+  id               String            @id @default(uuid()) @db.Uuid
+  tenantId         String            @map("tenant_id") @db.Uuid
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  kind             AIAnomalyKind
+  severity         AIAnomalySeverity
+  entityType       String            @map("entity_type")
+  entityId         String            @map("entity_id")
+  score            Float
+  evidence         Json
+  message          String
+  status           AIAnomalyStatus   @default(OPEN)
+  detectedAt       DateTime          @map("detected_at")
+  acknowledgedAt   DateTime?         @map("acknowledged_at")
+  acknowledgedById String?           @map("acknowledged_by") @db.Uuid
+  acknowledgedBy   User?             @relation("AcknowledgedByUserAiAnomalies", fields: [acknowledgedById], references: [id], onDelete: SetNull)
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  @@index([tenantId, status, detectedAt])
+  @@index([tenantId, kind, detectedAt])
+  @@index([tenantId, entityType, entityId])
+  @@map("ai_anomalies")
+  @@schema("public")
+}
+
+model DriverScore {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  driverId     String   @map("driver_id") @db.Uuid
+  driver       Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  periodStart  DateTime @map("period_start")
+  periodEnd    DateTime @map("period_end")
+  score        Int
+  breakdown    Json
+  recommendations String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@unique([driverId, periodStart])
+  @@index([tenantId, driverId, periodStart])
+  @@index([tenantId, createdAt])
+  @@map("driver_scores")
   @@schema("public")
 }
