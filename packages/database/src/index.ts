@@ -1,5 +1,13 @@
 export { prisma } from './client';
 export {
+  AIFeature,
+  AIUsageStatus,
+  AIChatMessageRole,
+  AIReportKind,
+  AIReportStatus,
+  AIAnomalyKind,
+  AIAnomalySeverity,
+  AIAnomalyStatus,
   ChecklistExecutionStatus,
   ChecklistItemStatus,
   DocumentStatus,
@@ -20,4 +28,25 @@ export {
   UserRole,
   VehicleCategory,
   VehicleStatus,
+} from '@prisma/client';
+
+export type {
+  AIChatSession,
+  AIChatMessage,
+  AIUsageLog,
+  AITenantQuota,
+  AIReport,
+  AIAnomaly,
+  DriverScore,
+  Tenant,
+  User,
+  Vehicle,
+  Driver,
+  FuelRecord,
+  ServiceOrder,
+  Document,
+  Fine,
+  Incident,
+  MaintenancePlan,
+  Tire,
 } from '@prisma/client';
