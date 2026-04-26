@@ -71,3 +71,22 @@ export class TooManyRequestsError extends AppError {
     this.name = 'TooManyRequestsError';
   }
 }
+
+/** 503 — recursos de IA desativados globalmente (feature flag AI_ENABLED=false) */
+export class AIDisabledError extends AppError {
+  constructor(message = 'Recursos de IA estão temporariamente indisponíveis', details?: unknown) {
+    super(message, 503, 'AI_DISABLED', details);
+    this.name = 'AIDisabledError';
+  }
+}
+
+/** 403 — plano do tenant não inclui recursos de IA */
+export class AIPlanRequiredError extends AppError {
+  constructor(
+    message = 'Seu plano não inclui recursos de IA. Faça upgrade para continuar.',
+    details?: unknown,
+  ) {
+    super(message, 403, 'PLAN_AI_REQUIRED', details);
+    this.name = 'AIPlanRequiredError';
+  }
+}

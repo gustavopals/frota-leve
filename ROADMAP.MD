@@ -1154,12 +1154,12 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **3.2.1** — Criar `apps/api/src/modules/ai/` seguindo o padrão do projeto (`ai.routes.ts`, `ai.controller.ts`, `ai.service.ts`, `ai.validators.ts`). Registrar em `/api/v1/ai`.
-- [ ] **3.2.2** — Criar middleware `requireAI` que valida `PLAN_LIMITS[tenantPlan].hasAI === true`, caso contrário 403 com `code: 'PLAN_AI_REQUIRED'`.
-- [ ] **3.2.3** — Criar middleware `aiRateLimiter` (Redis + token-bucket) com limites por tenant: chat 30 req/min, OCR 10 req/min, relatório on-demand 5 req/hora. Retorna `TooManyRequestsError`.
-- [ ] **3.2.4** — Rota administrativa `GET /api/v1/ai/usage` (OWNER, ADMIN): retorna consumo do mês atual (tokens, custo em USD, por feature) a partir de `AIUsageLog`.
-- [ ] **3.2.5** — Rota `GET /api/v1/ai/quota` (OWNER, ADMIN): retorna budget, usado, restante, data de reset.
-- [ ] **3.2.6** — Feature flag global: se `AI_ENABLED=false`, todas as rotas de IA respondem 503 `code: 'AI_DISABLED'`.
+- [x] **3.2.1** — Criar `apps/api/src/modules/ai/` seguindo o padrão do projeto (`ai.routes.ts`, `ai.controller.ts`, `ai.service.ts`, `ai.validators.ts`). Registrar em `/api/v1/ai`.
+- [x] **3.2.2** — Criar middleware `requireAI` que valida `PLAN_LIMITS[tenantPlan].hasAI === true`, caso contrário 403 com `code: 'PLAN_AI_REQUIRED'`.
+- [x] **3.2.3** — Criar middleware `aiRateLimiter` (Redis + token-bucket) com limites por tenant: chat 30 req/min, OCR 10 req/min, relatório on-demand 5 req/hora. Retorna `TooManyRequestsError`.
+- [x] **3.2.4** — Rota administrativa `GET /api/v1/ai/usage` (OWNER, ADMIN): retorna consumo do mês atual (tokens, custo em USD, por feature) a partir de `AIUsageLog`.
+- [x] **3.2.5** — Rota `GET /api/v1/ai/quota` (OWNER, ADMIN): retorna budget, usado, restante, data de reset.
+- [x] **3.2.6** — Feature flag global: se `AI_ENABLED=false`, todas as rotas de IA respondem 503 `code: 'AI_DISABLED'`.
 
 ---
 
@@ -1167,28 +1167,28 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **3.3.1** — `POST /api/v1/ai/chat/sessions` → cria `AIChatSession` para o usuário.
-- [ ] **3.3.2** — `GET /api/v1/ai/chat/sessions` (paginado) e `DELETE /api/v1/ai/chat/sessions/:id` (soft delete via `archivedAt`).
-- [ ] **3.3.3** — `POST /api/v1/ai/chat/sessions/:id/messages` (validate com Zod: `{ content: string (1..2000) }`) — fluxo:
+- [x] **3.3.1** — `POST /api/v1/ai/chat/sessions` → cria `AIChatSession` para o usuário.
+- [x] **3.3.2** — `GET /api/v1/ai/chat/sessions` (paginado) e `DELETE /api/v1/ai/chat/sessions/:id` (soft delete via `archivedAt`).
+- [x] **3.3.3** — `POST /api/v1/ai/chat/sessions/:id/messages` (validate com Zod: `{ content: string (1..2000) }`) — fluxo:
   1. Carrega últimas 10 mensagens da sessão (evita context bloat)
   2. `fleet-catalog` builder monta contexto compacto do tenant (contagens, categorias, top 10 veículos por custo) em bloco cacheado
   3. Decide intenção via tool-routing (Haiku) — ex: `queryFleetData`, `summarizePeriod`, `explainMetric`, `chitChat`
   4. Se intenção requer dados: executa query Prisma determinística (nunca deixa Claude montar SQL) e injeta resultado como `tool_result`
   5. Gera resposta final com Sonnet, streaming SSE
   6. Persiste user message e assistant message em `AIChatMessage`
-- [ ] **3.3.4** — Endpoint de streaming via SSE (`text/event-stream`). Evento `delta` por chunk, `done` com `{ usage, messageId }`, `error` em falha.
-- [ ] **3.3.5** — System prompt (versionado em `assistant.v1.ts`) contendo:
+- [x] **3.3.4** — Endpoint de streaming via SSE (`text/event-stream`). Evento `delta` por chunk, `done` com `{ usage, messageId }`, `error` em falha.
+- [x] **3.3.5** — System prompt (versionado em `assistant.v1.ts`) contendo:
   - Papel: "assistente de gestão de frotas da empresa {{tenantName}}"
   - Regras: não inventar dados; se não souber, dizer "não tenho esse dado"; sempre citar período; responder em PT-BR; markdown permitido; recusar tópicos off-scope educadamente
   - Ferramentas disponíveis e quando usar
   - **Bloco com `cache_control: ephemeral`**
-- [ ] **3.3.6** — Whitelist de ferramentas de dados (em `apps/api/src/modules/ai/tools/`): `getVehicleById`, `listVehiclesByFilter`, `getMonthlySummary`, `getTopCostVehicles`, `getDriverMetrics`, `listOpenAnomalies`. Cada uma com Zod input + implementação Prisma tenant-scoped.
-- [ ] **3.3.7** — Frontend `apps/web/src/app/features/ai-assistant/`:
+- [x] **3.3.6** — Whitelist de ferramentas de dados (em `apps/api/src/modules/ai/tools/`): `getVehicleById`, `listVehiclesByFilter`, `getMonthlySummary`, `getTopCostVehicles`, `getDriverMetrics`, `listOpenAnomalies`. Cada uma com Zod input + implementação Prisma tenant-scoped.
+- [x] **3.3.7** — Frontend `apps/web/src/app/features/ai-assistant/`:
   - `ai-assistant.routes.ts`, `ai-assistant.service.ts`, componentes standalone Angular 21
   - UI: lista de sessões (sidebar), painel de chat com streaming, indicador "pensando", render markdown (usar lib ngx-markdown ou equivalente)
   - Chips de sugestões iniciais baseadas no estado da frota (ex: "Resumo de março", "Veículos com maior custo/km", "Motoristas com multas")
   - Empty state e tela de upgrade para tenants ESSENTIAL (quando 403 `PLAN_AI_REQUIRED`)
-- [ ] **3.3.8** — Testes: e2e do fluxo completo com `MockAnthropicClient` cobrindo: session create, mensagem, tool-call loop, streaming, persistência, limite de rate, bloqueio por quota.
+- [x] **3.3.8** — Testes: e2e do fluxo completo com `MockAnthropicClient` cobrindo: session create, mensagem, tool-call loop, streaming, persistência, limite de rate, bloqueio por quota.
 
 **Critério de aceite**: cache hit rate ≥ 70% em teste de carga; nenhum vazamento cross-tenant verificado em e2e; latência p95 para primeira token < 2s.
 

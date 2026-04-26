@@ -114,6 +114,12 @@ jest.mock('../../config/database', () => ({
 
 const prisma = prismaClient as unknown as MockPrisma;
 
+function daysFromNow(days: number): Date {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() + days);
+  return date;
+}
+
 const TENANT: MockTenant = {
   id: 'aaaaaaaa-0000-0000-0000-000000000001',
   name: 'Tenant A',
@@ -305,7 +311,7 @@ describe('Maintenance E2E', () => {
     const targetVehicleUpcoming = {
       ...MAINTENANCE_PLAN_WITH_RELATIONS,
       id: 'dddddddd-0000-0000-0000-000000000006',
-      nextDueAt: new Date('2026-04-15T10:00:00.000Z'),
+      nextDueAt: daysFromNow(5),
       nextDueMileage: 58000,
     };
 

@@ -1,8 +1,136 @@
-<app-feature-placeholder
-  title="IA"
-  subtitle="Assistente operacional e contextual"
-  eyebrow="Feature lazy"
-  description="Modulo reservado para copiloto de operacao, consultas e automacoes assistidas."
->
-  <p>IA - em construcao.</p>
-</app-feature-placeholder>
+@if (planBlocked() || isEssentialPlan()) {
+  <div class="ai-upgrade">
+    <div class="ai-upgrade__card">
+      <h2>O Assistente IA é exclusivo dos planos Profissional e Enterprise</h2>
+      <p>
+        Faça upgrade do seu plano para liberar análises preditivas, conversas em linguagem natural
+        sobre sua frota e relatórios automáticos.
+      </p>
+      <po-button p-kind="primary" p-label="Ver planos" (p-click)="goToBilling()"></po-button>
+    </div>
+  </div>
+} @else {
+  <div class="ai-shell">
+    <aside class="ai-sidebar">
+      <header class="ai-sidebar__header">
+        <h3>Conversas</h3>
+        <po-button
+          p-kind="primary"
+          p-icon="an an-plus"
+          p-label="Nova"
+          p-size="small"
+          (p-click)="newSession()"
+        ></po-button>
+      </header>
+
+      @if (loadingSessions()) {
+        <po-loading></po-loading>
+      } @else if (sessions().length === 0) {
+        <p class="ai-sidebar__empty">Nenhuma conversa ainda. Comece uma nova!</p>
+      } @else {
+        <ul class="ai-sidebar__list">
+          @for (s of sessions(); track s.id) {
+            <li
+              class="ai-sidebar__item"
+              [class.is-active]="s.id === currentSessionId()"
+              (click)="selectSession(s.id)"
+            >
+              <span class="ai-sidebar__title">{{ s.title }}</span>
+              <button
+                class="ai-sidebar__archive"
+                aria-label="Arquivar conversa"
+                title="Arquivar"
+                (click)="archive(s.id, $event)"
+              >
+                <span class="an an-x"></span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </aside>
+
+    <section class="ai-chat">
+      <header class="ai-chat__header">
+        <div>
+          <h2>Assistente IA</h2>
+          <small>Pergunte sobre custos, veículos, motoristas e anomalias da sua frota.</small>
+        </div>
+      </header>
+
+      <div class="ai-chat__messages">
+        @if (messages().length === 0) {
+          <div class="ai-chat__empty">
+            <h3>Como posso ajudar hoje?</h3>
+            <p>Use uma sugestão abaixo ou digite sua pergunta.</p>
+            <div class="ai-suggestions">
+              @for (sug of suggestions; track sug.label) {
+                <button
+                  type="button"
+                  class="ai-suggestions__chip"
+                  (click)="applySuggestion(sug)"
+                >
+                  {{ sug.label }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        @for (m of messages(); track m.id) {
+          <article class="ai-message" [class.is-user]="m.role === 'user'">
+            <div class="ai-message__bubble">
+              @if (m.toolUses && m.toolUses.length > 0) {
+                <div class="ai-message__tools">
+                  @for (t of m.toolUses; track $index) {
+                    <span
+                      class="ai-tool-chip"
+                      [class.is-ok]="t.ok === true"
+                      [class.is-err]="t.ok === false"
+                    >
+                      <span class="an an-wrench"></span>
+                      {{ t.name }}{{ t.ok === false ? ' (erro)' : '' }}
+                    </span>
+                  }
+                </div>
+              }
+              @if (m.role === 'assistant') {
+                <div class="ai-message__markdown" [innerHTML]="m.text | aiMarkdown"></div>
+              } @else {
+                <pre class="ai-message__text">{{ m.text }}</pre>
+              }
+              @if (m.pending) {
+                <span class="ai-typing">pensando…</span>
+              }
+            </div>
+          </article>
+        }
+        <div #messagesEnd></div>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="ai-chat__error">{{ errorMessage() }}</div>
+      }
+
+      <footer class="ai-chat__composer">
+        <textarea
+          [ngModel]="draft()"
+          (ngModelChange)="draft.set($event)"
+          (keydown.control.enter)="send()"
+          (keydown.meta.enter)="send()"
+          placeholder="Pergunte algo sobre sua frota..."
+          rows="2"
+          [disabled]="streaming()"
+        ></textarea>
+        <po-button
+          p-kind="primary"
+          p-label="Enviar"
+          p-icon="an an-paper-plane-tilt"
+          [p-loading]="streaming()"
+          [p-disabled]="streaming() || !draft().trim()"
+          (p-click)="send()"
+        ></po-button>
+      </footer>
+    </section>
+  </div>
+}
