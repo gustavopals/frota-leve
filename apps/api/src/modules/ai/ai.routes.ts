@@ -10,6 +10,7 @@ import { anomalyRouter } from './anomaly/anomaly.routes';
 import { chatRouter } from './chat/chat.routes';
 import { ocrRouter } from './ocr/ocr.routes';
 import { reportsRouter } from './reports/reports.routes';
+import { scoringRouter } from './scoring/scoring.routes';
 
 const aiController = new AIController();
 
@@ -39,3 +40,6 @@ aiRouter.use('/reports', reportsRouter);
 
 // OCR de cupons e notas fiscais (TASK 3.6).
 aiRouter.use('/ocr', ocrRouter);
+
+// Scoring de motoristas (TASK 3.7).
+aiRouter.use('/scoring', scoringRouter);

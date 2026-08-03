@@ -30,6 +30,7 @@ import {
   getDriverTimelineActionLabel,
 } from '../../drivers.utils';
 import { formatPlate } from '@frota-leve/shared/src/utils/format.utils';
+import { DriverScorePanel } from '../../../ai-scoring/components/driver-score-panel/driver-score-panel';
 
 @Component({
   selector: 'app-driver-detail-page',
@@ -43,6 +44,7 @@ import { formatPlate } from '@frota-leve/shared/src/utils/format.utils';
     PoDividerModule,
     PoFieldModule,
     PoButtonModule,
+    DriverScorePanel,
   ],
   templateUrl: './driver-detail-page.html',
   styleUrl: './driver-detail-page.scss',

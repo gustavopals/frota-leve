@@ -27,6 +27,7 @@ export * from './services/assistant.service';
 export * from './services/ocr.service';
 export * from './services/report.markdown';
 export * from './services/report.service';
+export * from './services/driver-badges';
 export * from './services/scoring.service';
 
 export * from './tools/anomaly.tool';

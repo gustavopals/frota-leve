@@ -1,0 +1,70 @@
+.driver-score__gauge {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.driver-score__value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.driver-score__pillars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.driver-score__pillar-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.driver-score__bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-neutral-light-20, #eceeee);
+  overflow: hidden;
+  margin: 0.25rem 0;
+}
+
+.driver-score__bar-fill {
+  height: 100%;
+  background: var(--color-brand-01-base, #0c9abe);
+}
+
+.driver-score__pillar small {
+  font-size: 0.75rem;
+  color: var(--color-neutral-dark-50, #7a8385);
+}
+
+.driver-score__recommendation,
+.driver-score__history {
+  margin-top: 1.25rem;
+}
+
+.driver-score__recommendation h4,
+.driver-score__history h4 {
+  font-size: 0.875rem;
+  margin: 0.75rem 0 0.375rem;
+}
+
+.driver-score__recommendation ul,
+.driver-score__history ul {
+  margin: 0;
+  padding-left: 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.driver-score__empty {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-neutral-dark-50, #7a8385);
+}

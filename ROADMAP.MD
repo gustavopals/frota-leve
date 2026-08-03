@@ -1264,13 +1264,13 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **3.7.1** — Função pura `computeDriverScore(metrics): { score, breakdown }` em `packages/ai/src/services/scoring.service.ts`. Pesos: combustível 25, multas 25, sinistros 20, aderência ao checklist 15, cuidado com veículo 15. Cada componente normalizado 0-100 com fórmulas documentadas no JSDoc.
-- [ ] **3.7.2** — Job BullMQ `ai.driver.scoring` semanal (segundas 04:00). Para cada motorista ativo, calcula score do período (últimos 90 dias) e upserta `DriverScore`.
-- [ ] **3.7.3** — Recomendações via Haiku com tool `driverRecommendation` retornando `{ strengths: string[], improvements: string[], actions: [{ kind enum [TRAINING|BONUS|WARNING|NONE], description }] }`. Executado apenas quando o score muda ≥ 5 pontos vs. período anterior (economia de tokens).
-- [ ] **3.7.4** — Rotas: `GET /drivers/:id/score` (histórico), `GET /drivers/scoring/ranking` (paginado, filtro período).
-- [ ] **3.7.5** — Frontend: aba "Score IA" no detalhe do motorista (gauge, breakdown por pilar, histórico, recomendações); ranking na lista de motoristas.
-- [ ] **3.7.6** — Exposição do próprio score ao motorista no app mobile (tela "Minhas Conquistas") com gamificação: badges calculadas em código (sem IA): "Econômico" (top 20% combustível 3 meses seguidos), "Zero Multas 90d", "Checklist em dia 30d".
-- [ ] **3.7.7** — Testes: scoring determinístico com fixtures (mesmo input → mesmo output); recomendação IA validada por schema.
+- [x] **3.7.1** — Função pura `computeDriverScore(metrics): { score, breakdown }` em `packages/ai/src/services/scoring.service.ts`. Pesos: combustível 25, multas 25, sinistros 20, aderência ao checklist 15, cuidado com veículo 15. Cada componente normalizado 0-100 com fórmulas documentadas no JSDoc.
+- [x] **3.7.2** — Job BullMQ `ai.driver.scoring` semanal (segundas 04:00). Para cada motorista ativo, calcula score do período (últimos 90 dias) e upserta `DriverScore`.
+- [x] **3.7.3** — Recomendações via Haiku com tool `driverRecommendation` retornando `{ strengths: string[], improvements: string[], actions: [{ kind enum [TRAINING|BONUS|WARNING|NONE], description }] }`. Executado apenas quando o score muda ≥ 5 pontos vs. período anterior (economia de tokens).
+- [x] **3.7.4** — Rotas: `GET /drivers/:id/score` (histórico), `GET /drivers/scoring/ranking` (paginado, filtro período).
+- [x] **3.7.5** — Frontend: aba "Score IA" no detalhe do motorista (gauge, breakdown por pilar, histórico, recomendações); ranking na lista de motoristas.
+- [x] **3.7.6** — Exposição do próprio score ao motorista no app mobile (tela "Minhas Conquistas") com gamificação: badges calculadas em código (sem IA): "Econômico" (top 20% combustível 3 meses seguidos), "Zero Multas 90d", "Checklist em dia 30d".
+- [x] **3.7.7** — Testes: scoring determinístico com fixtures (mesmo input → mesmo output); recomendação IA validada por schema.
 
 **Critério de aceite**: scoring puro 100% coberto por testes; recomendações nunca persistem se schema falha; consumo de tokens limitado pela regra de mudança ≥ 5 pts.
 
