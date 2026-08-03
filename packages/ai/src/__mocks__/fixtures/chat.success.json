@@ -1,0 +1,13 @@
+{
+  "providerMessageId": "mock-chat-001",
+  "stopReason": "end_turn",
+  "rawText": "Resumo mockado da frota.",
+  "data": "Resumo mockado da frota.",
+  "usage": {
+    "inputTokens": 120,
+    "outputTokens": 48,
+    "cacheReadTokens": 0,
+    "cacheCreationTokens": 80,
+    "latencyMs": 35
+  }
+}

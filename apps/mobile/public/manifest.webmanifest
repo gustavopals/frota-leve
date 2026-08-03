@@ -1,0 +1,33 @@
+{
+  "name": "Frota Leve Motorista",
+  "short_name": "Frota Leve",
+  "description": "Checklist, abastecimento e alertas da frota, mesmo sem internet.",
+  "theme_color": "#102f37",
+  "background_color": "#f4f7f6",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "start_url": "/home?source=pwa",
+  "lang": "pt-BR",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

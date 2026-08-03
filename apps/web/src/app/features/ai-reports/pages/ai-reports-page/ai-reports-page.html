@@ -1,0 +1,46 @@
+<po-page-default p-title="Relatórios de frota">
+  @if (canGenerate) {
+    <form class="reports-ondemand" [formGroup]="onDemandForm">
+      <po-input
+        class="reports-ondemand__field"
+        formControlName="period"
+        p-label="Período (AAAA-MM)"
+        p-placeholder="2026-07"
+      ></po-input>
+      <po-button
+        p-label="Gerar agora"
+        p-kind="primary"
+        [p-loading]="generating"
+        (p-click)="generate()"
+      ></po-button>
+    </form>
+  }
+
+  <div class="reports-layout">
+    <section class="reports-list">
+      @if (reports.length === 0 && !loading) {
+        <p class="reports-empty">Nenhum relatório gerado ainda.</p>
+      }
+
+      @for (report of reports; track report.id) {
+        <po-widget class="reports-card" [p-title]="report.period">
+          <p class="reports-card__summary">{{ report.summary || 'Sem resumo disponível.' }}</p>
+          <div class="reports-card__actions">
+            <po-button p-label="Abrir" p-kind="secondary" (p-click)="select(report)"></po-button>
+            <po-button p-label="Baixar PDF" (p-click)="downloadPdf(report)"></po-button>
+          </div>
+        </po-widget>
+      }
+    </section>
+
+    <section class="reports-detail">
+      @if (loading) {
+        <po-loading p-text="Carregando..."></po-loading>
+      } @else if (selected) {
+        <article class="reports-detail__content" [innerHTML]="selected.content | aiMarkdown"></article>
+      } @else {
+        <p class="reports-empty">Selecione um relatório para ler a análise completa.</p>
+      }
+    </section>
+  </div>
+</po-page-default>

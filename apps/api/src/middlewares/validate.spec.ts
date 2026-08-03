@@ -70,7 +70,7 @@ describe('validate middleware', () => {
         code: 'VALIDATION_ERROR',
         message: 'Dados inválidos',
         details: {
-          page: ['Number must be greater than 0'],
+          page: ['Too small: expected number to be >0'],
         },
       },
     });
@@ -108,13 +108,13 @@ describe('validate middleware', () => {
         message: 'Dados inválidos',
         details: {
           body: {
-            active: ['Expected boolean, received string'],
+            active: ['Invalid input: expected boolean, received string'],
           },
           params: {
-            id: ['Expected number, received nan'],
+            id: ['Invalid input: expected number, received NaN'],
           },
           query: {
-            page: ['Number must be greater than 0'],
+            page: ['Too small: expected number to be >0'],
           },
         },
       },

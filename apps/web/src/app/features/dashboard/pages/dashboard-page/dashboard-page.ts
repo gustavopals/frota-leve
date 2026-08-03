@@ -26,6 +26,7 @@ import {
   getDashboardAlertTypeLabel,
   getDashboardVariationLabel,
 } from '../../dashboard.utils';
+import { AiInsightsWidget } from '../../../ai-anomalies/components/ai-insights-widget/ai-insights-widget';
 
 type DashboardPillTone = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -45,7 +46,14 @@ type DashboardStatusLegendItem = {
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [PoPageModule, PoWidgetModule, PoTagModule, PoChartModule, PoButtonModule],
+  imports: [
+    PoPageModule,
+    PoWidgetModule,
+    PoTagModule,
+    PoChartModule,
+    PoButtonModule,
+    AiInsightsWidget,
+  ],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

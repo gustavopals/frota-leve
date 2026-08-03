@@ -1,0 +1,102 @@
+<div class="mobile-page checklist">
+  <header class="mobile-page__heading">
+    <p class="mobile-page__eyebrow">Inspeção de saída</p>
+    <h1 class="mobile-page__title">Checklist</h1>
+    <p class="mobile-page__subtitle">Registre as condições do veículo antes de iniciar a rota.</p>
+  </header>
+
+  @if (!connectivity.online()) {
+  <p class="mobile-notice">Você está offline. Fotos e assinatura ficarão seguras neste aparelho até a sincronização.</p>
+  } @if (loading()) {
+  <p class="mobile-empty">Carregando checklist…</p>
+  } @else if (!templates().length) {
+  <p class="mobile-empty">Nenhum modelo de checklist está disponível para a categoria deste veículo.</p>
+  } @else {
+  <label class="mobile-field">
+    <span>Modelo de inspeção</span>
+    <select class="mobile-select" [value]="selectedTemplateId()" (change)="templateChanged($event)">
+      @for (template of templates(); track template.id) {
+      <option [value]="template.id">{{ template.name }}</option>
+      }
+    </select>
+  </label>
+
+  @if (selectedTemplate(); as template) {
+  <div class="checklist__progress">
+    <span [style.width.%]="(completedItems() / template.items.length) * 100"></span>
+    <b>{{ completedItems() }}/{{ template.items.length }}</b>
+  </div>
+
+  <section class="checklist__items">
+    @for (item of template.items; track item.id; let index = $index) {
+    <article class="checklist__item" [class.checklist__item--answered]="statusOf(item.id)">
+      <header>
+        <span>{{ (index + 1).toString().padStart(2, '0') }}</span>
+        <div>
+          <h2>{{ item.label }}</h2>
+          <p>{{ item.required ? 'Obrigatório' : 'Opcional' }} @if (item.photoRequired) { · foto obrigatória }</p>
+        </div>
+      </header>
+
+      <div class="checklist__choices" role="group" [attr.aria-label]="item.label">
+        <button type="button" [class.is-selected]="statusOf(item.id) === 'OK'" (click)="setStatus(item.id, 'OK')">
+          <b>✓</b><span>Conforme</span>
+        </button>
+        <button
+          type="button"
+          [class.is-selected]="statusOf(item.id) === 'ATTENTION'"
+          (click)="setStatus(item.id, 'ATTENTION')"
+        >
+          <b>~</b><span>Atenção</span>
+        </button>
+        <button
+          type="button"
+          [class.is-selected]="statusOf(item.id) === 'NON_COMPLIANT'"
+          (click)="setStatus(item.id, 'NON_COMPLIANT')"
+        >
+          <b>!</b><span>Não conforme</span>
+        </button>
+      </div>
+
+      @if (statusOf(item.id) === 'ATTENTION' || statusOf(item.id) === 'NON_COMPLIANT') {
+      <label class="mobile-field checklist__notes">
+        <span>Observação</span>
+        <input
+          class="mobile-input"
+          placeholder="Descreva o que encontrou"
+          [value]="answerOf(item.id)?.notes ?? ''"
+          (input)="setNotes(item.id, $event)"
+        />
+      </label>
+      }
+
+      <label class="checklist__photo" [class.checklist__photo--selected]="answerOf(item.id)?.photo">
+        <input type="file" accept="image/*" capture="environment" (change)="selectPhoto(item.id, $event)" />
+        @if (answerOf(item.id)?.photoPreview; as preview) {
+        <img [src]="preview" alt="Foto selecionada" />
+        <span>Trocar foto</span>
+        } @else {
+        <b>＋</b>
+        <span>{{ item.photoRequired ? 'Adicionar foto' : 'Foto opcional' }}</span>
+        }
+      </label>
+    </article>
+    }
+  </section>
+
+  <section class="mobile-section checklist__signature">
+    <h2 class="mobile-section__title">Assinatura do motorista</h2>
+    <app-signature-pad />
+  </section>
+
+  @if (error()) {
+  <p class="checklist__error" role="alert">{{ error() }}</p>
+  } @if (message()) {
+  <p class="checklist__success" role="status">{{ message() }}</p>
+  }
+
+  <button class="mobile-button mobile-button--wide" type="button" [disabled]="saving()" (click)="submit()">
+    {{ saving() ? 'Salvando inspeção…' : connectivity.online() ? 'Concluir checklist' : 'Salvar para enviar depois' }}
+  </button>
+  } }
+</div>

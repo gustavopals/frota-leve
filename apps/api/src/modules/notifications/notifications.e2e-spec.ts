@@ -63,7 +63,7 @@ jest.mock('../../config/database', () => ({
 const prisma = prismaClient as unknown as MockPrisma;
 
 const TENANT: MockTenant = {
-  id: 'aaaaaaaa-1010-1010-1010-101010101010',
+  id: 'aaaaaaaa-1010-4010-a010-101010101010',
   name: 'Tenant Notifications',
   plan: PlanType.PROFESSIONAL,
   status: TenantStatus.ACTIVE,
@@ -71,7 +71,7 @@ const TENANT: MockTenant = {
 };
 
 const USER: MockUser = {
-  id: 'bbbbbbbb-1010-1010-1010-101010101010',
+  id: 'bbbbbbbb-1010-4010-a010-101010101010',
   tenantId: TENANT.id,
   role: UserRole.MANAGER,
   email: 'manager@notifications.com',
@@ -79,7 +79,7 @@ const USER: MockUser = {
 };
 
 const VIEWER: MockUser = {
-  id: 'bbbbbbbb-1010-1010-1010-101010101011',
+  id: 'bbbbbbbb-1010-4010-a010-101010101011',
   tenantId: TENANT.id,
   role: UserRole.VIEWER,
   email: 'viewer@notifications.com',
@@ -87,7 +87,7 @@ const VIEWER: MockUser = {
 };
 
 const NOTIFICATION: MockNotification = {
-  id: 'cccccccc-1010-1010-1010-101010101010',
+  id: 'cccccccc-1010-4010-a010-101010101010',
   tenantId: TENANT.id,
   userId: USER.id,
   type: NotificationType.WARNING,

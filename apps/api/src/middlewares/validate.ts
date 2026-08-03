@@ -18,7 +18,14 @@ function assignValidatedValue(req: Request, target: ValidateTarget, value: unkno
       req.params = value as Request['params'];
       return;
     case 'query':
-      req.query = value as Request['query'];
+      // Express 5 expoe `req.query` como getter no prototype — atribuicao direta
+      // lanca TypeError. Definimos uma propriedade propria por cima do getter.
+      Object.defineProperty(req, 'query', {
+        value: value as Request['query'],
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
       return;
   }
 }

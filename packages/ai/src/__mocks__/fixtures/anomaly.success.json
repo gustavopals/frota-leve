@@ -1,0 +1,15 @@
+{
+  "providerMessageId": "mock-anomaly-001",
+  "stopReason": "end_turn",
+  "rawText": "{\"explanation\":\"Desvio acima da media movel dos ultimos 30 dias.\"}",
+  "data": {
+    "explanation": "Desvio acima da media movel dos ultimos 30 dias."
+  },
+  "usage": {
+    "inputTokens": 210,
+    "outputTokens": 60,
+    "cacheReadTokens": 24,
+    "cacheCreationTokens": 110,
+    "latencyMs": 38
+  }
+}

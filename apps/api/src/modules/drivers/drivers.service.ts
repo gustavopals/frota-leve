@@ -76,10 +76,11 @@ function toDriverWithFlags(driver: DriverRecord): DriverWithFlags {
 }
 
 function flattenValidationIssues(error: {
-  issues: Array<{ path: Array<string | number>; message: string }>;
+  // Zod 4 tipa `path` como PropertyKey[] — o symbol precisa passar por String().
+  issues: ReadonlyArray<{ path: ReadonlyArray<PropertyKey>; message: string }>;
 }): string[] {
   return error.issues.map((issue) => {
-    const path = issue.path.length > 0 ? `${issue.path.join('.')}: ` : '';
+    const path = issue.path.length > 0 ? `${issue.path.map(String).join('.')}: ` : '';
     return `${path}${issue.message}`;
   });
 }

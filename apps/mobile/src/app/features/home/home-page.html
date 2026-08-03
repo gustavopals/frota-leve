@@ -1,0 +1,109 @@
+<div class="mobile-page home">
+  <header class="home__welcome">
+    <div>
+      <p class="mobile-page__eyebrow">Operação de hoje</p>
+      <h1 class="mobile-page__title">Olá, {{ firstName() }}.</h1>
+    </div>
+    <button type="button" (click)="refresh()" [disabled]="store.loading()" aria-label="Atualizar dados">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 7v5h-5M4 17v-5h5M6.1 9a7 7 0 0 1 11.7-2L20 12M4 12l2.2 5a7 7 0 0 0 11.7-2" />
+      </svg>
+    </button>
+  </header>
+
+  @if (context(); as data) { @if (data.vehicle; as vehicle) {
+  <section class="home__vehicle" aria-label="Veículo vinculado">
+    <div class="home__vehicle-copy">
+      <span class="home__vehicle-status">{{ vehicle.status === 'ACTIVE' ? 'Em operação' : vehicle.status }}</span>
+      <p>{{ vehicle.brand }} {{ vehicle.model }} · {{ vehicle.year }}</p>
+      <strong>{{ vehicle.plate }}</strong>
+      <div class="home__vehicle-metrics">
+        <span><b>{{ formatMileage(vehicle.currentMileage) }}</b> km</span>
+        <span><b>{{ data.score.score }}</b> score</span>
+      </div>
+    </div>
+    <div class="home__vehicle-art" aria-hidden="true">
+      <span class="home__vehicle-road"></span>
+      <svg viewBox="0 0 240 105">
+        <path d="M28 71h185l-12-29c-3-7-10-12-18-13l-95-7c-11-1-21 4-27 13L43 62 28 71Z" />
+        <path d="M71 37h104c7 0 12 3 15 9l6 15H53l18-24Z" class="home__vehicle-window" />
+        <circle cx="72" cy="76" r="18" />
+        <circle cx="177" cy="76" r="18" />
+        <circle cx="72" cy="76" r="7" class="home__vehicle-hub" />
+        <circle cx="177" cy="76" r="7" class="home__vehicle-hub" />
+      </svg>
+    </div>
+  </section>
+
+  @if (data.responsibilityTerm?.status === 'PENDING') {
+  <a class="home__term" routerLink="/responsibility">
+    <span>
+      <b>Termo aguardando assinatura</b>
+      <small>Confirme o recebimento de {{ vehicle.plate }} antes de sair.</small>
+    </span>
+    <strong>Assinar →</strong>
+  </a>
+  }
+
+  <section class="home__actions mobile-section">
+    <h2 class="mobile-section__title">Ações rápidas</h2>
+    <div class="home__action-list">
+      <a routerLink="/checklist">
+        <span class="home__action-icon home__action-icon--check">✓</span>
+        <span><b>Iniciar checklist</b><small>Inspeção antes da saída</small></span>
+        <i>→</i>
+      </a>
+      <a routerLink="/problem">
+        <span class="home__action-icon home__action-icon--problem">!</span>
+        <span><b>Reportar problema</b><small>Foto e localização</small></span>
+        <i>→</i>
+      </a>
+    </div>
+  </section>
+
+  <section class="mobile-section">
+    <h2 class="mobile-section__title">
+      Próximas manutenções
+      <span class="mobile-section__meta">{{ data.maintenance.length }} itens</span>
+    </h2>
+    @if (data.maintenance.length) {
+    <div class="home__timeline">
+      @for (item of data.maintenance; track item.id) {
+      <article>
+        <span [class]="'home__timeline-dot home__timeline-dot--' + item.status.toLowerCase()"></span>
+        <div>
+          <b>{{ item.description }}</b>
+          <small>{{ dueLabel(item.nextDueAt, item.nextDueMileage) }}</small>
+        </div>
+        <span [class]="'home__due home__due--' + item.status.toLowerCase()"> {{ statusLabel(item.status) }} </span>
+      </article>
+      }
+    </div>
+    } @else {
+    <p class="mobile-empty">Nenhuma manutenção programada para este veículo.</p>
+    }
+  </section>
+
+  @if (data.serviceOrders.length) {
+  <section class="mobile-section">
+    <h2 class="mobile-section__title">Ordens de serviço</h2>
+    <div class="home__orders">
+      @for (order of data.serviceOrders; track order.id) {
+      <article>
+        <span>{{ order.status.replace('_', ' ') }}</span>
+        <b>{{ order.description }}</b>
+        <small>{{ order.workshop || 'Oficina a definir' }}</small>
+      </article>
+      }
+    </div>
+  </section>
+  } } @else {
+  <section class="home__no-vehicle">
+    <span>Sem veículo</span>
+    <h2>Nenhum ativo vinculado ao seu usuário.</h2>
+    <p>Peça ao gestor para associar um veículo antes de iniciar a operação.</p>
+  </section>
+  } } @else {
+  <section class="home__loading" aria-label="Carregando"><i></i><i></i><i></i></section>
+  }
+</div>

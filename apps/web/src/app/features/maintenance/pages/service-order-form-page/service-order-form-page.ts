@@ -43,6 +43,8 @@ import {
   formatMaintenanceType,
   formatServiceOrderStatus,
 } from '../../maintenance.utils';
+import { OcrScanButton } from '../../../ai-ocr/components/ocr-scan-button/ocr-scan-button';
+import type { OcrInvoiceData } from '../../../ai-ocr/ai-ocr.types';
 
 type ServiceOrderPhotoAttachment = {
   url: string;
@@ -90,12 +92,46 @@ function roundToTwoDecimals(value: number): number {
     PoButtonModule,
     PoDividerModule,
     PoWidgetModule,
+    OcrScanButton,
   ],
   templateUrl: './service-order-form-page.html',
   styleUrl: './service-order-form-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServiceOrderFormPage {
+  /**
+   * Preenche a OS com o resultado do OCR da nota fiscal (TASK 3.6.6).
+   *
+   * Só aplica campos com confiança >= 0.5 e acrescenta os itens lidos ao array
+   * existente, sem apagar o que o usuário já tinha digitado.
+   */
+  applyInvoiceOcr(data: OcrInvoiceData): void {
+    const confidenceOf = (field: string): number =>
+      data.fieldsConfidence?.[field] ?? data.confidence;
+
+    if (data.supplier && confidenceOf('supplier') >= 0.5) {
+      this.form.patchValue({ workshop: data.supplier });
+    }
+
+    if (data.totalValue !== null && confidenceOf('totalValue') >= 0.5) {
+      this.form.patchValue({ laborCost: data.totalValue });
+    }
+
+    for (const item of data.items ?? []) {
+      if (!item.description) {
+        continue;
+      }
+
+      this.itemsArray.push(
+        this.createItemGroup({
+          description: item.description,
+          quantity: item.qty ?? 1,
+          unitCost: item.unitValue ?? 0,
+        }),
+      );
+    }
+  }
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
   private readonly activatedRoute = inject(ActivatedRoute);

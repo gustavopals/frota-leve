@@ -7,4 +7,6 @@ export {
   ConflictError,
   PlanLimitError,
   TooManyRequestsError,
+  AIDisabledError,
+  AIPlanRequiredError,
 } from './app-error';

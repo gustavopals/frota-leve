@@ -8,6 +8,13 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# O AiClient troca o provider real pelo mock quando AI_MOCK=true, e recusa
+# operar sem ANTHROPIC_API_KEY. As duas variáveis juntas garantem que nenhum
+# job do CI chegue à Anthropic (DoD da Fase 3).
+env:
+  AI_MOCK: 'true'
+  AI_ENABLED: 'false'
+
 jobs:
   lint:
     name: Lint

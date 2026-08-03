@@ -1,0 +1,62 @@
+<main class="login">
+  <section class="login__brand" aria-labelledby="login-title">
+    <div class="login__mark" aria-hidden="true">
+      <span>FL</span>
+      <i></i>
+    </div>
+    <div>
+      <p class="login__eyebrow">Frota Leve · Motorista</p>
+      <h1 id="login-title">Sua rota começa aqui.</h1>
+      <p class="login__promise">Checklist, abastecimento e alertas em um só lugar — até sem sinal.</p>
+    </div>
+  </section>
+
+  <form class="login__form" (ngSubmit)="submit()">
+    <div class="login__form-heading">
+      <h2>Acessar operação</h2>
+      <p>Use o e-mail e a senha fornecidos pelo gestor da frota.</p>
+    </div>
+
+    <label class="mobile-field">
+      <span>E-mail</span>
+      <input
+        class="mobile-input"
+        type="email"
+        name="email"
+        autocomplete="email"
+        inputmode="email"
+        placeholder="motorista@empresa.com.br"
+        [(ngModel)]="email"
+        [disabled]="loading()"
+      />
+    </label>
+
+    <label class="mobile-field">
+      <span>Senha</span>
+      <span class="login__password">
+        <input
+          class="mobile-input"
+          [type]="passwordVisible() ? 'text' : 'password'"
+          name="password"
+          autocomplete="current-password"
+          placeholder="Sua senha"
+          [(ngModel)]="password"
+          [disabled]="loading()"
+        />
+        <button type="button" (click)="togglePassword()">{{ passwordVisible() ? 'Ocultar' : 'Mostrar' }}</button>
+      </span>
+    </label>
+
+    @if (error()) {
+    <p class="login__error" role="alert">{{ error() }}</p>
+    }
+
+    <button class="mobile-button mobile-button--wide" type="submit" [disabled]="loading()">
+      {{ loading() ? 'Entrando…' : 'Entrar' }}
+    </button>
+
+    <p class="login__offline-note">
+      Depois do primeiro acesso, seus dados essenciais ficam disponíveis offline neste aparelho.
+    </p>
+  </form>
+</main>

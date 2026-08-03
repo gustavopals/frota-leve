@@ -1,0 +1,50 @@
+<po-page-default p-title="Anomalias detectadas">
+  <form class="anomalies-filters" [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
+    <po-select
+      class="anomalies-filters__field"
+      formControlName="status"
+      p-label="Situação"
+      p-placeholder="Todas"
+      [p-options]="statusOptions"
+    ></po-select>
+
+    <po-select
+      class="anomalies-filters__field"
+      formControlName="kind"
+      p-label="Tipo"
+      p-placeholder="Todos"
+      [p-options]="kindOptions"
+    ></po-select>
+
+    <po-select
+      class="anomalies-filters__field"
+      formControlName="severity"
+      p-label="Severidade"
+      p-placeholder="Todas"
+      [p-options]="severityOptions"
+    ></po-select>
+
+    <div class="anomalies-filters__actions">
+      <po-button p-label="Filtrar" p-kind="primary" (p-click)="applyFilters()"></po-button>
+    </div>
+  </form>
+
+  <p class="anomalies-summary">
+    {{ total }} anomalia(s) encontrada(s). A detecção roda por regras determinísticas; a
+    explicação é gerada por IA.
+  </p>
+
+  <po-table
+    [p-columns]="columns"
+    [p-items]="items"
+    [p-actions]="tableActions"
+    [p-loading]="loading"
+    [p-sort]="true"
+  ></po-table>
+
+  @if (hasNext) {
+    <div class="anomalies-more">
+      <po-button p-label="Carregar mais" (p-click)="loadMore()"></po-button>
+    </div>
+  }
+</po-page-default>

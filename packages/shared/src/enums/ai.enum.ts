@@ -1,0 +1,53 @@
+export enum AIFeature {
+  CHAT = 'CHAT',
+  ANOMALY_EXPLANATION = 'ANOMALY_EXPLANATION',
+  REPORT_MONTHLY = 'REPORT_MONTHLY',
+  REPORT_ON_DEMAND = 'REPORT_ON_DEMAND',
+  OCR_FUEL = 'OCR_FUEL',
+  OCR_INVOICE = 'OCR_INVOICE',
+  DRIVER_SCORING = 'DRIVER_SCORING',
+  DRIVER_RECOMMENDATION = 'DRIVER_RECOMMENDATION',
+}
+
+export enum AIUsageStatus {
+  SUCCESS = 'SUCCESS',
+  ERROR = 'ERROR',
+  BLOCKED = 'BLOCKED',
+}
+
+export enum AIChatMessageRole {
+  USER = 'USER',
+  ASSISTANT = 'ASSISTANT',
+  TOOL = 'TOOL',
+}
+
+export enum AIReportKind {
+  MONTHLY = 'MONTHLY',
+  ON_DEMAND = 'ON_DEMAND',
+}
+
+export enum AIReportStatus {
+  PENDING = 'PENDING',
+  GENERATED = 'GENERATED',
+  FAILED = 'FAILED',
+}
+
+export enum AIAnomalyKind {
+  FUEL_DEVIATION = 'FUEL_DEVIATION',
+  MAINT_COST = 'MAINT_COST',
+  FINE_PATTERN = 'FINE_PATTERN',
+  COST_PER_KM_TREND = 'COST_PER_KM_TREND',
+  OTHER = 'OTHER',
+}
+
+export enum AIAnomalySeverity {
+  LOW = 'LOW',
+  MED = 'MED',
+  HIGH = 'HIGH',
+}
+
+export enum AIAnomalyStatus {
+  OPEN = 'OPEN',
+  ACK = 'ACK',
+  DISMISSED = 'DISMISSED',
+}

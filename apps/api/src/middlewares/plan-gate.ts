@@ -3,14 +3,18 @@ import { PLAN_LIMITS } from '@frota-leve/shared';
 import type { PlanType as SharedPlanType } from '@frota-leve/shared';
 import { PlanLimitError, UnauthorizedError } from '../shared/errors';
 
-type PlanFeature = keyof (typeof PLAN_LIMITS)[SharedPlanType];
+type BooleanPlanFeature = {
+  [K in keyof (typeof PLAN_LIMITS)[SharedPlanType]]: (typeof PLAN_LIMITS)[SharedPlanType][K] extends boolean
+    ? K
+    : never;
+}[keyof (typeof PLAN_LIMITS)[SharedPlanType]];
 
 /**
  * Middleware de gate de plano.
  * Bloqueia a rota quando o plano do tenant não inclui a feature solicitada.
  * Deve ser usado após tenantMiddleware (que popula req.tenant).
  */
-export function requirePlanFeature(feature: PlanFeature) {
+export function requirePlanFeature(feature: BooleanPlanFeature) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.tenant) {
       next(new UnauthorizedError('Tenant não identificado'));

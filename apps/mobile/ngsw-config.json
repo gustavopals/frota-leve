@@ -1,0 +1,39 @@
+{
+  "$schema": "../../node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app-shell",
+      "installMode": "prefetch",
+      "resources": {
+        "files": ["/favicon.svg", "/index.html", "/manifest.webmanifest", "/*.css", "/*.js"]
+      }
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": ["/assets/**", "/icons/**", "/media/**"]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "driver-read-model",
+      "urls": [
+        "/api/v1/mobile/context",
+        "/api/v1/mobile/checklist-templates**",
+        "/api/v1/notifications**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 40,
+        "maxAge": "12h",
+        "timeout": "0u",
+        "refreshAhead": "10m"
+      }
+    }
+  ],
+  "navigationUrls": ["/**", "!/**/*.*", "!/**/*__*", "!/**/*__*/**"]
+}

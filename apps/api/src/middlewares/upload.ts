@@ -33,3 +33,28 @@ export const spreadsheetUpload = multer({
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
 }).single('file');
+
+const IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const IMAGE_EXTENSIONS = /\.(jpe?g|png|webp)$/i;
+
+function imageFilter(
+  _req: Express.Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback,
+) {
+  if (IMAGE_MIME_TYPES.has(file.mimetype) || IMAGE_EXTENSIONS.test(file.originalname)) {
+    cb(null, true);
+  } else {
+    cb(new ValidationError('Formato de imagem inválido. Envie JPEG, PNG ou WebP.'));
+  }
+}
+
+/**
+ * Upload de imagem para OCR (TASK 3.6.3).
+ * Armazenamento em memória: a imagem não toca o disco e é descartada com a resposta.
+ */
+export const imageUpload = multer({
+  storage,
+  fileFilter: imageFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).single('image');

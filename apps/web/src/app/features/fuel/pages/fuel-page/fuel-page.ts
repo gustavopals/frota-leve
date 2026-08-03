@@ -60,6 +60,8 @@ import {
   formatVehicleLabel,
   toIsoDateInputValue,
 } from '../../fuel.utils';
+import { OcrScanButton } from '../../../ai-ocr/components/ocr-scan-button/ocr-scan-button';
+import type { OcrFuelData } from '../../../ai-ocr/ai-ocr.types';
 
 type TankMode = 'full' | 'partial';
 
@@ -161,12 +163,65 @@ const monthFormatter = new Intl.DateTimeFormat('pt-BR', {
     PoModalModule,
     PoDividerModule,
     PoChartModule,
+    OcrScanButton,
   ],
   templateUrl: './fuel-page.html',
   styleUrl: './fuel-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FuelPage {
+  ocrFieldsConfidence: Record<string, number> = {};
+
+  /**
+   * Preenche o formulário com o resultado do OCR (TASK 3.6.5).
+   *
+   * Campos com confiança abaixo de 0.5 são deixados em branco de propósito: um
+   * palpite ruim preenchido é pior que um campo vazio, porque passa despercebido
+   * na revisão.
+   */
+  applyOcrResult(data: OcrFuelData): void {
+    const confidenceOf = (field: string): number =>
+      data.fieldsConfidence?.[field] ?? data.confidence;
+    const patch: Record<string, unknown> = {};
+
+    const assign = (field: string, value: unknown): void => {
+      if (value !== null && value !== undefined && confidenceOf(field) >= 0.5) {
+        patch[field] = value;
+      }
+    };
+
+    assign('liters', data.liters);
+    assign('pricePerLiter', data.pricePerLiter);
+    assign('gasStation', data.gasStation);
+    assign('fuelType', data.fuelType);
+    assign('mileage', data.odometerKm);
+
+    if (data.date && confidenceOf('date') >= 0.5) {
+      const parsed = new Date(data.date);
+      if (!Number.isNaN(parsed.getTime())) {
+        patch['date'] = parsed.toISOString().slice(0, 10);
+      }
+    }
+
+    this.form.patchValue(patch);
+    this.ocrFieldsConfidence = data.fieldsConfidence ?? {};
+  }
+
+  /** Classe de destaque por faixa de confiança, usada no template. */
+  ocrFieldClass(field: string): string {
+    const confidence = this.ocrFieldsConfidence[field];
+
+    if (confidence === undefined) {
+      return '';
+    }
+
+    if (confidence >= 0.8) {
+      return 'ocr-field--high';
+    }
+
+    return confidence >= 0.5 ? 'ocr-field--review' : '';
+  }
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
   private readonly fuelService = inject(FuelService);

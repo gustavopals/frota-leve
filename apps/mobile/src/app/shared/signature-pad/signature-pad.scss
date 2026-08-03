@@ -1,0 +1,43 @@
+.signature {
+  position: relative;
+  overflow: hidden;
+  border: 1px dashed #a9b9b7;
+  border-radius: 16px;
+  background: linear-gradient(transparent 74%, #e7edeb 75%, transparent 76%), white;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 170px;
+  touch-action: none;
+}
+
+.signature > span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: #a1afad;
+  font-size: 0.78rem;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: #edf2f1;
+  color: #38545a;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 750;
+  padding: 0 10px;
+}
+
+button:disabled {
+  opacity: 0.4;
+}

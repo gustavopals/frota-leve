@@ -1,0 +1,16 @@
+{
+  "providerMessageId": "mock-report-001",
+  "stopReason": "end_turn",
+  "rawText": "{\"title\":\"Relatorio Mockado\",\"summary\":\"Resumo executivo\"}",
+  "data": {
+    "title": "Relatorio Mockado",
+    "summary": "Resumo executivo"
+  },
+  "usage": {
+    "inputTokens": 540,
+    "outputTokens": 180,
+    "cacheReadTokens": 120,
+    "cacheCreationTokens": 300,
+    "latencyMs": 80
+  }
+}

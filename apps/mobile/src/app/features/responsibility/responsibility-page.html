@@ -1,0 +1,69 @@
+<div class="mobile-page responsibility">
+  <header class="mobile-page__heading">
+    <p class="mobile-page__eyebrow">Recebimento do veículo</p>
+    <h1 class="mobile-page__title">Termo de responsabilidade</h1>
+    <p class="mobile-page__subtitle">Leia as condições e registre sua assinatura digital.</p>
+  </header>
+
+  @if (term(); as currentTerm) { @if (currentTerm.status === 'SIGNED') {
+  <section class="responsibility__signed">
+    <span>✓</span>
+    <div>
+      <h2>Termo assinado</h2>
+      <p>{{ dateLabel(currentTerm.signedAt) }}</p>
+    </div>
+  </section>
+  }
+
+  <article class="responsibility__document">
+    <header>
+      <span>Versão {{ currentTerm.contentVersion }}</span>
+      <strong>{{ store.context()?.vehicle?.plate }}</strong>
+    </header>
+    @for (paragraph of paragraphs(); track paragraph) {
+    <p>{{ paragraph }}</p>
+    }
+  </article>
+
+  @if (currentTerm.status === 'PENDING') { @if (!connectivity.online()) {
+  <p class="mobile-notice">Você pode assinar offline. O aceite será enviado quando a conexão voltar.</p>
+  }
+
+  <label class="responsibility__accept">
+    <input type="checkbox" [(ngModel)]="accepted" />
+    <span>Li e concordo com o termo de responsabilidade acima.</span>
+  </label>
+
+  <section class="mobile-section">
+    <h2 class="mobile-section__title">Sua assinatura</h2>
+    <app-signature-pad />
+  </section>
+
+  <div class="responsibility__location">
+    <label class="mobile-field">
+      <span>Local da assinatura</span>
+      <input class="mobile-input" placeholder="GPS ou endereço (opcional)" [(ngModel)]="location" />
+    </label>
+    <button
+      class="mobile-button mobile-button--secondary"
+      type="button"
+      [disabled]="locating()"
+      (click)="captureLocation()"
+    >
+      {{ locating() ? 'Buscando…' : 'Usar GPS' }}
+    </button>
+  </div>
+
+  @if (error()) {
+  <p class="responsibility__error" role="alert">{{ error() }}</p>
+  } @if (message()) {
+  <p class="responsibility__success" role="status">{{ message() }}</p>
+  }
+
+  <button class="mobile-button mobile-button--wide" type="button" [disabled]="saving()" (click)="sign()">
+    {{ saving() ? 'Registrando assinatura…' : connectivity.online() ? 'Assinar termo' : 'Salvar assinatura' }}
+  </button>
+  } } @else {
+  <p class="mobile-empty">Nenhum termo de responsabilidade está associado ao veículo atual.</p>
+  }
+</div>

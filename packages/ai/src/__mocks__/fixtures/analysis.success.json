@@ -1,0 +1,16 @@
+{
+  "providerMessageId": "mock-analysis-001",
+  "stopReason": "end_turn",
+  "rawText": "{\"summary\":\"Analise mockada\",\"riskLevel\":\"medium\"}",
+  "data": {
+    "summary": "Analise mockada",
+    "riskLevel": "medium"
+  },
+  "usage": {
+    "inputTokens": 240,
+    "outputTokens": 90,
+    "cacheReadTokens": 32,
+    "cacheCreationTokens": 160,
+    "latencyMs": 50
+  }
+}

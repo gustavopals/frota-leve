@@ -20,7 +20,232 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+  /mobile/context:
+    get:
+      tags: [Mobile]
+      summary: Retorna o contexto operacional do motorista autenticado
+      operationId: getMobileContext
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Motorista, veículo atribuído, manutenções, score e termo de responsabilidade
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MobileContextResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /mobile/checklist-templates:
+    get:
+      tags: [Mobile]
+      summary: Lista os modelos de checklist aplicáveis ao veículo atribuído
+      operationId: listMobileChecklistTemplates
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Modelos globais e da categoria do veículo
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MobileChecklistTemplate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /mobile/checklist-executions:
+    post:
+      tags: [Mobile]
+      summary: Envia um checklist preenchido pelo motorista
+      operationId: createMobileChecklistExecution
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileChecklistExecutionInput'
+      responses:
+        '201':
+          description: Checklist registrado; motorista e veículo são obtidos da sessão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /mobile/fuel-records:
+    post:
+      tags: [Mobile]
+      summary: Registra um abastecimento no veículo atribuído
+      operationId: createMobileFuelRecord
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileFuelRecordInput'
+      responses:
+        '201':
+          description: Abastecimento registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /mobile/problems:
+    post:
+      tags: [Mobile]
+      summary: Registra uma ocorrência rápida com localização e fotos
+      operationId: createMobileProblem
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileProblemInput'
+      responses:
+        '201':
+          description: Ocorrência registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /mobile/responsibility-terms/{id}/sign:
+    post:
+      tags: [Mobile]
+      summary: Assina o termo de responsabilidade do veículo atribuído
+      operationId: signMobileResponsibilityTerm
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileResponsibilitySignatureInput'
+      responses:
+        '200':
+          description: Termo assinado e auditado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Termo não encontrado para a atribuição atual
+  /mobile/uploads:
+    post:
+      tags: [Mobile]
+      summary: Envia uma foto ou assinatura do aplicativo
+      operationId: createMobileUpload
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: URL pública do arquivo enviado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    required: [url]
+                    properties:
+                      url:
+                        type: string
+                        format: uri
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    ValidationError:
+      description: Dados inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Token ausente ou inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Usuário sem perfil de motorista ou sem atribuição válida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   schemas:
     HealthResponse:
       type: object
@@ -45,3 +270,281 @@ components:
         uptime:
           type: integer
           example: 128
+    SuccessResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          additionalProperties: true
+    ErrorResponse:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: Dados inválidos
+            details:
+              type: object
+              additionalProperties: true
+              nullable: true
+    MobileContextResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            [user, tenant, driver, vehicle, maintenance, serviceOrders, score, unreadNotifications]
+          properties:
+            user:
+              type: object
+              additionalProperties: true
+            tenant:
+              type: object
+              additionalProperties: true
+            driver:
+              type: object
+              required: [id, name, score]
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                score:
+                  type: number
+            vehicle:
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/MobileVehicle'
+            maintenance:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+            serviceOrders:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+            score:
+              type: object
+              additionalProperties: true
+            unreadNotifications:
+              type: integer
+              minimum: 0
+            responsibilityTerm:
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/MobileResponsibilityTerm'
+            refreshedAt:
+              type: string
+              format: date-time
+    MobileVehicle:
+      type: object
+      required: [id, plate, brand, model, year, category, fuelType, currentMileage]
+      properties:
+        id:
+          type: string
+          format: uuid
+        plate:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        category:
+          type: string
+        fuelType:
+          type: string
+        currentMileage:
+          type: integer
+          minimum: 0
+    MobileChecklistTemplate:
+      type: object
+      required: [id, name, items]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        vehicleCategory:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            type: object
+            required: [id, label, required, photoRequired, displayOrder]
+            properties:
+              id:
+                type: string
+                format: uuid
+              label:
+                type: string
+              required:
+                type: boolean
+              photoRequired:
+                type: boolean
+              displayOrder:
+                type: integer
+    MobileChecklistExecutionInput:
+      type: object
+      required: [templateId, executedAt, items]
+      properties:
+        templateId:
+          type: string
+          format: uuid
+        executedAt:
+          type: string
+          format: date-time
+        signatureUrl:
+          type: string
+          format: uri
+          nullable: true
+        location:
+          type: string
+          nullable: true
+          maxLength: 200
+        notes:
+          type: string
+          nullable: true
+          maxLength: 4000
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: object
+            required: [checklistItemId, status]
+            properties:
+              checklistItemId:
+                type: string
+                format: uuid
+              status:
+                type: string
+                enum: [OK, ATTENTION, NON_COMPLIANT]
+              photoUrl:
+                type: string
+                format: uri
+                nullable: true
+              notes:
+                type: string
+                nullable: true
+    MobileFuelRecordInput:
+      type: object
+      required: [date, mileage, liters, pricePerLiter, totalCost, fuelType]
+      properties:
+        date:
+          type: string
+          format: date-time
+        mileage:
+          type: integer
+          minimum: 0
+        liters:
+          type: number
+          exclusiveMinimum: 0
+        pricePerLiter:
+          type: number
+          exclusiveMinimum: 0
+        totalCost:
+          type: number
+          exclusiveMinimum: 0
+        fuelType:
+          type: string
+          enum: [GASOLINE, ETHANOL, DIESEL, DIESEL_S10, GNV, ELECTRIC, HYBRID]
+        fullTank:
+          type: boolean
+          default: true
+        gasStation:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        receiptUrl:
+          type: string
+          format: uri
+          nullable: true
+    MobileProblemInput:
+      type: object
+      required: [date, location, type, description]
+      properties:
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+          maxLength: 200
+        type:
+          type: string
+          enum: [COLLISION, THEFT, VANDALISM, NATURAL, OTHER]
+        description:
+          type: string
+          minLength: 3
+          maxLength: 2000
+        thirdPartyInvolved:
+          type: boolean
+          default: false
+        policeReport:
+          type: boolean
+          default: false
+        photos:
+          type: array
+          maxItems: 5
+          items:
+            type: string
+            format: uri
+    MobileResponsibilitySignatureInput:
+      type: object
+      required: [signatureUrl]
+      properties:
+        signatureUrl:
+          type: string
+          format: uri
+        location:
+          type: string
+          nullable: true
+          maxLength: 200
+    MobileResponsibilityTerm:
+      type: object
+      required: [id, contentVersion, content, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        contentVersion:
+          type: string
+        content:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, SIGNED]
+        signatureUrl:
+          type: string
+          format: uri
+          nullable: true
+        signedAt:
+          type: string
+          format: date-time
+          nullable: true

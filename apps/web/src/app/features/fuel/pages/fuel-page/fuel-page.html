@@ -338,6 +338,10 @@
       <small>{{ selectedVehicleHelper }}</small>
     </div>
 
+    <div class="fuel-page__ocr">
+      <app-ocr-scan-button kind="fuel" (scanned)="applyOcrResult($any($event))" />
+    </div>
+
     <form
       class="fuel-page__modal-form"
       [formGroup]="form"

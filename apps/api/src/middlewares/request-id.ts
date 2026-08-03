@@ -1,5 +1,5 @@
+import { randomUUID } from 'node:crypto';
 import type { Request, Response, NextFunction } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Injeta um ID único por request.
@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
  */
 export function requestId(req: Request, res: Response, next: NextFunction): void {
   const existingId = req.headers['x-request-id'];
-  const id = typeof existingId === 'string' ? existingId : uuidv4();
+  const id = typeof existingId === 'string' ? existingId : randomUUID();
 
   req.requestId = id;
   res.setHeader('X-Request-Id', id);

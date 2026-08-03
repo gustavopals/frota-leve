@@ -1,0 +1,69 @@
+@if (!unavailable) {
+  <po-widget p-title="Score IA" class="driver-score">
+    @if (loading) {
+      <p class="driver-score__empty">Carregando score...</p>
+    } @else if (!current) {
+      <p class="driver-score__empty">Score ainda não calculado para este motorista.</p>
+    } @else {
+      <div class="driver-score__gauge">
+        <span class="driver-score__value">{{ current.score }}</span>
+        <po-tag [p-value]="'de 100'" [p-type]="scoreTagType"></po-tag>
+      </div>
+
+      <ul class="driver-score__pillars">
+        @for (pillar of pillars; track pillar.key) {
+          <li class="driver-score__pillar">
+            <div class="driver-score__pillar-head">
+              <span>{{ pillar.label }}</span>
+              <strong>{{ pillar.value }}</strong>
+            </div>
+            <div class="driver-score__bar">
+              <div class="driver-score__bar-fill" [style.width.%]="pillar.value"></div>
+            </div>
+            <small>peso {{ pillar.weight }}%</small>
+          </li>
+        }
+      </ul>
+
+      @if (recommendation) {
+        <section class="driver-score__recommendation">
+          @if (recommendation.strengths.length) {
+            <h4>Pontos fortes</h4>
+            <ul>
+              @for (item of recommendation.strengths; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          }
+          @if (recommendation.improvements.length) {
+            <h4>A melhorar</h4>
+            <ul>
+              @for (item of recommendation.improvements; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          }
+          @if (recommendation.actions.length) {
+            <h4>Ações sugeridas</h4>
+            <ul>
+              @for (action of recommendation.actions; track action.description) {
+                <li>{{ action.description }}</li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      @if (history.length > 1) {
+        <section class="driver-score__history">
+          <h4>Histórico</h4>
+          <ul>
+            @for (item of history; track item.id) {
+              <li>{{ item.periodStart | date: 'shortDate' }} — {{ item.score }}</li>
+            }
+          </ul>
+        </section>
+      }
+    }
+  </po-widget>
+}
