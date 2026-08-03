@@ -1204,7 +1204,7 @@ Uma task só está **pronta** quando:
   - **Fine pattern**: ≥ 3 multas mesmo motorista OU mesmo trecho em 30 dias
   - **Cost/km trend**: regressão linear dos últimos 6 meses; flag se slope > 5% ao mês com R² > 0.5
 - [x] **3.4.2** — Job BullMQ `ai.anomaly.scan` — agendado diariamente 03:00 (cron). Para cada tenant com `hasAI`, roda detecção, upserta `AIAnomaly` (dedupe por `tenantId+kind+entityId` ainda OPEN).
-- [ ] **3.4.3** — Ao criar anomalia, disparar Claude Haiku (com tool forçada `explainAnomaly`) para gerar `message` curta em PT-BR (≤ 280 chars) com causa provável e recomendação. Armazenar em `AIAnomaly.message`.
+- [x] **3.4.3** — Ao criar anomalia, disparar Claude Haiku (com tool forçada `explainAnomaly`) para gerar `message` curta em PT-BR (≤ 280 chars) com causa provável e recomendação. Armazenar em `AIAnomaly.message`.
 - [ ] **3.4.4** — Notificação: criar registro em `Notification` (módulo existente) e e-mail diário consolidado para OWNER/ADMIN com anomalias HIGH.
 - [ ] **3.4.5** — Rotas: `GET /ai/anomalies` (filtros status/kind/severity, paginado), `POST /ai/anomalies/:id/acknowledge`, `POST /ai/anomalies/:id/dismiss`.
 - [ ] **3.4.6** — Frontend: widget "Insights IA" no dashboard (top 5 anomalias HIGH+MED abertas); tela dedicada `/ai/anomalies` com filtros; seção "Análise IA" na tela de detalhe de veículo (anomalias abertas + health score calculado como 100 − penalidades).

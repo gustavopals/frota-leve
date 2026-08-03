@@ -1,4 +1,5 @@
 import { AIAnomalyKind, AIAnomalySeverity, AIAnomalyStatus, PlanType } from '@frota-leve/database';
+import { anomalyExplainerService } from '@frota-leve/ai';
 import type { AnomalyFinding } from '@frota-leve/ai';
 import { prisma as prismaClient } from '../../../config/database';
 import {
@@ -108,6 +109,44 @@ describe('AnomalyScanService.scanTenant', () => {
     expect(prisma.aIAnomaly.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: 'anomalia-existente' } }),
     );
+  });
+
+  it('usa a explicação da IA como message quando ela está disponível', async () => {
+    prisma.fine.findMany.mockResolvedValue(finesTriggeringPattern());
+    const explain = jest
+      .spyOn(anomalyExplainerService, 'explain')
+      .mockResolvedValue('Motorista reincidente; agende treinamento defensivo.');
+
+    await service.scanTenant(TENANT_ID, REFERENCE);
+
+    expect(prisma.aIAnomaly.create.mock.calls[0]?.[0]?.data.message).toBe(
+      'Motorista reincidente; agende treinamento defensivo.',
+    );
+
+    explain.mockRestore();
+  });
+
+  it('cai no texto determinístico quando a IA não devolve explicação', async () => {
+    prisma.fine.findMany.mockResolvedValue(finesTriggeringPattern());
+    const explain = jest.spyOn(anomalyExplainerService, 'explain').mockResolvedValue(null);
+
+    await service.scanTenant(TENANT_ID, REFERENCE);
+
+    expect(prisma.aIAnomaly.create.mock.calls[0]?.[0]?.data.message).toContain('3 multas');
+
+    explain.mockRestore();
+  });
+
+  it('não gasta IA ao apenas atualizar uma anomalia já aberta', async () => {
+    prisma.fine.findMany.mockResolvedValue(finesTriggeringPattern());
+    prisma.aIAnomaly.findFirst.mockResolvedValue({ id: 'anomalia-existente' });
+    const explain = jest.spyOn(anomalyExplainerService, 'explain');
+
+    await service.scanTenant(TENANT_ID, REFERENCE);
+
+    expect(explain).not.toHaveBeenCalled();
+
+    explain.mockRestore();
   });
 
   it('deduplica por tenantId + kind + entityId considerando apenas status OPEN', async () => {

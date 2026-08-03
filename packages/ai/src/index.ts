@@ -18,6 +18,7 @@ export * from './prompts/system/ocr.v1';
 export * from './prompts/system/report.v1';
 
 export * from './services/analysis.service';
+export * from './services/anomaly-explainer.service';
 export * from './services/anomaly.service';
 export * from './services/anomaly.types';
 export * from './services/statistics';

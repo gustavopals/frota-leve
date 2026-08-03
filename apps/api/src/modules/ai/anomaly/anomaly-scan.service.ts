@@ -1,5 +1,5 @@
 import { AIAnomalyKind, AIAnomalyStatus, type Prisma, VehicleStatus } from '@frota-leve/database';
-import { anomalyService } from '@frota-leve/ai';
+import { anomalyExplainerService, anomalyService } from '@frota-leve/ai';
 import type { AnomalyDetectionInput, AnomalyFinding, CostPerKmSeries } from '@frota-leve/ai';
 import { PLAN_LIMITS } from '@frota-leve/shared';
 import type { PlanType as SharedPlanType } from '@frota-leve/shared';
@@ -263,6 +263,10 @@ export class AnomalyScanService {
         continue;
       }
 
+      // Explicação por IA só na criação (TASK 3.4.3). Em refresh o texto é
+      // preservado para não gastar token reescrevendo a mesma anomalia.
+      const aiMessage = await anomalyExplainerService.explain({ tenantId, finding });
+
       await prisma.aIAnomaly.create({
         data: {
           tenantId,
@@ -272,7 +276,7 @@ export class AnomalyScanService {
           entityId: finding.entityId,
           score: finding.score,
           evidence,
-          message: buildFallbackMessage(finding),
+          message: aiMessage ?? buildFallbackMessage(finding),
           status: AIAnomalyStatus.OPEN,
           detectedAt: referenceDate,
         },
