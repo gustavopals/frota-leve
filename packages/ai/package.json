@@ -22,7 +22,8 @@
     "@anthropic-ai/sdk": "^0.115.0",
     "@frota-leve/database": "*",
     "@frota-leve/shared": "*",
-    "redis": "^5.12.1"
+    "redis": "^5.12.1",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

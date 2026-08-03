@@ -8,6 +8,7 @@ import { AIController } from './ai.controller';
 import { usageQuerySchema } from './ai.validators';
 import { anomalyRouter } from './anomaly/anomaly.routes';
 import { chatRouter } from './chat/chat.routes';
+import { ocrRouter } from './ocr/ocr.routes';
 import { reportsRouter } from './reports/reports.routes';
 
 const aiController = new AIController();
@@ -35,3 +36,6 @@ aiRouter.use('/anomalies', anomalyRouter);
 
 // Relatórios mensais e sob demanda (TASK 3.5).
 aiRouter.use('/reports', reportsRouter);
+
+// OCR de cupons e notas fiscais (TASK 3.6).
+aiRouter.use('/ocr', ocrRouter);

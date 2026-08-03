@@ -100,12 +100,27 @@ function toSystemBlocks(params: AiClientInvokeParams): string | TextBlockParam[]
 }
 
 function toMessageContent(message: AiPromptBlock) {
+  const textBlock = {
+    type: 'text' as const,
+    text: message.role === 'tool' ? `[tool_result]\n${message.content}` : message.content,
+    cache_control: message.cacheable ? ({ type: 'ephemeral' } as const) : undefined,
+  };
+
+  if (!message.image) {
+    return [textBlock];
+  }
+
+  // A imagem vem antes do texto: e a ordem recomendada para leitura de documentos.
   return [
     {
-      type: 'text' as const,
-      text: message.role === 'tool' ? `[tool_result]\n${message.content}` : message.content,
-      cache_control: message.cacheable ? ({ type: 'ephemeral' } as const) : undefined,
+      type: 'image' as const,
+      source: {
+        type: 'base64' as const,
+        media_type: message.image.mediaType,
+        data: message.image.base64,
+      },
     },
+    textBlock,
   ];
 }
 

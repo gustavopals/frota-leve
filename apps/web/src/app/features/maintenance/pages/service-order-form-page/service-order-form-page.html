@@ -9,7 +9,11 @@
 >
   <section class="service-order-form-page">
     <div class="service-order-form-page__main">
-      <form class="service-order-form-page__form" [formGroup]="form" novalidate>
+      <div class="service-order-form__ocr">
+  <app-ocr-scan-button kind="invoice" label="Escanear nota fiscal" (scanned)="applyInvoiceOcr($any($event))" />
+</div>
+
+<form class="service-order-form-page__form" [formGroup]="form" novalidate>
         <section class="service-order-form-page__section">
           <div class="service-order-form-page__section-head">
             <span class="service-order-form-page__eyebrow">Cadastro essencial</span>

@@ -1,0 +1,15 @@
+<label class="ocr-scan">
+  <input
+    class="ocr-scan__input"
+    type="file"
+    accept="image/jpeg,image/png,image/webp"
+    capture="environment"
+    (change)="onFileSelected($event)"
+  />
+  <po-button
+    class="ocr-scan__button"
+    p-icon="po-icon-camera"
+    [p-label]="label()"
+    [p-loading]="loading"
+  ></po-button>
+</label>

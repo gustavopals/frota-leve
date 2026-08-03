@@ -1243,18 +1243,18 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **3.6.1** — Definir tools com JSON Schema estrito em `packages/ai/src/tools/`:
+- [x] **3.6.1** — Definir tools com JSON Schema estrito em `packages/ai/src/tools/`:
   - `ocr-fuel.tool.ts`: `{ liters, totalCost, pricePerLiter, gasStation, fuelType enum, date ISO, odometerKm?, cnpj?, confidence 0..1, fieldsConfidence: Record<string, 0..1> }`
   - `ocr-invoice.tool.ts`: `{ supplier, cnpj?, issueDate, totalValue, items: [{ description, qty?, unitValue?, totalValue }], taxes?, confidence, fieldsConfidence }`
-- [ ] **3.6.2** — `ocr.service.ts#extract(imageBuffer, kind)`:
+- [x] **3.6.2** — `ocr.service.ts#extract(imageBuffer, kind)`:
   - Validar MIME (jpeg/png/webp), tamanho ≤ 5MB, downscale para máx 1568px antes de enviar
   - Chamar Haiku com `tool_choice: { type: 'tool', name }` para forçar saída estruturada
   - Validar retorno com Zod; se falhar schema, 1 retry; se falhar de novo, retornar `confidence=0` + raw text para o usuário revisar
-- [ ] **3.6.3** — `POST /api/v1/ai/ocr/fuel` e `POST /api/v1/ai/ocr/invoice` usando `upload` middleware (multer, 1 arquivo, campo `image`).
-- [ ] **3.6.4** — Não persistir a imagem por padrão; opcionalmente salvar em S3 sob `tenants/{tenantId}/ocr/{yyyy-mm}/` por 30 dias para auditoria se `OCR_RETAIN_IMAGES=true`.
-- [ ] **3.6.5** — Frontend: no formulário de abastecimento, botão "Escanear cupom" → abre câmera (mobile) ou file picker (web) → envia → preenche campos. Campos com `fieldsConfidence >= 0.8` bordered verde, 0.5–0.8 amarelo com ícone de revisão, < 0.5 vazio.
-- [ ] **3.6.6** — Mesmo fluxo para OS de manutenção com OCR de NF.
-- [ ] **3.6.7** — Testes com fixtures de cupons reais (anonimizados) cobrindo: cupom nítido, cupom desfocado, foto girada, cupom em outro idioma (deve retornar low confidence).
+- [x] **3.6.3** — `POST /api/v1/ai/ocr/fuel` e `POST /api/v1/ai/ocr/invoice` usando `upload` middleware (multer, 1 arquivo, campo `image`).
+- [x] **3.6.4** — Não persistir a imagem por padrão; opcionalmente salvar em S3 sob `tenants/{tenantId}/ocr/{yyyy-mm}/` por 30 dias para auditoria se `OCR_RETAIN_IMAGES=true`.
+- [x] **3.6.5** — Frontend: no formulário de abastecimento, botão "Escanear cupom" → abre câmera (mobile) ou file picker (web) → envia → preenche campos. Campos com `fieldsConfidence >= 0.8` bordered verde, 0.5–0.8 amarelo com ícone de revisão, < 0.5 vazio.
+- [x] **3.6.6** — Mesmo fluxo para OS de manutenção com OCR de NF.
+- [x] **3.6.7** — Testes com fixtures de cupons reais (anonimizados) cobrindo: cupom nítido, cupom desfocado, foto girada, cupom em outro idioma (deve retornar low confidence).
 
 **Critério de aceite**: acurácia ≥ 90% em `liters` e `totalCost` no dataset de validação; nunca retorna JSON malformado (Zod garante); imagem descartada após resposta se flag desligada.
 

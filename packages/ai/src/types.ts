@@ -10,11 +10,19 @@ export interface AiUsageMetrics {
   latencyMs?: number;
 }
 
+export interface AiPromptImage {
+  /** MIME já validado pelo chamador. */
+  mediaType: 'image/jpeg' | 'image/png' | 'image/webp';
+  base64: string;
+}
+
 export interface AiPromptBlock {
   role: 'system' | 'user' | 'assistant' | 'tool';
   content: string;
   cacheable?: boolean;
   containsFreshImage?: boolean;
+  /** Anexa uma imagem ao bloco — usado pelo OCR (TASK 3.6). */
+  image?: AiPromptImage;
 }
 
 export interface AiToolDefinition {
