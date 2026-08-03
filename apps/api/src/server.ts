@@ -4,6 +4,7 @@ import './config/load-env';
 import { createApp } from './app';
 import { env } from './config/env';
 import { logger } from './config/logger';
+import { aiAnomalyScanScheduler } from './modules/ai/anomaly/ai-anomaly-scan.scheduler';
 import { documentAlertScheduler } from './modules/documents/document-alert.scheduler';
 import { maintenancePlanAlertScheduler } from './modules/maintenance/maintenance-plan-alert.scheduler';
 import { notificationAlertScheduler } from './modules/notifications/notification-alert.scheduler';
@@ -42,6 +43,7 @@ function shutdown(signal: NodeJS.Signals): void {
       return;
     }
 
+    aiAnomalyScanScheduler.stop();
     documentAlertScheduler.stop();
     maintenancePlanAlertScheduler.stop();
     notificationAlertScheduler.stop();
@@ -59,6 +61,7 @@ server.listen(env.PORT, () => {
     environment: env.NODE_ENV,
   });
 
+  aiAnomalyScanScheduler.start();
   documentAlertScheduler.start();
   maintenancePlanAlertScheduler.start();
   notificationAlertScheduler.start();
