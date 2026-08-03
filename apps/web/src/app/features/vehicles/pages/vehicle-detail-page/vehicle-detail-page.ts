@@ -30,10 +30,19 @@ import {
   PoInfoModule,
   PoDividerModule,
 } from '@po-ui/ng-components';
+import { VehicleAiAnalysis } from '../../../ai-anomalies/components/vehicle-ai-analysis/vehicle-ai-analysis';
 
 @Component({
   selector: 'app-vehicle-detail-page',
-  imports: [PoPageModule, PoWidgetModule, PoTagModule, PoTabsModule, PoInfoModule, PoDividerModule],
+  imports: [
+    PoPageModule,
+    PoWidgetModule,
+    PoTagModule,
+    PoTabsModule,
+    PoInfoModule,
+    PoDividerModule,
+    VehicleAiAnalysis,
+  ],
   templateUrl: './vehicle-detail-page.html',
   styleUrl: './vehicle-detail-page.scss',
 })

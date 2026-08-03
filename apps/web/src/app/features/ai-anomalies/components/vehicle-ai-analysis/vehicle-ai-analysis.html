@@ -1,0 +1,29 @@
+@if (!unavailable) {
+  <po-widget p-title="Análise IA" class="vehicle-ai">
+    @if (loading) {
+      <p class="vehicle-ai__empty">Carregando análise...</p>
+    } @else {
+      <div class="vehicle-ai__score">
+        <span class="vehicle-ai__score-label">Health score</span>
+        <po-tag [p-value]="healthScore + ' / 100'" [p-type]="healthScoreTagType"></po-tag>
+      </div>
+
+      @if (items.length === 0) {
+        <p class="vehicle-ai__empty">Nenhuma anomalia aberta para este veículo.</p>
+      } @else {
+        <ul class="vehicle-ai__list">
+          @for (item of items; track item.id) {
+            <li class="vehicle-ai__item">
+              <div class="vehicle-ai__header">
+                <po-tag [p-value]="item.severityLabel" [p-type]="item.severityTagType"></po-tag>
+                <span class="vehicle-ai__kind">{{ item.kindLabel }}</span>
+              </div>
+              <p class="vehicle-ai__message">{{ item.message }}</p>
+              <span class="vehicle-ai__date">{{ item.detectedAtLabel }}</span>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </po-widget>
+}

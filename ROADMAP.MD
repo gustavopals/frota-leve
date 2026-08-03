@@ -1207,7 +1207,7 @@ Uma task só está **pronta** quando:
 - [x] **3.4.3** — Ao criar anomalia, disparar Claude Haiku (com tool forçada `explainAnomaly`) para gerar `message` curta em PT-BR (≤ 280 chars) com causa provável e recomendação. Armazenar em `AIAnomaly.message`.
 - [x] **3.4.4** — Notificação: criar registro em `Notification` (módulo existente) e e-mail diário consolidado para OWNER/ADMIN com anomalias HIGH.
 - [x] **3.4.5** — Rotas: `GET /ai/anomalies` (filtros status/kind/severity, paginado), `POST /ai/anomalies/:id/acknowledge`, `POST /ai/anomalies/:id/dismiss`.
-- [ ] **3.4.6** — Frontend: widget "Insights IA" no dashboard (top 5 anomalias HIGH+MED abertas); tela dedicada `/ai/anomalies` com filtros; seção "Análise IA" na tela de detalhe de veículo (anomalias abertas + health score calculado como 100 − penalidades).
+- [x] **3.4.6** — Frontend: widget "Insights IA" no dashboard (top 5 anomalias HIGH+MED abertas); tela dedicada `/ai/anomalies` com filtros; seção "Análise IA" na tela de detalhe de veículo (anomalias abertas + health score calculado como 100 − penalidades).
 - [x] **3.4.7** — Testes unitários das regras com fixtures sintéticas cobrindo falsos positivos/negativos.
 
 **Critério de aceite**: detecção funciona sem `AI_ENABLED`; apenas o texto explicativo depende de IA; dedupe correta verificada em teste.

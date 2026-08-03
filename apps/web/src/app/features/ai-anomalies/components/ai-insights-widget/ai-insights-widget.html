@@ -1,0 +1,24 @@
+@if (!unavailable) {
+  <po-widget p-title="Insights IA" class="insights-widget">
+    @if (loading) {
+      <p class="insights-widget__empty">Carregando insights...</p>
+    } @else if (items.length === 0) {
+      <p class="insights-widget__empty">Nenhuma anomalia aberta. Frota sem desvios relevantes.</p>
+    } @else {
+      <ul class="insights-widget__list">
+        @for (item of items; track item.id) {
+          <li class="insights-widget__item">
+            <div class="insights-widget__header">
+              <po-tag [p-value]="item.severityLabel" [p-type]="item.severityTagType"></po-tag>
+              <span class="insights-widget__kind">{{ item.kindLabel }}</span>
+            </div>
+            <p class="insights-widget__message">{{ item.message }}</p>
+            <span class="insights-widget__date">{{ item.detectedAtLabel }}</span>
+          </li>
+        }
+      </ul>
+
+      <a class="insights-widget__link" routerLink="/ai/anomalies">Ver todas as anomalias</a>
+    }
+  </po-widget>
+}
