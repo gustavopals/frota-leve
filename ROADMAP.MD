@@ -381,7 +381,7 @@ Uma task só está **pronta** quando:
   - Build das imagens Docker
   - Push para ECR (ou Docker Hub)
   - Deploy no servidor (EC2 via SSH, ou ECS)
-- [ ] **0.5.6** — Configurar GitHub branch protection: require PR, require CI pass, require 1 approval
+- [ ] **0.5.6** — Configurar GitHub branch protection: require PR, require CI pass, require 1 approval — **bloqueado por permissão**: o PAT em uso não tem a permissão "Administration" do repositório (a API responde 403). Resolver por um destes caminhos: (a) adicionar `Administration: Read and write` ao token em github.com/settings/tokens e rodar `gh api -X PUT repos/gustavopals/frota-leve/branches/main/protection`; ou (b) configurar direto em Settings → Branches → Add rule, exigindo PR, 1 approval e os checks `Lint`, `Type Check`, `Test` e `Build`
   - Procedimento manual documentado em `docs/deployment.md`
 
 ---
