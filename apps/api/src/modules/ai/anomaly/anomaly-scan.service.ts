@@ -1,9 +1,20 @@
-import { AIAnomalyKind, AIAnomalyStatus, type Prisma, VehicleStatus } from '@frota-leve/database';
+import {
+  AIAnomalyKind,
+  AIAnomalySeverity,
+  AIAnomalyStatus,
+  NotificationType,
+  type Prisma,
+  UserRole,
+  VehicleStatus,
+} from '@frota-leve/database';
 import { anomalyExplainerService, anomalyService } from '@frota-leve/ai';
 import type { AnomalyDetectionInput, AnomalyFinding, CostPerKmSeries } from '@frota-leve/ai';
 import { PLAN_LIMITS } from '@frota-leve/shared';
 import type { PlanType as SharedPlanType } from '@frota-leve/shared';
 import { prisma } from '../../../config/database';
+import { env } from '../../../config/env';
+import { logger } from '../../../config/logger';
+import { notificationEmailService } from '../../notifications/notification-email.service';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const FUEL_WINDOW_DAYS = 30;
@@ -218,6 +229,32 @@ export function buildCostPerKmSeries(
   return series;
 }
 
+interface CreatedAnomaly {
+  id: string;
+  kind: AIAnomalyKind;
+  severity: AIAnomalySeverity;
+  message: string;
+}
+
+const ANOMALY_ENTITY = 'AIAnomaly';
+
+/** Só OWNER e ADMIN recebem o digest de anomalias HIGH (TASK 3.4.4). */
+const ANOMALY_NOTIFICATION_ROLES = [UserRole.OWNER, UserRole.ADMIN] as const;
+
+const SEVERITY_TO_NOTIFICATION: Record<AIAnomalySeverity, NotificationType> = {
+  [AIAnomalySeverity.HIGH]: NotificationType.CRITICAL,
+  [AIAnomalySeverity.MED]: NotificationType.WARNING,
+  [AIAnomalySeverity.LOW]: NotificationType.INFO,
+};
+
+const KIND_TITLE: Record<AIAnomalyKind, string> = {
+  [AIAnomalyKind.FUEL_DEVIATION]: 'Desvio de consumo detectado',
+  [AIAnomalyKind.MAINT_COST]: 'Custo de manutenção acima do esperado',
+  [AIAnomalyKind.FINE_PATTERN]: 'Reincidência de multas',
+  [AIAnomalyKind.COST_PER_KM_TREND]: 'Custo por km em alta',
+  [AIAnomalyKind.OTHER]: 'Anomalia operacional',
+};
+
 export class AnomalyScanService {
   /**
    * Roda a detecção para um tenant e persiste os achados.
@@ -235,6 +272,7 @@ export class AnomalyScanService {
 
     let created = 0;
     let refreshed = 0;
+    const createdAnomalies: CreatedAnomaly[] = [];
 
     for (const finding of findings) {
       const existing = await prisma.aIAnomaly.findFirst({
@@ -267,7 +305,8 @@ export class AnomalyScanService {
       // preservado para não gastar token reescrevendo a mesma anomalia.
       const aiMessage = await anomalyExplainerService.explain({ tenantId, finding });
 
-      await prisma.aIAnomaly.create({
+      const message = aiMessage ?? buildFallbackMessage(finding);
+      const anomaly = await prisma.aIAnomaly.create({
         data: {
           tenantId,
           kind: finding.kind,
@@ -276,15 +315,106 @@ export class AnomalyScanService {
           entityId: finding.entityId,
           score: finding.score,
           evidence,
-          message: aiMessage ?? buildFallbackMessage(finding),
+          message,
           status: AIAnomalyStatus.OPEN,
           detectedAt: referenceDate,
         },
       });
       created += 1;
+      createdAnomalies.push({
+        id: anomaly?.id ?? finding.entityId,
+        kind: finding.kind,
+        severity: finding.severity,
+        message,
+      });
     }
 
+    await this.notifyCreated(tenantId, createdAnomalies, referenceDate);
+
     return { tenantId, detected: findings.length, created, refreshed };
+  }
+
+  /**
+   * Cria as notificações in-app e dispara o digest de anomalias HIGH (TASK 3.4.4).
+   *
+   * Nunca lança: uma falha de e-mail não pode desfazer uma varredura que já
+   * persistiu as anomalias — elas continuam visíveis pela API e pelo widget.
+   */
+  private async notifyCreated(
+    tenantId: string,
+    anomalies: CreatedAnomaly[],
+    referenceDate: Date,
+  ): Promise<void> {
+    if (anomalies.length === 0) {
+      return;
+    }
+
+    try {
+      const recipients = await prisma.user.findMany({
+        where: {
+          tenantId,
+          isActive: true,
+          role: { in: [...ANOMALY_NOTIFICATION_ROLES] },
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          tenant: { select: { name: true, tradeName: true } },
+        },
+      });
+
+      if (recipients.length === 0) {
+        return;
+      }
+
+      await prisma.notification.createMany({
+        data: recipients.flatMap((recipient) =>
+          anomalies.map((anomaly) => ({
+            tenantId,
+            userId: recipient.id,
+            type: SEVERITY_TO_NOTIFICATION[anomaly.severity],
+            title: KIND_TITLE[anomaly.kind],
+            message: anomaly.message,
+            entityType: ANOMALY_ENTITY,
+            entityId: anomaly.id,
+          })),
+        ),
+      });
+
+      const highAnomalies = anomalies.filter(
+        (anomaly) => anomaly.severity === AIAnomalySeverity.HIGH,
+      );
+
+      if (highAnomalies.length === 0) {
+        return;
+      }
+
+      const alerts = highAnomalies.map((anomaly) => ({
+        title: KIND_TITLE[anomaly.kind],
+        message: anomaly.message,
+        actionUrl: `${env.FRONTEND_URL}/ai/anomalies`,
+        actionLabel: 'Ver anomalias',
+      }));
+
+      for (const recipient of recipients) {
+        await notificationEmailService.sendCriticalAlertDigest({
+          recipient: {
+            id: recipient.id,
+            name: recipient.name,
+            email: recipient.email,
+            companyName: recipient.tenant?.tradeName ?? recipient.tenant?.name ?? 'sua frota',
+          },
+          alerts,
+          referenceDate,
+        });
+      }
+    } catch (error) {
+      logger.error('Falha ao notificar anomalias detectadas.', {
+        tenantId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   /** Tenants cujo plano habilita IA — os únicos varridos pelo job (TASK 3.4.2). */

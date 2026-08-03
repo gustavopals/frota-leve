@@ -6,6 +6,7 @@ import { requireAI } from '../../middlewares/require-ai';
 import { validate } from '../../middlewares/validate';
 import { AIController } from './ai.controller';
 import { usageQuerySchema } from './ai.validators';
+import { anomalyRouter } from './anomaly/anomaly.routes';
 import { chatRouter } from './chat/chat.routes';
 
 const aiController = new AIController();
@@ -27,3 +28,6 @@ aiRouter.get('/quota', authorize('OWNER', 'ADMIN'), aiController.getQuota);
 // Sub-router de chat (assistente conversacional).
 // Permitido para qualquer role autenticada do tenant — limites são por sessão/usuário.
 aiRouter.use('/chat', chatRouter);
+
+// Anomalias detectadas pelas regras determinísticas (TASK 3.4).
+aiRouter.use('/anomalies', anomalyRouter);
