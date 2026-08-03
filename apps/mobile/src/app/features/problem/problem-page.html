@@ -1,0 +1,96 @@
+<div class="mobile-page problem">
+  <header class="mobile-page__heading">
+    <p class="mobile-page__eyebrow">Ocorrência rápida</p>
+    <h1 class="mobile-page__title">Reportar problema</h1>
+    <p class="mobile-page__subtitle">Informe avarias, falhas ou acidentes assim que acontecerem.</p>
+  </header>
+
+  @if (!connectivity.online()) {
+  <p class="mobile-notice">Sem conexão. A ocorrência, as fotos e o GPS ficarão salvos para envio posterior.</p>
+  }
+
+  <form class="mobile-form" (ngSubmit)="submit()">
+    <label class="mobile-field">
+      <span>Tipo de ocorrência</span>
+      <select class="mobile-select" name="type" [(ngModel)]="type">
+        <option value="OTHER">Falha ou avaria</option>
+        <option value="COLLISION">Colisão</option>
+        <option value="THEFT">Roubo ou furto</option>
+        <option value="VANDALISM">Vandalismo</option>
+        <option value="NATURAL">Evento natural</option>
+      </select>
+    </label>
+
+    <label class="mobile-field">
+      <span>O que aconteceu?</span>
+      <textarea
+        class="mobile-textarea"
+        name="description"
+        maxlength="2000"
+        placeholder="Ex.: luz de óleo acendeu e o motor perdeu força"
+        [(ngModel)]="description"
+      ></textarea>
+    </label>
+
+    <div class="problem__location">
+      <label class="mobile-field">
+        <span>Localização</span>
+        <input
+          class="mobile-input"
+          name="location"
+          maxlength="200"
+          placeholder="GPS ou endereço"
+          [(ngModel)]="location"
+        />
+      </label>
+      <button
+        class="mobile-button mobile-button--secondary"
+        type="button"
+        [disabled]="locating()"
+        (click)="captureLocation()"
+      >
+        {{ locating() ? 'Buscando…' : 'Usar GPS' }}
+      </button>
+    </div>
+
+    <section class="problem__photos mobile-section">
+      <h2 class="mobile-section__title">Fotos <span class="mobile-section__meta">até 5</span></h2>
+      <div class="problem__photo-grid">
+        @for (preview of previews(); track preview; let index = $index) {
+        <figure>
+          <img [src]="preview" alt="Foto da ocorrência" />
+          <button type="button" (click)="removePhoto(index)" aria-label="Remover foto">×</button>
+        </figure>
+        } @if (photos().length < 5) {
+        <label>
+          <input type="file" accept="image/*" capture="environment" multiple (change)="selectPhotos($event)" />
+          <b>＋</b><span>Adicionar</span>
+        </label>
+        }
+      </div>
+    </section>
+
+    <div class="problem__checks">
+      <label
+        ><input type="checkbox" name="thirdParty" [(ngModel)]="thirdPartyInvolved" /><span
+          >Houve terceiro envolvido</span
+        ></label
+      >
+      <label
+        ><input type="checkbox" name="policeReport" [(ngModel)]="policeReport" /><span
+          >Boletim de ocorrência registrado</span
+        ></label
+      >
+    </div>
+
+    @if (error()) {
+    <p class="problem__error" role="alert">{{ error() }}</p>
+    } @if (message()) {
+    <p class="problem__success" role="status">{{ message() }}</p>
+    }
+
+    <button class="mobile-button mobile-button--wide" type="submit" [disabled]="saving()">
+      {{ saving() ? 'Salvando…' : connectivity.online() ? 'Enviar ocorrência' : 'Salvar para enviar depois' }}
+    </button>
+  </form>
+</div>

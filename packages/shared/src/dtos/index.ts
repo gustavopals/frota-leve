@@ -12,3 +12,4 @@ export * from './checklist-execution.dto';
 export * from './tire.dto';
 export * from './tire-inspection.dto';
 export * from './tire-move.dto';
+export * from './mobile.dto';

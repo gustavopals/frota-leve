@@ -1,0 +1,37 @@
+<div class="mobile-page alerts">
+  <header class="alerts__heading">
+    <div class="mobile-page__heading">
+      <p class="mobile-page__eyebrow">Central de atenção</p>
+      <h1 class="mobile-page__title">Alertas</h1>
+      <p class="mobile-page__subtitle">Manutenção, documentos, CNH e multas atribuídas.</p>
+    </div>
+    @if (notifications().length) {
+    <button class="mobile-button mobile-button--quiet" type="button" (click)="markAllRead()">Ler tudo</button>
+    }
+  </header>
+
+  @if (error()) {
+  <p class="mobile-notice">{{ error() }}</p>
+  } @if (loading()) {
+  <p class="mobile-empty">Atualizando alertas…</p>
+  } @else if (!notifications().length) {
+  <section class="alerts__empty">
+    <span>✓</span>
+    <h2>Tudo em ordem</h2>
+    <p>Nenhum alerta foi enviado para você.</p>
+  </section>
+  } @else {
+  <section class="alerts__list">
+    @for (notification of notifications(); track notification.id) {
+    <button type="button" [class.alerts__item--unread]="!notification.isRead" (click)="markRead(notification)">
+      <span class="alerts__icon">{{ icon(notification.entityType) }}</span>
+      <span class="alerts__copy">
+        <span><b>{{ notification.title }}</b><small>{{ dateLabel(notification.createdAt) }}</small></span>
+        <p>{{ notification.message }}</p>
+      </span>
+      @if (!notification.isRead) { <i aria-label="Não lido"></i> }
+    </button>
+    }
+  </section>
+  }
+</div>

@@ -48,6 +48,7 @@ model Tenant {
   aiReports            AIReport[]
   aiAnomalies          AIAnomaly[]
   driverScores         DriverScore[]
+  responsibilityTerms  ResponsibilityTerm[]
 
   @@map("tenants")
   @@schema("public")
@@ -96,6 +97,7 @@ model User {
   aiUsageLogs              AIUsageLog[]
   aiChatSessions           AIChatSession[]
   acknowledgedAiAnomalies  AIAnomaly[]          @relation("AcknowledgedByUserAiAnomalies")
+  responsibilityTerms      ResponsibilityTerm[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -397,6 +399,7 @@ model Vehicle {
   fines               Fine[]
   incidents           Incident[]
   checklistExecutions ChecklistExecution[]
+  responsibilityTerms ResponsibilityTerm[]
   currentTires        Tire[]            @relation("CurrentVehicleTires")
   tireInspections     TireInspection[]  @relation("VehicleTireInspections")
   createdAt           DateTime          @default(now()) @map("created_at")
@@ -457,6 +460,7 @@ model Driver {
   incidents        Incident[]
   checklistExecutions ChecklistExecution[]
   driverScores     DriverScore[]
+  responsibilityTerms ResponsibilityTerm[]
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
 
@@ -787,6 +791,42 @@ model Notification {
   @@index([tenantId, createdAt])
   @@index([tenantId, entityType, entityId])
   @@map("notifications")
+  @@schema("public")
+}
+
+enum ResponsibilityTermStatus {
+  PENDING
+  SIGNED
+
+  @@map("responsibility_term_status")
+  @@schema("public")
+}
+
+model ResponsibilityTerm {
+  id              String                   @id @default(uuid()) @db.Uuid
+  tenantId        String                   @map("tenant_id") @db.Uuid
+  tenant          Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vehicleId       String                   @map("vehicle_id") @db.Uuid
+  vehicle         Vehicle                  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driverId        String                   @map("driver_id") @db.Uuid
+  driver          Driver                   @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  userId          String                   @map("user_id") @db.Uuid
+  user            User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contentVersion  String                   @map("content_version")
+  content         String                   @db.Text
+  status          ResponsibilityTermStatus @default(PENDING)
+  signatureUrl    String?                  @map("signature_url")
+  signedAt        DateTime?                @map("signed_at")
+  signedLocation  String?                  @map("signed_location")
+  ipAddress       String?                  @map("ip_address")
+  userAgent       String?                  @map("user_agent")
+  createdAt       DateTime                 @default(now()) @map("created_at")
+  updatedAt       DateTime                 @updatedAt @map("updated_at")
+
+  @@unique([vehicleId, driverId, contentVersion])
+  @@index([tenantId, userId, status])
+  @@index([tenantId, vehicleId, createdAt])
+  @@map("responsibility_terms")
   @@schema("public")
 }
 

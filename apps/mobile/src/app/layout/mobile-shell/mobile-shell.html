@@ -1,0 +1,71 @@
+<div class="mobile-shell">
+  <header class="mobile-shell__header">
+    <a class="mobile-shell__brand" routerLink="/home" aria-label="Ir para o início">
+      <span class="mobile-shell__mark" aria-hidden="true">FL</span>
+      <span>
+        <strong>Frota Leve</strong>
+        <small>Motorista</small>
+      </span>
+    </a>
+
+    <button
+      class="mobile-shell__connection"
+      type="button"
+      [class.mobile-shell__connection--offline]="!connectivity.online()"
+      [class.mobile-shell__connection--pending]="sync.pendingCount() > 0"
+      [class.mobile-shell__connection--failed]="sync.failedCount() > 0"
+      (click)="syncNow()"
+      [attr.aria-label]="connectivity.online() ? 'Sincronizar agora' : 'Sem conexão'"
+    >
+      <span class="mobile-shell__connection-dot"></span>
+      @if (!connectivity.online()) { Offline } @else if (sync.syncing()) { Sincronizando } @else if (sync.pendingCount()
+      > 0) { {{ sync.pendingCount() }} pendente{{ sync.pendingCount() === 1 ? '' : 's' }} } @else if (sync.failedCount()
+      > 0) { {{ sync.failedCount() }} não enviado{{ sync.failedCount() === 1 ? '' : 's' }} } @else { Online }
+    </button>
+  </header>
+
+  <main class="mobile-shell__content">
+    <router-outlet />
+  </main>
+
+  <nav class="mobile-shell__nav" aria-label="Navegação principal">
+    <a routerLink="/home" routerLinkActive="is-active" aria-label="Início">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 11.5 12 4l9 7.5v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-8Z" />
+      </svg>
+      <span>Início</span>
+    </a>
+    <a routerLink="/checklist" routerLinkActive="is-active" aria-label="Checklist">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 5h12M8 12h12M8 19h12M3 5l1.4 1.4L6.8 4M3 12l1.4 1.4L6.8 11M3 19l1.4 1.4L6.8 18" />
+      </svg>
+      <span>Checklist</span>
+    </a>
+    <a class="mobile-shell__nav-primary" routerLink="/fuel" routerLinkActive="is-active" aria-label="Abastecer">
+      <span class="mobile-shell__nav-primary-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17M4 21h13M8 7h4M15 8h2l3 3v7a2 2 0 0 1-4 0v-4" />
+        </svg>
+      </span>
+      <span>Abastecer</span>
+    </a>
+    <a routerLink="/alerts" routerLinkActive="is-active" aria-label="Alertas">
+      <span class="mobile-shell__nav-icon-wrap">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" />
+        </svg>
+        @if (unread() > 0) {
+        <b>{{ unread() > 9 ? '9+' : unread() }}</b>
+        }
+      </span>
+      <span>Alertas</span>
+    </a>
+    <a routerLink="/profile" routerLinkActive="is-active" aria-label="Perfil">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21a8 8 0 0 1 16 0" />
+      </svg>
+      <span>Perfil</span>
+    </a>
+  </nav>
+</div>

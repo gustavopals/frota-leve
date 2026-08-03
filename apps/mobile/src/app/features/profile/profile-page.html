@@ -1,0 +1,104 @@
+<div class="mobile-page profile">
+  @if (context(); as data) {
+  <header class="profile__identity">
+    <span class="profile__avatar">
+      @if (data.driver.photoUrl) { <img [src]="data.driver.photoUrl" alt="Foto do motorista" /> } @else { {{
+      data.driver.name.charAt(0) }} }
+    </span>
+    <div>
+      <p class="mobile-page__eyebrow">Perfil do motorista</p>
+      <h1>{{ data.driver.name }}</h1>
+      <span>{{ data.driver.department || data.tenant.name }}</span>
+    </div>
+  </header>
+
+  <section class="profile__score">
+    <div class="profile__gauge" [style.--score-angle]="scoreAngle()">
+      <span><strong>{{ data.score.score }}</strong><small>de 100</small></span>
+    </div>
+    <div class="profile__score-copy">
+      <span>Score atual</span>
+      <h2>{{ data.score.rank ? data.score.rank + 'º lugar' : 'Sem ranking' }}</h2>
+      <p>
+        entre {{ data.score.totalDrivers }} motorista{{ data.score.totalDrivers === 1 ? '' : 's' }} ativo{{
+        data.score.totalDrivers === 1 ? '' : 's' }}
+      </p>
+    </div>
+  </section>
+
+  <section class="mobile-section">
+    <h2 class="mobile-section__title">Minhas conquistas</h2>
+    <div class="profile__badges">
+      @for (badge of data.score.badges; track badge.code) {
+      <article [class.profile__badge--locked]="!badge.earned">
+        <span>{{ badge.earned ? '◆' : '◇' }}</span>
+        <div><b>{{ badge.label }}</b><small>{{ badge.description }}</small></div>
+      </article>
+      }
+    </div>
+  </section>
+
+  <section class="mobile-section profile__details">
+    <h2 class="mobile-section__title">Dados pessoais</h2>
+    <dl>
+      <div>
+        <dt>E-mail</dt>
+        <dd>{{ data.driver.email || data.user.email }}</dd>
+      </div>
+      <div>
+        <dt>Telefone</dt>
+        <dd>{{ data.driver.phone || 'Não informado' }}</dd>
+      </div>
+      <div>
+        <dt>Categoria CNH</dt>
+        <dd>{{ data.driver.cnhCategory || 'Não informada' }}</dd>
+      </div>
+      <div>
+        <dt>Validade CNH</dt>
+        <dd>{{ dateLabel(data.driver.cnhExpiration) }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  @if (data.responsibilityTerm) {
+  <a class="profile__term" routerLink="/responsibility">
+    <span
+      ><b>Termo de responsabilidade</b
+      ><small
+        >{{ data.responsibilityTerm.status === 'SIGNED' ? 'Assinado e registrado' : 'Assinatura pendente' }}</small
+      ></span
+    >
+    <strong>{{ data.responsibilityTerm.status === 'SIGNED' ? 'Ver' : 'Assinar' }} →</strong>
+  </a>
+  } @if (sync.pendingCount() > 0) {
+  <button class="profile__sync" type="button" (click)="sync.syncNow()" [disabled]="sync.syncing()">
+    <span
+      ><b
+        >{{ sync.pendingCount() }} envio{{ sync.pendingCount() === 1 ? '' : 's' }} pendente{{ sync.pendingCount() === 1
+        ? '' : 's' }}</b
+      ><small>Toque para sincronizar agora</small></span
+    >
+    <strong>↻</strong>
+  </button>
+  } @for (operation of failed(); track operation.id) {
+  <div class="profile__failed">
+    <span
+      ><b>{{ operationLabel(operation.type) }} não enviado</b
+      ><small>{{ operation.lastError ?? 'Falha ao sincronizar' }}</small></span
+    >
+    <div class="profile__failed-actions">
+      <button type="button" (click)="retryFailed(operation.id)" [disabled]="sync.syncing()">
+        Tentar de novo
+      </button>
+      <button type="button" (click)="discardFailed(operation.id)">Descartar</button>
+    </div>
+  </div>
+  }
+
+  <button class="mobile-button mobile-button--secondary mobile-button--wide" type="button" (click)="logout()">
+    Sair deste aparelho
+  </button>
+  } @else {
+  <p class="mobile-empty">Carregando perfil…</p>
+  }
+</div>

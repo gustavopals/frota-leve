@@ -1,0 +1,14 @@
+<div class="signature">
+  <canvas
+    #canvas
+    (pointerdown)="pointerDown($event)"
+    (pointermove)="pointerMove($event)"
+    (pointerup)="pointerUp()"
+    (pointercancel)="pointerUp()"
+    aria-label="Área para assinatura"
+  ></canvas>
+  @if (empty()) {
+  <span>Assine com o dedo</span>
+  }
+  <button type="button" (click)="clear()" [disabled]="empty()">Limpar</button>
+</div>

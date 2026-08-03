@@ -1,0 +1,138 @@
+<div class="mobile-page fuel">
+  <header class="mobile-page__heading">
+    <p class="mobile-page__eyebrow">Registro operacional</p>
+    <h1 class="mobile-page__title">Abastecer</h1>
+    <p class="mobile-page__subtitle">Fotografe o cupom para preencher os dados ou informe manualmente.</p>
+  </header>
+
+  <section class="fuel__receipt">
+    <label [class.fuel__receipt--selected]="receiptPreview">
+      <input type="file" accept="image/*" capture="environment" (change)="selectReceipt($event)" />
+      @if (receiptPreview) {
+      <img [src]="receiptPreview" alt="Cupom selecionado" />
+      <span>Trocar foto do cupom</span>
+      } @else {
+      <span class="fuel__camera" aria-hidden="true">◎</span>
+      <div><b>Fotografar cupom</b><small>JPG, PNG ou WEBP</small></div>
+      }
+    </label>
+    <button
+      class="mobile-button mobile-button--secondary"
+      type="button"
+      [disabled]="!receipt || scanning() || !connectivity.online()"
+      (click)="scanReceipt()"
+    >
+      {{ scanning() ? 'Lendo cupom…' : 'Preencher com OCR' }}
+    </button>
+  </section>
+
+  @if (!connectivity.online()) {
+  <p class="mobile-notice">Sem internet: preencha manualmente. O registro e a foto serão sincronizados depois.</p>
+  }
+
+  <form class="mobile-form" (ngSubmit)="submit()">
+    <div class="fuel__row">
+      <label class="mobile-field" [class]="fieldClass('odometerKm')">
+        <span>Quilometragem</span>
+        <input class="mobile-input" type="number" name="mileage" inputmode="numeric" min="0" [(ngModel)]="mileage" />
+      </label>
+      <label class="mobile-field" [class]="fieldClass('liters')">
+        <span>Litros</span>
+        <input
+          class="mobile-input"
+          type="number"
+          name="liters"
+          inputmode="decimal"
+          min="0.01"
+          step="0.01"
+          [(ngModel)]="liters"
+          (ngModelChange)="recalculate('liters')"
+        />
+      </label>
+    </div>
+
+    <div class="fuel__row">
+      <label class="mobile-field" [class]="fieldClass('pricePerLiter')">
+        <span>Preço por litro</span>
+        <span class="fuel__money"
+          ><i>R$</i
+          ><input
+            class="mobile-input"
+            type="number"
+            name="pricePerLiter"
+            inputmode="decimal"
+            min="0.01"
+            step="0.001"
+            [(ngModel)]="pricePerLiter"
+            (ngModelChange)="recalculate('price')"
+        /></span>
+      </label>
+      <label class="mobile-field" [class]="fieldClass('totalCost')">
+        <span>Valor total</span>
+        <span class="fuel__money"
+          ><i>R$</i
+          ><input
+            class="mobile-input"
+            type="number"
+            name="totalCost"
+            inputmode="decimal"
+            min="0.01"
+            step="0.01"
+            [(ngModel)]="totalCost"
+            (ngModelChange)="recalculate('total')"
+        /></span>
+      </label>
+    </div>
+
+    <label class="mobile-field" [class]="fieldClass('fuelType')">
+      <span>Combustível</span>
+      <select class="mobile-select" name="fuelType" [(ngModel)]="fuelType">
+        <option value="GASOLINE">Gasolina</option>
+        <option value="ETHANOL">Etanol</option>
+        <option value="DIESEL">Diesel</option>
+        <option value="DIESEL_S10">Diesel S10</option>
+        <option value="GNV">GNV</option>
+        <option value="ELECTRIC">Elétrico</option>
+        <option value="HYBRID">Híbrido</option>
+      </select>
+    </label>
+
+    <label class="mobile-field" [class]="fieldClass('gasStation')">
+      <span>Posto</span>
+      <input
+        class="mobile-input"
+        name="gasStation"
+        placeholder="Nome do estabelecimento"
+        maxlength="120"
+        [(ngModel)]="gasStation"
+      />
+    </label>
+
+    <label class="fuel__toggle">
+      <input type="checkbox" name="fullTank" [(ngModel)]="fullTank" />
+      <span><b>Tanque completo</b><small>Necessário para calcular o consumo real</small></span>
+      <i></i>
+    </label>
+
+    <label class="mobile-field">
+      <span>Observação</span>
+      <textarea
+        class="mobile-textarea"
+        name="notes"
+        maxlength="500"
+        placeholder="Opcional"
+        [(ngModel)]="notes"
+      ></textarea>
+    </label>
+
+    @if (error()) {
+    <p class="fuel__error" role="alert">{{ error() }}</p>
+    } @if (message()) {
+    <p class="fuel__success" role="status">{{ message() }}</p>
+    }
+
+    <button class="mobile-button mobile-button--wide" type="submit" [disabled]="saving()">
+      {{ saving() ? 'Salvando…' : connectivity.online() ? 'Registrar abastecimento' : 'Salvar para enviar depois' }}
+    </button>
+  </form>
+</div>

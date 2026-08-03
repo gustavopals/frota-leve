@@ -29,6 +29,7 @@ import { logger } from './config/logger';
 import { env } from './config/env';
 import { NotFoundError } from './shared/errors';
 import { metricsRouter } from './modules/ai/observability/observability.routes';
+import { mobileRouter } from './modules/mobile/mobile.routes';
 
 export function createApp() {
   const app = express();
@@ -87,6 +88,7 @@ export function createApp() {
   app.use('/api/v1/notifications', notificationsRouter);
   app.use('/api/v1/tires', tiresRouter);
   app.use('/api/v1/ai', aiRouter);
+  app.use('/api/v1/mobile', mobileRouter);
 
   // Métricas Prometheus (TASK 3.9.1) — sem auth: só contadores agregados.
   app.use('/metrics', metricsRouter);
