@@ -50,12 +50,12 @@ jest.mock('../../config/database', () => ({
 const prisma = prismaClient as unknown as MockPrisma;
 
 const USER = {
-  id: 'bbbbbbbb-9999-9999-9999-999999999999',
-  tenantId: 'aaaaaaaa-9999-9999-9999-999999999999',
+  id: 'bbbbbbbb-9999-4999-a999-999999999999',
+  tenantId: 'aaaaaaaa-9999-4999-a999-999999999999',
 };
 
 const UNREAD_NOTIFICATION: MockNotification = {
-  id: 'cccccccc-9999-9999-9999-999999999991',
+  id: 'cccccccc-9999-4999-a999-999999999991',
   tenantId: USER.tenantId,
   userId: USER.id,
   type: NotificationType.WARNING,

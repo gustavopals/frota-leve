@@ -1,3 +1,4 @@
+import { AI_MODEL_SONNET } from '@frota-leve/shared';
 import { z } from 'zod';
 
 function parseBoolean(value: unknown): boolean | undefined {
@@ -53,10 +54,10 @@ const envSchema = z
     // Inteligência Artificial (Anthropic API)
     AI_ENABLED: z.preprocess(
       preprocessBoolean,
-      z.boolean({ invalid_type_error: 'AI_ENABLED deve ser booleano' }).default(false),
+      z.boolean({ error: 'AI_ENABLED deve ser booleano' }).default(false),
     ),
     ANTHROPIC_API_KEY: z.string().optional(),
-    AI_DEFAULT_MODEL: z.string().default('claude-sonnet-4-6'),
+    AI_DEFAULT_MODEL: z.string().default(AI_MODEL_SONNET),
     AI_DAILY_COST_USD_LIMIT: z.coerce.number().positive().default(50),
     AI_TENANT_MONTHLY_TOKEN_BUDGET_PRO: z.coerce.number().int().positive().default(2_000_000),
     AI_TENANT_MONTHLY_TOKEN_BUDGET_ENT: z.coerce.number().int().positive().default(20_000_000),

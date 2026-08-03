@@ -47,7 +47,21 @@ const tireSchemaShape = {
     .default(0),
 };
 
-function withTireConsistency<TSchema extends z.ZodTypeAny>(schema: TSchema) {
+/**
+ * Campos lidos pelas regras de consistencia. No Zod 4 o callback do `superRefine`
+ * recebe `output<TSchema>`, entao o generico precisa declarar o shape esperado —
+ * no Zod 3 o valor chegava como `any` e o acesso as propriedades passava batido.
+ */
+interface TireConsistencyShape {
+  currentGrooveDepth: number;
+  originalGrooveDepth: number;
+  currentVehicleId?: string | null;
+  position?: string | null;
+  status: TireStatus;
+  retreatCount: number;
+}
+
+function withTireConsistency<TSchema extends z.ZodType<TireConsistencyShape>>(schema: TSchema) {
   return schema.superRefine((value, ctx) => {
     if (value.currentGrooveDepth > value.originalGrooveDepth) {
       ctx.addIssue({

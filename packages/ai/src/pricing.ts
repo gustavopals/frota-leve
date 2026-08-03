@@ -24,11 +24,12 @@ export const AI_MODEL_PRICING_TABLE: Record<string, AiModelPricing> = {
     cacheReadUsdPerMillion: 0.3,
     cacheCreationUsdPerMillion: 3.75,
   },
+  // Opus 5: US$ 5 / US$ 25 por milhao de tokens (mesmo preco do Opus 4.8).
   [AI_MODEL_OPUS]: {
-    inputUsdPerMillion: 15,
-    outputUsdPerMillion: 75,
-    cacheReadUsdPerMillion: 1.5,
-    cacheCreationUsdPerMillion: 18.75,
+    inputUsdPerMillion: 5,
+    outputUsdPerMillion: 25,
+    cacheReadUsdPerMillion: 0.5,
+    cacheCreationUsdPerMillion: 6.25,
   },
 };
 

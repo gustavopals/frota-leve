@@ -44,7 +44,7 @@ jest.mock('../../../config/database', () => {
   };
 });
 
-const ctx = { tenantId: '00000000-0000-0000-0000-000000000001', userId: 'u1' };
+const ctx = { tenantId: '00000000-0000-4000-a000-000000000001', userId: 'u1' };
 
 describe('AI tools whitelist', () => {
   it('exposes the expected tool names', () => {

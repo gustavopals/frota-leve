@@ -19,14 +19,14 @@
     "test": "jest --config jest.config.cjs --passWithNoTests"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.90.0",
+    "@anthropic-ai/sdk": "^0.115.0",
     "@frota-leve/database": "*",
     "@frota-leve/shared": "*",
     "redis": "^5.12.1"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "jest": "^29.7.0",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.4.2",
     "ts-jest": "^29.4.9",
     "typescript": "*"
   }

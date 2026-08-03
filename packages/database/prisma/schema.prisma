@@ -3,9 +3,10 @@ generator client {
   previewFeatures = ["postgresqlExtensions"]
 }
 
+// Prisma 7: a URL de conexao vive em prisma.config.ts (Migrate) e no driver
+// adapter passado ao PrismaClient (runtime). Nao declarar `url` aqui.
 datasource db {
   provider   = "postgresql"
-  url        = env("DATABASE_URL")
   schemas    = ["public"]
   extensions = [vector]
 }

@@ -1,7 +1,8 @@
 import { PrismaClient, PlanType, TenantStatus, UserRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { createPrismaAdapter } from '../src/client';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: createPrismaAdapter() });
 
 async function upsertUser(params: {
   email: string;

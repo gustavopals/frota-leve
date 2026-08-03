@@ -6,6 +6,7 @@ import Anthropic, {
 } from '@anthropic-ai/sdk';
 import type {
   Message,
+  MessageCreateParamsNonStreaming,
   MessageParam,
   TextBlockParam,
   Tool,
@@ -27,6 +28,7 @@ import {
   AIQuotaExceededError,
   AiError,
 } from './errors';
+import { supportsEffort } from './models';
 import { computeCostUsdMicros } from './pricing';
 import { checkAndReserveQuota, commitQuota, refundQuota } from './quota';
 import type {
@@ -145,6 +147,30 @@ function mapTools(params: AiClientInvokeParams): Tool[] | undefined {
     description: tool.description,
     input_schema: tool.inputSchema,
   }));
+}
+
+/**
+ * Monta `thinking` e `output_config.effort`.
+ *
+ * Sonnet 5 / Opus 5 rejeitam temperature/top_p/top_k e budget_tokens com HTTP 400 —
+ * por isso nenhum parametro de sampling é enviado. `effort` so vale para a geracao 5;
+ * o Haiku 4.5 retorna erro se receber. Quando o caller nao pede nada, omitimos os dois
+ * e o modelo usa o proprio default.
+ */
+function mapReasoning(
+  params: AiClientInvokeParams,
+): Pick<MessageCreateParamsNonStreaming, 'thinking' | 'output_config'> {
+  const reasoning: Pick<MessageCreateParamsNonStreaming, 'thinking' | 'output_config'> = {};
+
+  if (params.thinking) {
+    reasoning.thinking = { type: params.thinking };
+  }
+
+  if (params.effort && supportsEffort(params.model)) {
+    reasoning.output_config = { effort: params.effort };
+  }
+
+  return reasoning;
 }
 
 function parseRetryAfterMs(error: APIError | RateLimitError): number | null {
@@ -352,7 +378,7 @@ export class AiClient {
         messages: mapMessages(params),
         tools: mapTools(params),
         tool_choice: mapToolChoice(params),
-        temperature: params.temperature,
+        ...mapReasoning(params),
       },
       {
         maxRetries: 0,

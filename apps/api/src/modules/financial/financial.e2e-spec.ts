@@ -66,7 +66,7 @@ jest.mock('../../config/database', () => ({
 const prisma = prismaClient as unknown as MockPrisma;
 
 const TENANT: MockTenant = {
-  id: 'aaaaaaaa-4444-4444-4444-444444444444',
+  id: 'aaaaaaaa-4444-4444-a444-444444444444',
   name: 'Tenant Financial',
   plan: PlanType.PROFESSIONAL,
   status: TenantStatus.ACTIVE,
@@ -74,7 +74,7 @@ const TENANT: MockTenant = {
 };
 
 const USER: MockUser = {
-  id: 'bbbbbbbb-4444-4444-4444-444444444444',
+  id: 'bbbbbbbb-4444-4444-a444-444444444444',
   tenantId: TENANT.id,
   role: UserRole.MANAGER,
   email: 'manager@financial.com',
@@ -82,7 +82,7 @@ const USER: MockUser = {
 };
 
 const VEHICLE_A: MockVehicle = {
-  id: 'cccccccc-4444-4444-4444-444444444441',
+  id: 'cccccccc-4444-4444-a444-444444444441',
   tenantId: TENANT.id,
   plate: 'AAA1A11',
   brand: 'Mercedes-Benz',
@@ -94,7 +94,7 @@ const VEHICLE_A: MockVehicle = {
 };
 
 const VEHICLE_B: MockVehicle = {
-  id: 'cccccccc-4444-4444-4444-444444444442',
+  id: 'cccccccc-4444-4444-a444-444444444442',
   tenantId: TENANT.id,
   plate: 'BBB2B22',
   brand: 'Mercedes-Benz',

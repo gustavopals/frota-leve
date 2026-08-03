@@ -142,7 +142,7 @@ jest.mock('../../config/database', () => ({
 const prisma = prismaClient as unknown as MockPrisma;
 
 const TENANT: MockTenant = {
-  id: 'aaaaaaaa-1111-1111-1111-111111111111',
+  id: 'aaaaaaaa-1111-4111-a111-111111111111',
   name: 'Tenant SO',
   plan: PlanType.PROFESSIONAL,
   status: TenantStatus.ACTIVE,
@@ -150,7 +150,7 @@ const TENANT: MockTenant = {
 };
 
 const OWNER: MockUser = {
-  id: 'bbbbbbbb-1111-1111-1111-111111111111',
+  id: 'bbbbbbbb-1111-4111-a111-111111111111',
   tenantId: TENANT.id,
   role: UserRole.OWNER,
   email: 'owner@tenant.com',
@@ -158,7 +158,7 @@ const OWNER: MockUser = {
 };
 
 const VIEWER: MockUser = {
-  id: 'bbbbbbbb-1111-1111-1111-111111111112',
+  id: 'bbbbbbbb-1111-4111-a111-111111111112',
   tenantId: TENANT.id,
   role: UserRole.VIEWER,
   email: 'viewer@tenant.com',
@@ -166,7 +166,7 @@ const VIEWER: MockUser = {
 };
 
 const VEHICLE: MockVehicle = {
-  id: 'cccccccc-1111-1111-1111-111111111111',
+  id: 'cccccccc-1111-4111-a111-111111111111',
   tenantId: TENANT.id,
   plate: 'ABC1234',
   brand: 'Toyota',
@@ -177,14 +177,14 @@ const VEHICLE: MockVehicle = {
 };
 
 const DRIVER: MockDriver = {
-  id: 'dddddddd-1111-1111-1111-111111111111',
+  id: 'dddddddd-1111-4111-a111-111111111111',
   tenantId: TENANT.id,
   name: 'João Silva',
   cpf: '12345678901',
 };
 
 const PLAN: MockMaintenancePlan = {
-  id: 'eeeeeeee-1111-1111-1111-111111111111',
+  id: 'eeeeeeee-1111-4111-a111-111111111111',
   tenantId: TENANT.id,
   vehicleId: VEHICLE.id,
   name: 'Troca de óleo',
@@ -194,7 +194,7 @@ const PLAN: MockMaintenancePlan = {
 };
 
 const ITEM: MockServiceOrderItem = {
-  id: 'ffffffff-1111-1111-1111-111111111111',
+  id: 'ffffffff-1111-4111-a111-111111111111',
   description: 'Filtro de óleo',
   quantity: 1,
   unitCost: 80,
@@ -203,7 +203,7 @@ const ITEM: MockServiceOrderItem = {
 };
 
 const SERVICE_ORDER: MockServiceOrder = {
-  id: '99999999-1111-1111-1111-111111111111',
+  id: '99999999-1111-4111-a111-111111111111',
   tenantId: TENANT.id,
   vehicleId: VEHICLE.id,
   driverId: DRIVER.id,

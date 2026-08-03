@@ -19,8 +19,9 @@ import {
 } from '@prisma/client';
 import type { FineStatus, IncidentStatus, IncidentType, ServiceOrderStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { createPrismaAdapter } from '../src/client';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: createPrismaAdapter() });
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

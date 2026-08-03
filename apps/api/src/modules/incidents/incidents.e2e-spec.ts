@@ -98,7 +98,7 @@ jest.mock('../../config/database', () => ({
 const prisma = prismaClient as unknown as MockPrisma;
 
 const TENANT: MockTenant = {
-  id: 'aaaaaaaa-3333-3333-3333-333333333333',
+  id: 'aaaaaaaa-3333-4333-a333-333333333333',
   name: 'Tenant Incidents',
   plan: PlanType.PROFESSIONAL,
   status: TenantStatus.ACTIVE,
@@ -106,7 +106,7 @@ const TENANT: MockTenant = {
 };
 
 const OWNER: MockUser = {
-  id: 'bbbbbbbb-3333-3333-3333-333333333331',
+  id: 'bbbbbbbb-3333-4333-a333-333333333331',
   tenantId: TENANT.id,
   role: UserRole.OWNER,
   email: 'owner@incidents.com',
@@ -114,7 +114,7 @@ const OWNER: MockUser = {
 };
 
 const VIEWER: MockUser = {
-  id: 'bbbbbbbb-3333-3333-3333-333333333332',
+  id: 'bbbbbbbb-3333-4333-a333-333333333332',
   tenantId: TENANT.id,
   role: UserRole.VIEWER,
   email: 'viewer@incidents.com',
@@ -122,7 +122,7 @@ const VIEWER: MockUser = {
 };
 
 const VEHICLE: MockVehicle = {
-  id: 'cccccccc-3333-3333-3333-333333333333',
+  id: 'cccccccc-3333-4333-a333-333333333333',
   tenantId: TENANT.id,
   plate: 'ABC1D23',
   brand: 'Volkswagen',
@@ -133,14 +133,14 @@ const VEHICLE: MockVehicle = {
 };
 
 const DRIVER: MockDriver = {
-  id: 'dddddddd-3333-3333-3333-333333333333',
+  id: 'dddddddd-3333-4333-a333-333333333333',
   tenantId: TENANT.id,
   name: 'Marina Souza',
   cpf: '12345678900',
 };
 
 const INCIDENT: MockIncident = {
-  id: 'eeeeeeee-3333-3333-3333-333333333333',
+  id: 'eeeeeeee-3333-4333-a333-333333333333',
   tenantId: TENANT.id,
   vehicleId: VEHICLE.id,
   driverId: DRIVER.id,
@@ -329,7 +329,7 @@ describe('Incidents E2E', () => {
       INCIDENT,
       {
         ...INCIDENT,
-        id: 'ffffffff-3333-3333-3333-333333333333',
+        id: 'ffffffff-3333-4333-a333-333333333333',
         type: IncidentType.THEFT,
         status: IncidentStatus.CONCLUDED,
         actualCost: 6000,

@@ -1,7 +1,7 @@
 import { aiClient } from '../client';
 import { AI_MODEL_HAIKU } from '../models';
 import { redactPii } from '../pii-redactor';
-import type { AiPromptBlock, AiToolDefinition, AiUsageMetrics } from '../types';
+import type { AiEffortLevel, AiPromptBlock, AiToolDefinition, AiUsageMetrics } from '../types';
 
 export type AssistantToolExecutor = (name: string, input: unknown) => Promise<unknown>;
 
@@ -16,7 +16,7 @@ export interface AssistantTurnParams {
   tools: AiToolDefinition[];
   toolExecutor: AssistantToolExecutor;
   maxTokens?: number;
-  temperature?: number;
+  effort?: AiEffortLevel;
   maxToolIterations?: number;
 }
 
@@ -33,8 +33,10 @@ type AssistantToolUse = {
   input: unknown;
 };
 
-const DEFAULT_MAX_TOKENS = 1024;
-const DEFAULT_TEMPERATURE = 0.3;
+// Sonnet 5 tokeniza ~30% mais que o Sonnet 4.6 para o mesmo texto; o teto subiu junto
+// para a resposta nao ser cortada no meio.
+const DEFAULT_MAX_TOKENS = 1536;
+const DEFAULT_EFFORT: AiEffortLevel = 'low';
 const DEFAULT_MAX_TOOL_ITERATIONS = 3;
 const ROUTING_MAX_TOKENS = 512;
 const STREAM_CHUNK_SIZE = 24;
@@ -207,7 +209,7 @@ export class AssistantService {
    */
   async *streamTurn(params: AssistantTurnParams): AsyncGenerator<AssistantStreamEvent> {
     const maxTokens = params.maxTokens ?? DEFAULT_MAX_TOKENS;
-    const temperature = params.temperature ?? DEFAULT_TEMPERATURE;
+    const effort = params.effort ?? DEFAULT_EFFORT;
     const maxToolIterations = params.maxToolIterations ?? DEFAULT_MAX_TOOL_ITERATIONS;
     const messages = buildBaseMessages(params);
     let usage = emptyUsage();
@@ -226,7 +228,6 @@ export class AssistantService {
           tools: params.tools,
           toolChoice: { type: 'auto' },
           maxTokens: ROUTING_MAX_TOKENS,
-          temperature: 0,
         });
 
         usage = addUsage(usage, routingResult.usage);
@@ -270,7 +271,10 @@ export class AssistantService {
         messages,
         toolChoice: { type: 'none' },
         maxTokens,
-        temperature,
+        // Resposta final sem raciocinio: preserva a latencia/custo do Sonnet 4.6 e
+        // mantem o max_tokens inteiro disponivel para o texto da resposta.
+        thinking: 'disabled',
+        effort,
       });
 
       usage = addUsage(usage, finalResult.usage);

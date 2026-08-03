@@ -1,8 +1,9 @@
 import { PlanType } from '../enums/plan.enum';
 
+// Fonte canonica dos IDs de modelo. packages/ai reexporta daqui — nao duplicar.
 export const AI_MODEL_HAIKU = 'claude-haiku-4-5-20251001';
-export const AI_MODEL_SONNET = 'claude-sonnet-4-6';
-export const AI_MODEL_OPUS = 'claude-opus-4-7';
+export const AI_MODEL_SONNET = 'claude-sonnet-5';
+export const AI_MODEL_OPUS = 'claude-opus-5';
 
 export const AI_MONTHLY_TOKEN_BUDGET_PRO = 2_000_000;
 export const AI_MONTHLY_TOKEN_BUDGET_ENT = 20_000_000;

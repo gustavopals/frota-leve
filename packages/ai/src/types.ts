@@ -36,6 +36,12 @@ export interface AiModelDefinition {
   label: string;
 }
 
+/** Controla profundidade de raciocinio e gasto de tokens nos modelos da geracao 5. */
+export type AiEffortLevel = 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+
+/** `adaptive` deixa o modelo decidir quando pensar; `disabled` desliga o raciocinio. */
+export type AiThinkingMode = 'adaptive' | 'disabled';
+
 export interface AiClientInvokeParams {
   tenantId: string;
   userId?: string;
@@ -46,7 +52,9 @@ export interface AiClientInvokeParams {
   tools?: AiToolDefinition[];
   toolChoice?: AiToolChoice;
   maxTokens: number;
-  temperature?: number;
+  /** Omitido = usa o default do modelo. Nao enviar para modelos sem suporte a effort. */
+  thinking?: AiThinkingMode;
+  effort?: AiEffortLevel;
   cacheKey?: string;
 }
 

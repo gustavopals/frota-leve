@@ -105,7 +105,7 @@ jest.mock('../../../config/database', () => ({
 }));
 
 jest.mock('@frota-leve/ai', () => ({
-  AI_MODEL_SONNET: 'claude-sonnet-4-6',
+  AI_MODEL_SONNET: 'claude-sonnet-5',
   assistantService: {
     streamTurn: jest.fn(),
   },
@@ -334,7 +334,7 @@ describe('AI chat endpoints', () => {
       {
         tokensIn: 120,
         tokensOut: 30,
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
       },
     );
 
@@ -382,7 +382,7 @@ describe('AI chat endpoints', () => {
         content: { text: 'Resposta mockada.' },
         tokensIn: 120,
         tokensOut: 30,
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-5',
       },
     });
   });

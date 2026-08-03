@@ -121,7 +121,7 @@ function daysFromNow(days: number): Date {
 }
 
 const TENANT: MockTenant = {
-  id: 'aaaaaaaa-0000-0000-0000-000000000001',
+  id: 'aaaaaaaa-0000-4000-a000-000000000001',
   name: 'Tenant A',
   plan: PlanType.PROFESSIONAL,
   status: TenantStatus.ACTIVE,
@@ -129,7 +129,7 @@ const TENANT: MockTenant = {
 };
 
 const OWNER: MockUser = {
-  id: 'bbbbbbbb-0000-0000-0000-000000000001',
+  id: 'bbbbbbbb-0000-4000-a000-000000000001',
   tenantId: TENANT.id,
   role: UserRole.OWNER,
   email: 'owner@a.com',
@@ -137,7 +137,7 @@ const OWNER: MockUser = {
 };
 
 const VIEWER: MockUser = {
-  id: 'bbbbbbbb-0000-0000-0000-000000000002',
+  id: 'bbbbbbbb-0000-4000-a000-000000000002',
   tenantId: TENANT.id,
   role: UserRole.VIEWER,
   email: 'viewer@a.com',
@@ -145,7 +145,7 @@ const VIEWER: MockUser = {
 };
 
 const VEHICLE: MockVehicle = {
-  id: 'cccccccc-0000-0000-0000-000000000001',
+  id: 'cccccccc-0000-4000-a000-000000000001',
   tenantId: TENANT.id,
   plate: 'ABC1234',
   brand: 'Toyota',
@@ -156,7 +156,7 @@ const VEHICLE: MockVehicle = {
 };
 
 const MAINTENANCE_PLAN: MockMaintenancePlan = {
-  id: 'dddddddd-0000-0000-0000-000000000001',
+  id: 'dddddddd-0000-4000-a000-000000000001',
   tenantId: TENANT.id,
   vehicleId: VEHICLE.id,
   name: 'Troca de óleo',
@@ -165,7 +165,8 @@ const MAINTENANCE_PLAN: MockMaintenancePlan = {
   intervalDays: 180,
   lastExecutedAt: new Date('2026-01-15T12:00:00.000Z'),
   lastExecutedMileage: 50000,
-  nextDueAt: new Date('2026-07-14T12:00:00.000Z'),
+  // Relativo a "hoje": datas fixas expiram e transformam o plano em atrasado.
+  nextDueAt: daysFromNow(100),
   nextDueMileage: 60000,
   isActive: true,
   createdAt: new Date('2026-04-01T10:00:00.000Z'),
@@ -243,14 +244,15 @@ describe('Maintenance E2E', () => {
   it('GET /maintenance/alerts returns overdue and upcoming plans summary', async () => {
     const overdueByDatePlan = {
       ...MAINTENANCE_PLAN_WITH_RELATIONS,
-      id: 'dddddddd-0000-0000-0000-000000000002',
-      nextDueAt: new Date('2026-04-01T10:00:00.000Z'),
+      id: 'dddddddd-0000-4000-a000-000000000002',
+      nextDueAt: daysFromNow(-5),
       nextDueMileage: 65000,
     };
     const upcomingByMileagePlan = {
       ...MAINTENANCE_PLAN_WITH_RELATIONS,
-      id: 'dddddddd-0000-0000-0000-000000000003',
-      nextDueAt: new Date('2026-06-01T10:00:00.000Z'),
+      id: 'dddddddd-0000-4000-a000-000000000003',
+      // Fora da janela de 30 dias: entra em "upcoming" apenas pela quilometragem.
+      nextDueAt: daysFromNow(60),
       nextDueMileage: 55700,
       vehicle: {
         ...VEHICLE,
@@ -259,8 +261,8 @@ describe('Maintenance E2E', () => {
     };
     const unrelatedPlan = {
       ...MAINTENANCE_PLAN_WITH_RELATIONS,
-      id: 'dddddddd-0000-0000-0000-000000000004',
-      nextDueAt: new Date('2026-12-01T10:00:00.000Z'),
+      id: 'dddddddd-0000-4000-a000-000000000004',
+      nextDueAt: daysFromNow(240),
       nextDueMileage: 70000,
     };
 
@@ -298,11 +300,11 @@ describe('Maintenance E2E', () => {
   it('GET /maintenance/alerts filters by vehicle and custom thresholds', async () => {
     const anotherVehiclePlan = {
       ...MAINTENANCE_PLAN_WITH_RELATIONS,
-      id: 'dddddddd-0000-0000-0000-000000000005',
-      vehicleId: 'cccccccc-0000-0000-0000-000000000009',
+      id: 'dddddddd-0000-4000-a000-000000000005',
+      vehicleId: 'cccccccc-0000-4000-a000-000000000009',
       vehicle: {
         ...VEHICLE,
-        id: 'cccccccc-0000-0000-0000-000000000009',
+        id: 'cccccccc-0000-4000-a000-000000000009',
         plate: 'XYZ9999',
       },
       nextDueAt: new Date('2026-04-20T10:00:00.000Z'),
@@ -310,7 +312,7 @@ describe('Maintenance E2E', () => {
     };
     const targetVehicleUpcoming = {
       ...MAINTENANCE_PLAN_WITH_RELATIONS,
-      id: 'dddddddd-0000-0000-0000-000000000006',
+      id: 'dddddddd-0000-4000-a000-000000000006',
       nextDueAt: daysFromNow(5),
       nextDueMileage: 58000,
     };
@@ -342,7 +344,7 @@ describe('Maintenance E2E', () => {
   it('GET /maintenance/stats returns MTTR and MTBF by vehicle', async () => {
     const anotherVehicle: MockVehicle = {
       ...VEHICLE,
-      id: 'cccccccc-0000-0000-0000-000000000009',
+      id: 'cccccccc-0000-4000-a000-000000000009',
       plate: 'XYZ9999',
       brand: 'Volvo',
       model: 'FH',

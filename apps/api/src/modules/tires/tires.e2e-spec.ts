@@ -125,7 +125,7 @@ jest.mock('../../config/database', () => ({
 const prisma = prismaClient as unknown as MockPrisma;
 
 const TENANT: MockTenant = {
-  id: 'aaaaaaaa-3333-3333-3333-333333333333',
+  id: 'aaaaaaaa-3333-4333-a333-333333333333',
   name: 'Tenant Tires',
   plan: PlanType.PROFESSIONAL,
   status: TenantStatus.ACTIVE,
@@ -133,7 +133,7 @@ const TENANT: MockTenant = {
 };
 
 const OWNER: MockUser = {
-  id: 'bbbbbbbb-3333-3333-3333-333333333331',
+  id: 'bbbbbbbb-3333-4333-a333-333333333331',
   tenantId: TENANT.id,
   role: UserRole.OWNER,
   email: 'owner@tires.com',
@@ -141,7 +141,7 @@ const OWNER: MockUser = {
 };
 
 const VIEWER: MockUser = {
-  id: 'bbbbbbbb-3333-3333-3333-333333333332',
+  id: 'bbbbbbbb-3333-4333-a333-333333333332',
   tenantId: TENANT.id,
   role: UserRole.VIEWER,
   email: 'viewer@tires.com',
@@ -149,7 +149,7 @@ const VIEWER: MockUser = {
 };
 
 const VEHICLE: MockVehicle = {
-  id: 'cccccccc-3333-3333-3333-333333333333',
+  id: 'cccccccc-3333-4333-a333-333333333333',
   tenantId: TENANT.id,
   plate: 'BRA2E19',
   brand: 'Fiat',
@@ -158,7 +158,7 @@ const VEHICLE: MockVehicle = {
 };
 
 const FREE_TIRE: MockTire = {
-  id: 'dddddddd-3333-3333-3333-333333333333',
+  id: 'dddddddd-3333-4333-a333-333333333333',
   tenantId: TENANT.id,
   brand: 'Pirelli',
   model: 'Chrono',
@@ -181,7 +181,7 @@ const FREE_TIRE: MockTire = {
 
 const INSTALLED_TIRE: MockTire = {
   ...FREE_TIRE,
-  id: 'dddddddd-3333-3333-3333-333333333334',
+  id: 'dddddddd-3333-4333-a333-333333333334',
   status: TireStatus.IN_USE,
   currentVehicleId: VEHICLE.id,
   position: 'Dianteiro esquerdo',
@@ -192,7 +192,7 @@ const INSTALLED_TIRE: MockTire = {
 
 const RETREADED_TIRE: MockTire = {
   ...INSTALLED_TIRE,
-  id: 'dddddddd-3333-3333-3333-333333333336',
+  id: 'dddddddd-3333-4333-a333-333333333336',
   brand: 'Goodyear',
   model: 'Cargo G28',
   serialNumber: 'PNEU-0003',
@@ -209,7 +209,7 @@ const RETREADED_TIRE: MockTire = {
 };
 
 const TIRE_INSPECTION: MockInspection = {
-  id: 'eeeeeeee-3333-3333-3333-333333333333',
+  id: 'eeeeeeee-3333-4333-a333-333333333333',
   tenantId: TENANT.id,
   tireId: INSTALLED_TIRE.id,
   vehicleId: VEHICLE.id,
@@ -296,7 +296,7 @@ describe('Tires E2E', () => {
       },
       {
         ...INSTALLED_TIRE,
-        id: 'dddddddd-3333-3333-3333-333333333335',
+        id: 'dddddddd-3333-4333-a333-333333333335',
         serialNumber: 'PNEU-0002',
         currentGrooveDepth: 2.8,
         position: 'Traseiro direito',
@@ -337,7 +337,7 @@ describe('Tires E2E', () => {
       },
       {
         ...FREE_TIRE,
-        id: 'dddddddd-3333-3333-3333-333333333337',
+        id: 'dddddddd-3333-4333-a333-333333333337',
         brand: 'Pirelli',
         serialNumber: 'PNEU-0004',
         costNew: 620,

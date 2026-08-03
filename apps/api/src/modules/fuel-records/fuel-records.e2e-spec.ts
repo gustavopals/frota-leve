@@ -122,7 +122,7 @@ const prisma = prismaClient as unknown as MockPrisma;
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const TENANT: MockTenant = {
-  id: 'aaaaaaaa-0000-0000-0000-000000000001',
+  id: 'aaaaaaaa-0000-4000-a000-000000000001',
   name: 'Tenant A',
   plan: PlanType.PROFESSIONAL,
   status: TenantStatus.ACTIVE,
@@ -130,7 +130,7 @@ const TENANT: MockTenant = {
 };
 
 const OWNER: MockUser = {
-  id: 'bbbbbbbb-0000-0000-0000-000000000001',
+  id: 'bbbbbbbb-0000-4000-a000-000000000001',
   tenantId: TENANT.id,
   role: UserRole.OWNER,
   email: 'owner@a.com',
@@ -138,7 +138,7 @@ const OWNER: MockUser = {
 };
 
 const VIEWER: MockUser = {
-  id: 'bbbbbbbb-0000-0000-0000-000000000002',
+  id: 'bbbbbbbb-0000-4000-a000-000000000002',
   tenantId: TENANT.id,
   role: UserRole.VIEWER,
   email: 'viewer@a.com',
@@ -146,7 +146,7 @@ const VIEWER: MockUser = {
 };
 
 const VEHICLE: MockVehicle = {
-  id: 'cccccccc-0000-0000-0000-000000000001',
+  id: 'cccccccc-0000-4000-a000-000000000001',
   tenantId: TENANT.id,
   plate: 'ABC1234',
   brand: 'Toyota',
@@ -160,7 +160,7 @@ const VEHICLE: MockVehicle = {
 };
 
 const SECOND_VEHICLE: MockVehicle = {
-  id: 'cccccccc-0000-0000-0000-000000000002',
+  id: 'cccccccc-0000-4000-a000-000000000002',
   tenantId: TENANT.id,
   plate: 'XYZ9K87',
   brand: 'Volkswagen',
@@ -174,14 +174,14 @@ const SECOND_VEHICLE: MockVehicle = {
 };
 
 const DRIVER: MockDriver = {
-  id: 'dddddddd-0000-0000-0000-000000000001',
+  id: 'dddddddd-0000-4000-a000-000000000001',
   tenantId: TENANT.id,
   name: 'João Silva',
   cpf: '12345678901',
 };
 
 const FUEL_RECORD: MockFuelRecord = {
-  id: 'eeeeeeee-0000-0000-0000-000000000001',
+  id: 'eeeeeeee-0000-4000-a000-000000000001',
   tenantId: TENANT.id,
   vehicleId: VEHICLE.id,
   driverId: DRIVER.id,
@@ -345,7 +345,7 @@ describe('FuelRecords E2E', () => {
     prisma.fuelRecord.findFirst.mockResolvedValue(null);
 
     const res = await request(app)
-      .get('/api/v1/fuel-records/ffffffff-0000-0000-0000-000000000099')
+      .get('/api/v1/fuel-records/ffffffff-0000-4000-a000-000000000099')
       .set('Authorization', `Bearer ${makeToken(OWNER)}`);
 
     expect(res.status).toBe(404);
@@ -628,7 +628,7 @@ describe('FuelRecords E2E', () => {
     prisma.fuelRecord.findFirst.mockResolvedValue(null);
 
     const res = await request(app)
-      .delete('/api/v1/fuel-records/ffffffff-0000-0000-0000-000000000099')
+      .delete('/api/v1/fuel-records/ffffffff-0000-4000-a000-000000000099')
       .set('Authorization', `Bearer ${makeToken(OWNER)}`);
 
     expect(res.status).toBe(404);

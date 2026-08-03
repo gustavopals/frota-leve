@@ -153,7 +153,7 @@ jest.mock('../../config/database', () => ({
 const prisma = prismaClient as unknown as MockPrisma;
 
 const TENANT: MockTenant = {
-  id: 'aaaaaaaa-5555-5555-5555-555555555555',
+  id: 'aaaaaaaa-5555-4555-a555-555555555555',
   name: 'Tenant Checklists',
   plan: PlanType.PROFESSIONAL,
   status: TenantStatus.ACTIVE,
@@ -161,7 +161,7 @@ const TENANT: MockTenant = {
 };
 
 const OWNER: MockUser = {
-  id: 'bbbbbbbb-5555-5555-5555-555555555551',
+  id: 'bbbbbbbb-5555-4555-a555-555555555551',
   tenantId: TENANT.id,
   role: UserRole.OWNER,
   email: 'owner@checklists.com',
@@ -169,7 +169,7 @@ const OWNER: MockUser = {
 };
 
 const VIEWER: MockUser = {
-  id: 'bbbbbbbb-5555-5555-5555-555555555552',
+  id: 'bbbbbbbb-5555-4555-a555-555555555552',
   tenantId: TENANT.id,
   role: UserRole.VIEWER,
   email: 'viewer@checklists.com',
@@ -177,7 +177,7 @@ const VIEWER: MockUser = {
 };
 
 const VEHICLE: MockVehicle = {
-  id: 'ffffffff-5555-5555-5555-555555555551',
+  id: 'ffffffff-5555-4555-a555-555555555551',
   tenantId: TENANT.id,
   plate: 'CHK1A23',
   brand: 'Fiat',
@@ -186,14 +186,14 @@ const VEHICLE: MockVehicle = {
 };
 
 const DRIVER: MockDriver = {
-  id: '99999999-5555-5555-5555-555555555551',
+  id: '99999999-5555-4555-a555-555555555551',
   tenantId: TENANT.id,
   name: 'João Lima',
   cpf: '12345678900',
 };
 
 const TEMPLATE: MockChecklistTemplate = {
-  id: 'cccccccc-5555-5555-5555-555555555555',
+  id: 'cccccccc-5555-4555-a555-555555555555',
   tenantId: TENANT.id,
   name: 'Checklist diário de saída',
   vehicleCategory: VehicleCategory.LIGHT,
@@ -201,7 +201,7 @@ const TEMPLATE: MockChecklistTemplate = {
   updatedAt: new Date('2026-04-09T10:00:00.000Z'),
   items: [
     {
-      id: 'dddddddd-5555-5555-5555-555555555551',
+      id: 'dddddddd-5555-4555-a555-555555555551',
       label: 'Verificar pneus',
       required: true,
       photoRequired: false,
@@ -209,7 +209,7 @@ const TEMPLATE: MockChecklistTemplate = {
       createdAt: new Date('2026-04-09T10:00:00.000Z'),
     },
     {
-      id: 'dddddddd-5555-5555-5555-555555555552',
+      id: 'dddddddd-5555-4555-a555-555555555552',
       label: 'Conferir luzes',
       required: true,
       photoRequired: false,
@@ -233,7 +233,7 @@ const TEMPLATE_ITEM_ENGINE = getTemplateItem(TEMPLATE, 0);
 const TEMPLATE_ITEM_LIGHT = getTemplateItem(TEMPLATE, 1);
 
 const EXECUTION: MockChecklistExecution = {
-  id: 'abababab-5555-5555-5555-555555555551',
+  id: 'abababab-5555-4555-a555-555555555551',
   tenantId: TENANT.id,
   templateId: TEMPLATE.id,
   vehicleId: VEHICLE.id,
@@ -254,7 +254,7 @@ const EXECUTION: MockChecklistExecution = {
   driver: DRIVER,
   items: [
     {
-      id: 'cdcdcdcd-5555-5555-5555-555555555551',
+      id: 'cdcdcdcd-5555-4555-a555-555555555551',
       checklistItemId: TEMPLATE_ITEM_ENGINE.id,
       label: TEMPLATE_ITEM_ENGINE.label,
       status: ChecklistItemStatus.OK,
@@ -263,7 +263,7 @@ const EXECUTION: MockChecklistExecution = {
       createdAt: new Date('2026-04-09T12:05:00.000Z'),
     },
     {
-      id: 'cdcdcdcd-5555-5555-5555-555555555552',
+      id: 'cdcdcdcd-5555-4555-a555-555555555552',
       checklistItemId: TEMPLATE_ITEM_LIGHT.id,
       label: TEMPLATE_ITEM_LIGHT.label,
       status: ChecklistItemStatus.NON_COMPLIANT,
@@ -275,7 +275,7 @@ const EXECUTION: MockChecklistExecution = {
 };
 
 const AUTO_SERVICE_ORDER = {
-  id: 'abababab-7777-7777-7777-777777777771',
+  id: 'abababab-7777-4777-a777-777777777771',
 };
 
 const COMPLIANCE_EXECUTIONS = [
@@ -424,7 +424,7 @@ describe('Checklists E2E', () => {
       vehicleCategory: VehicleCategory.HEAVY,
       items: [
         {
-          id: 'dddddddd-5555-5555-5555-555555555553',
+          id: 'dddddddd-5555-4555-a555-555555555553',
           label: 'Inspecionar suspensão',
           required: true,
           photoRequired: true,
