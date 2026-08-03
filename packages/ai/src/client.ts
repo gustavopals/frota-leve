@@ -29,6 +29,7 @@ import {
   AiError,
 } from './errors';
 import { resolveEffectiveModel, supportsEffort } from './models';
+import { redactPii } from './pii-redactor';
 import { computeCostUsdMicros } from './pricing';
 import { checkAndReserveQuota, commitQuota, refundQuota } from './quota';
 import type {
@@ -83,7 +84,7 @@ function toSystemBlocks(params: AiClientInvokeParams): string | TextBlockParam[]
   const systemBlocks: TextBlockParam[] = [
     {
       type: 'text',
-      text: params.system,
+      text: redactPii(params.system),
       cache_control: { type: 'ephemeral' },
     },
   ];
@@ -92,7 +93,7 @@ function toSystemBlocks(params: AiClientInvokeParams): string | TextBlockParam[]
     .filter((message) => message.role === 'system')
     .map<TextBlockParam>((message) => ({
       type: 'text',
-      text: message.content,
+      text: redactPii(message.content),
       cache_control: message.cacheable ? { type: 'ephemeral' } : undefined,
     }));
 
@@ -100,9 +101,13 @@ function toSystemBlocks(params: AiClientInvokeParams): string | TextBlockParam[]
 }
 
 function toMessageContent(message: AiPromptBlock) {
+  // Redação central: qualquer prompt que saia daqui já passou pelo redator,
+  // independentemente da feature que o montou (DoD da Fase 3).
+  const content = redactPii(message.content);
+
   const textBlock = {
     type: 'text' as const,
-    text: message.role === 'tool' ? `[tool_result]\n${message.content}` : message.content,
+    text: message.role === 'tool' ? `[tool_result]\n${content}` : content,
     cache_control: message.cacheable ? ({ type: 'ephemeral' } as const) : undefined,
   };
 

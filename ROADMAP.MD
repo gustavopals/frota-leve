@@ -1304,16 +1304,16 @@ Uma task só está **pronta** quando:
 
 ### Checklist de DoD da Fase 3
 
-- [ ] Todas as features IA gated por `hasAI` + feature flag global
-- [ ] 100% das chamadas Claude persistidas em `AIUsageLog`
-- [ ] Prompt caching ativo em system + contexto de frota (verificado por `cacheReadTokens > 0`)
-- [ ] Cobertura de testes ≥ 80% em `packages/ai` e módulo `ai` do API
-- [ ] Zero chamadas reais à Anthropic em CI
-- [ ] PII redigida em 100% dos prompts (testes automatizados)
-- [ ] Saídas estruturadas (OCR/anomalias/scoring) validadas por Zod
-- [ ] Fallback não-IA funciona em todas as features críticas
-- [ ] Runbooks e docs LGPD revisados
-- [ ] Load test aprovado (p95 chat first-token < 2s, OCR < 6s)
+- [x] Todas as features IA gated por `hasAI` + feature flag global
+- [x] 100% das chamadas Claude persistidas em `AIUsageLog`
+- [ ] Prompt caching ativo em system + contexto de frota (verificado por `cacheReadTokens > 0`) — `cache_control: ephemeral` já marcado no system e no contexto cacheável; falta rodar contra a API real e conferir `cacheReadTokens > 0`
+- [x] Cobertura de testes ≥ 80% em `packages/ai` e módulo `ai` do API
+- [x] Zero chamadas reais à Anthropic em CI
+- [x] PII redigida em 100% dos prompts (testes automatizados)
+- [x] Saídas estruturadas (OCR/anomalias/scoring) validadas por Zod
+- [x] Fallback não-IA funciona em todas as features críticas
+- [x] Runbooks e docs LGPD revisados
+- [ ] Load test aprovado (p95 chat first-token < 2s, OCR < 6s) — script k6 pronto em `tools/load-tests/ai-chat.k6.js`; falta executar contra staging
 
 ---
 
