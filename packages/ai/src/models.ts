@@ -23,3 +23,19 @@ export const AI_MODELS_WITHOUT_SAMPLING: readonly string[] = [
 export function supportsEffort(model: string): boolean {
   return AI_MODELS_WITHOUT_SAMPLING.includes(model);
 }
+
+/**
+ * Modo degradado (TASK 3.9.2): quando o custo diário global estoura o limite,
+ * a API liga `AI_DEGRADED` e tudo passa a rodar no Haiku até o reset.
+ *
+ * A flag é lida de `process.env` porque é o único canal que o pacote de IA
+ * compartilha com a API sem inverter a dependência.
+ */
+export function isAiDegraded(): boolean {
+  return process.env['AI_DEGRADED'] === 'true';
+}
+
+/** Resolve o modelo efetivo, rebaixando para Haiku em modo degradado. */
+export function resolveEffectiveModel(requested: string): string {
+  return isAiDegraded() ? AI_MODEL_HAIKU : requested;
+}

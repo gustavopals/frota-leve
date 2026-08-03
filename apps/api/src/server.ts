@@ -6,6 +6,7 @@ import { env } from './config/env';
 import { logger } from './config/logger';
 import { aiAnomalyScanScheduler } from './modules/ai/anomaly/ai-anomaly-scan.scheduler';
 import { aiReportMonthlyScheduler } from './modules/ai/reports/ai-report-monthly.scheduler';
+import { aiCostGuardScheduler } from './modules/ai/observability/ai-cost-guard.scheduler';
 import { aiDriverScoringScheduler } from './modules/ai/scoring/ai-driver-scoring.scheduler';
 import { documentAlertScheduler } from './modules/documents/document-alert.scheduler';
 import { maintenancePlanAlertScheduler } from './modules/maintenance/maintenance-plan-alert.scheduler';
@@ -48,6 +49,7 @@ function shutdown(signal: NodeJS.Signals): void {
     aiAnomalyScanScheduler.stop();
     aiReportMonthlyScheduler.stop();
     aiDriverScoringScheduler.stop();
+    aiCostGuardScheduler.stop();
     documentAlertScheduler.stop();
     maintenancePlanAlertScheduler.stop();
     notificationAlertScheduler.stop();
@@ -68,6 +70,7 @@ server.listen(env.PORT, () => {
   aiAnomalyScanScheduler.start();
   aiReportMonthlyScheduler.start();
   aiDriverScoringScheduler.start();
+  aiCostGuardScheduler.start();
   documentAlertScheduler.start();
   maintenancePlanAlertScheduler.start();
   notificationAlertScheduler.start();

@@ -28,6 +28,7 @@ import { aiRouter } from './modules/ai/ai.routes';
 import { logger } from './config/logger';
 import { env } from './config/env';
 import { NotFoundError } from './shared/errors';
+import { metricsRouter } from './modules/ai/observability/observability.routes';
 
 export function createApp() {
   const app = express();
@@ -86,6 +87,9 @@ export function createApp() {
   app.use('/api/v1/notifications', notificationsRouter);
   app.use('/api/v1/tires', tiresRouter);
   app.use('/api/v1/ai', aiRouter);
+
+  // Métricas Prometheus (TASK 3.9.1) — sem auth: só contadores agregados.
+  app.use('/metrics', metricsRouter);
 
   // TODO: demais rotas serão registradas aqui conforme as tasks avançam
 

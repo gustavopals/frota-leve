@@ -28,7 +28,7 @@ import {
   AIQuotaExceededError,
   AiError,
 } from './errors';
-import { supportsEffort } from './models';
+import { resolveEffectiveModel, supportsEffort } from './models';
 import { computeCostUsdMicros } from './pricing';
 import { checkAndReserveQuota, commitQuota, refundQuota } from './quota';
 import type {
@@ -385,15 +385,17 @@ export class AiClient {
     }
 
     const startedAt = Date.now();
+    // Em modo degradado tudo cai para o Haiku (TASK 3.9.2).
+    const effectiveModel = resolveEffectiveModel(params.model);
     const response = await this.getProvider().messages.create(
       {
-        model: params.model,
+        model: effectiveModel,
         max_tokens: params.maxTokens,
         system: toSystemBlocks(params),
         messages: mapMessages(params),
         tools: mapTools(params),
         tool_choice: mapToolChoice(params),
-        ...mapReasoning(params),
+        ...mapReasoning({ ...params, model: effectiveModel }),
       },
       {
         maxRetries: 0,
