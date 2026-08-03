@@ -1280,10 +1280,10 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **3.8.1** — Tela `/settings/ai` (OWNER): visualizar consumo de tokens/custo do mês, gráfico por feature, histórico de 6 meses, status do circuit breaker.
-- [ ] **3.8.2** — Toggle por feature (chat/anomalias/relatórios/OCR/scoring) persistido em `TenantSettings.aiFeatures` (default todas on). Backend consulta antes de executar.
-- [ ] **3.8.3** — Configuração de destinatários de e-mail de relatório mensal e de alertas de anomalia.
-- [ ] **3.8.4** — Log de chamadas IA (tabela `AIUsageLog`) filtrável, útil para auditoria.
+- [x] **3.8.1** — Tela `/settings/ai` (OWNER): visualizar consumo de tokens/custo do mês, gráfico por feature, histórico de 6 meses, status do circuit breaker.
+- [x] **3.8.2** — Toggle por feature (chat/anomalias/relatórios/OCR/scoring) persistido em `TenantSettings.aiFeatures` (default todas on). Backend consulta antes de executar.
+- [x] **3.8.3** — Configuração de destinatários de e-mail de relatório mensal e de alertas de anomalia.
+- [x] **3.8.4** — Log de chamadas IA (tabela `AIUsageLog`) filtrável, útil para auditoria.
 
 ---
 

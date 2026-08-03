@@ -1,0 +1,89 @@
+<section class="ai-settings">
+  <header class="ai-settings__header">
+    <h2>Inteligência artificial</h2>
+    <p>Consumo, custo e controle das funcionalidades de IA do seu tenant.</p>
+  </header>
+
+  @if (loading) {
+    <p class="ai-settings__empty">Carregando painel...</p>
+  } @else {
+    <div class="ai-settings__grid">
+      <po-widget p-title="Custo do mês">
+        <strong class="ai-settings__metric">US$ {{ monthCostUsd }}</strong>
+        @if (overview) {
+          <p class="ai-settings__hint">
+            Limite diário configurado: US$ {{ overview.circuitBreaker.dailyCostLimitUsd }}
+          </p>
+          <po-tag
+            [p-value]="circuitBreakerLabel"
+            [p-type]="circuitBreakerTagType"
+            p-label="Circuit breaker"
+          ></po-tag>
+        }
+      </po-widget>
+
+      <po-widget p-title="Consumo por feature">
+        @if (overview && overview.currentMonth.length) {
+          <ul class="ai-settings__list">
+            @for (item of overview.currentMonth; track item.feature) {
+              <li>
+                <span>{{ item.feature }}</span>
+                <span>{{ item.calls }} chamadas — US$ {{ costOf(item) }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="ai-settings__empty">Nenhuma chamada registrada neste mês.</p>
+        }
+      </po-widget>
+    </div>
+
+    @if (costSeries.length && historyLabels.length) {
+      <po-widget p-title="Histórico de custo (6 meses)">
+        <po-chart
+          [p-type]="chartType"
+          [p-series]="costSeries"
+          [p-categories]="historyLabels"
+        ></po-chart>
+      </po-widget>
+    }
+
+    <po-widget p-title="Funcionalidades">
+      <ul class="ai-settings__toggles">
+        @for (toggle of toggles; track toggle.key) {
+          <li class="ai-settings__toggle">
+            <div>
+              <strong>{{ toggle.label }}</strong>
+              <po-tag
+                [p-value]="toggle.enabled ? 'Ativa' : 'Desativada'"
+                [p-type]="toggleTagType(toggle.enabled)"
+              ></po-tag>
+            </div>
+            <po-button
+              [p-label]="toggle.enabled ? 'Desativar' : 'Ativar'"
+              (p-click)="toggleFeature(toggle)"
+            ></po-button>
+          </li>
+        }
+      </ul>
+    </po-widget>
+
+    <po-widget p-title="Log de chamadas">
+      @if (logs.length) {
+        <ul class="ai-settings__list">
+          @for (log of logs; track log.id) {
+            <li>
+              <span>{{ log.feature }} — {{ log.model }}</span>
+              <span>
+                {{ log.inputTokens + log.outputTokens }} tokens · {{ log.latencyMs }}ms ·
+                {{ log.status }}
+              </span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="ai-settings__empty">Nenhuma chamada registrada.</p>
+      }
+    </po-widget>
+  }
+</section>
