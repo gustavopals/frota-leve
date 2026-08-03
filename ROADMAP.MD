@@ -1198,7 +1198,7 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **3.4.1** — Implementar detecção **determinística** (sem IA) em `packages/ai/src/services/anomaly.service.ts` — a IA NÃO decide se é anomalia, só explica. Regras:
+- [x] **3.4.1** — Implementar detecção **determinística** (sem IA) em `packages/ai/src/services/anomaly.service.ts` — a IA NÃO decide se é anomalia, só explica. Regras:
   - **Fuel deviation**: z-score do km/l do abastecimento vs. média móvel de 30 dias do veículo; flag se `|z| > 2` e amostra ≥ 10
   - **Maint cost**: custo acumulado nos últimos 90 dias vs. percentil 90 de veículos mesma categoria/idade no tenant; flag se > p90
   - **Fine pattern**: ≥ 3 multas mesmo motorista OU mesmo trecho em 30 dias
@@ -1208,7 +1208,7 @@ Uma task só está **pronta** quando:
 - [ ] **3.4.4** — Notificação: criar registro em `Notification` (módulo existente) e e-mail diário consolidado para OWNER/ADMIN com anomalias HIGH.
 - [ ] **3.4.5** — Rotas: `GET /ai/anomalies` (filtros status/kind/severity, paginado), `POST /ai/anomalies/:id/acknowledge`, `POST /ai/anomalies/:id/dismiss`.
 - [ ] **3.4.6** — Frontend: widget "Insights IA" no dashboard (top 5 anomalias HIGH+MED abertas); tela dedicada `/ai/anomalies` com filtros; seção "Análise IA" na tela de detalhe de veículo (anomalias abertas + health score calculado como 100 − penalidades).
-- [ ] **3.4.7** — Testes unitários das regras com fixtures sintéticas cobrindo falsos positivos/negativos.
+- [x] **3.4.7** — Testes unitários das regras com fixtures sintéticas cobrindo falsos positivos/negativos.
 
 **Critério de aceite**: detecção funciona sem `AI_ENABLED`; apenas o texto explicativo depende de IA; dedupe correta verificada em teste.
 
