@@ -1218,8 +1218,8 @@ Uma task só está **pronta** quando:
 
 **Subtasks:**
 
-- [ ] **3.5.1** — Criar builder `monthly-aggregates.ts` que agrega (via Prisma, tenant-scoped): custos por categoria, top 5 veículos por custo/km, consumo médio e desvio, manutenções realizadas/pendentes, multas, anomalias HIGH do período, comparativo com mês anterior. Saída: objeto tipado `MonthlyReportData`.
-- [ ] **3.5.2** — `report.service.ts#generateMonthly(tenantId, period)`:
+- [x] **3.5.1** — Criar builder `monthly-aggregates.ts` que agrega (via Prisma, tenant-scoped): custos por categoria, top 5 veículos por custo/km, consumo médio e desvio, manutenções realizadas/pendentes, multas, anomalias HIGH do período, comparativo com mês anterior. Saída: objeto tipado `MonthlyReportData`.
+- [x] **3.5.2** — `report.service.ts#generateMonthly(tenantId, period)`:
   1. Idempotência: se existe `AIReport` com `status=GENERATED` para `tenantId+period+MONTHLY`, retorna o existente
   2. Upsert com `status=PENDING`
   3. Persiste `dataSnapshot` (agregados) para auditoria
@@ -1228,12 +1228,12 @@ Uma task só está **pronta** quando:
   6. Valida com Zod (`ReportOutputSchema`: requer headings específicos e tamanho mínimo)
   7. Gera `summary` de 2-3 frases via Haiku (extração)
   8. Atualiza `AIReport` com `status=GENERATED`, `content`, `summary`, `generatedAt`
-- [ ] **3.5.3** — Job BullMQ `ai.report.monthly` — cron dia 2 do mês às 06:00 para todos os tenants ativos com `hasAI`. Concorrência limitada a 3 para não estourar rate limit da Anthropic.
-- [ ] **3.5.4** — Fallback: se Claude falhar 3× ou quota esgotada, gerar relatório "tabular" sem narrativa (só os agregados em markdown) e marcar `status=GENERATED` com flag `degraded=true` em `dataSnapshot`.
-- [ ] **3.5.5** — Envio de e-mail (Resend) para OWNER/ADMIN com resumo + link para o relatório completo.
-- [ ] **3.5.6** — `POST /ai/reports/on-demand` (OWNER/ADMIN): gera relatório do período informado (validar ≤ 12 meses atrás, ≥ 7 dias de dados), respeita rate limit.
-- [ ] **3.5.7** — `GET /ai/reports`, `GET /ai/reports/:id`, `GET /ai/reports/:id/pdf` (render com Puppeteer do markdown).
-- [ ] **3.5.8** — Frontend: tela `/ai/reports` listando por período, visualização do markdown, botão "Baixar PDF", botão "Gerar agora" (on-demand).
+- [x] **3.5.3** — Job BullMQ `ai.report.monthly` — cron dia 2 do mês às 06:00 para todos os tenants ativos com `hasAI`. Concorrência limitada a 3 para não estourar rate limit da Anthropic.
+- [x] **3.5.4** — Fallback: se Claude falhar 3× ou quota esgotada, gerar relatório "tabular" sem narrativa (só os agregados em markdown) e marcar `status=GENERATED` com flag `degraded=true` em `dataSnapshot`.
+- [x] **3.5.5** — Envio de e-mail (Resend) para OWNER/ADMIN com resumo + link para o relatório completo.
+- [x] **3.5.6** — `POST /ai/reports/on-demand` (OWNER/ADMIN): gera relatório do período informado (validar ≤ 12 meses atrás, ≥ 7 dias de dados), respeita rate limit.
+- [x] **3.5.7** — `GET /ai/reports`, `GET /ai/reports/:id`, `GET /ai/reports/:id/pdf` (render com Puppeteer do markdown).
+- [x] **3.5.8** — Frontend: tela `/ai/reports` listando por período, visualização do markdown, botão "Baixar PDF", botão "Gerar agora" (on-demand).
 
 **Critério de aceite**: idempotência verificada (rodar job 2× não duplica); fallback testado desligando mock; PDF abre corretamente.
 

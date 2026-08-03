@@ -9,6 +9,7 @@ export * from './types';
 
 export * from './context/fleet-catalog';
 export * from './context/monthly-aggregates';
+export * from './context/monthly-aggregates.types';
 export * from './context/vehicle-dossier';
 
 export * from './prompts/builders';
@@ -24,6 +25,7 @@ export * from './services/anomaly.types';
 export * from './services/statistics';
 export * from './services/assistant.service';
 export * from './services/ocr.service';
+export * from './services/report.markdown';
 export * from './services/report.service';
 export * from './services/scoring.service';
 

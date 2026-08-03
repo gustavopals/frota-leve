@@ -8,6 +8,7 @@ import { AIController } from './ai.controller';
 import { usageQuerySchema } from './ai.validators';
 import { anomalyRouter } from './anomaly/anomaly.routes';
 import { chatRouter } from './chat/chat.routes';
+import { reportsRouter } from './reports/reports.routes';
 
 const aiController = new AIController();
 
@@ -31,3 +32,6 @@ aiRouter.use('/chat', chatRouter);
 
 // Anomalias detectadas pelas regras determinísticas (TASK 3.4).
 aiRouter.use('/anomalies', anomalyRouter);
+
+// Relatórios mensais e sob demanda (TASK 3.5).
+aiRouter.use('/reports', reportsRouter);

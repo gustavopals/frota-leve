@@ -90,6 +90,11 @@ export const APP_ROUTES: Routes = [
           import('./features/ai-assistant/ai-assistant.routes').then((m) => m.AI_ASSISTANT_ROUTES),
       },
       {
+        path: 'ai/reports',
+        loadChildren: () =>
+          import('./features/ai-reports/ai-reports.routes').then((m) => m.AI_REPORTS_ROUTES),
+      },
+      {
         path: 'ai/anomalies',
         loadChildren: () =>
           import('./features/ai-anomalies/ai-anomalies.routes').then((m) => m.AI_ANOMALIES_ROUTES),

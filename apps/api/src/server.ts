@@ -5,6 +5,7 @@ import { createApp } from './app';
 import { env } from './config/env';
 import { logger } from './config/logger';
 import { aiAnomalyScanScheduler } from './modules/ai/anomaly/ai-anomaly-scan.scheduler';
+import { aiReportMonthlyScheduler } from './modules/ai/reports/ai-report-monthly.scheduler';
 import { documentAlertScheduler } from './modules/documents/document-alert.scheduler';
 import { maintenancePlanAlertScheduler } from './modules/maintenance/maintenance-plan-alert.scheduler';
 import { notificationAlertScheduler } from './modules/notifications/notification-alert.scheduler';
@@ -44,6 +45,7 @@ function shutdown(signal: NodeJS.Signals): void {
     }
 
     aiAnomalyScanScheduler.stop();
+    aiReportMonthlyScheduler.stop();
     documentAlertScheduler.stop();
     maintenancePlanAlertScheduler.stop();
     notificationAlertScheduler.stop();
@@ -62,6 +64,7 @@ server.listen(env.PORT, () => {
   });
 
   aiAnomalyScanScheduler.start();
+  aiReportMonthlyScheduler.start();
   documentAlertScheduler.start();
   maintenancePlanAlertScheduler.start();
   notificationAlertScheduler.start();
